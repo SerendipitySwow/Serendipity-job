@@ -24,4 +24,5 @@ Homestead.json
 .idea
 vendor
 runtimes
+composer.lock
 

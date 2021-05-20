@@ -1,0 +1,9 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types = 1);
+define('SERENDIPITY_JOB_PATH', dirname(__DIR__));
+
+require_once SERENDIPITY_JOB_PATH . 'vendor/autoload.php';
+
+
