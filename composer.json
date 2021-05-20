@@ -1,0 +1,12 @@
+{
+    "name": "serendipity/serendipity-php",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "he ping",
+            "email": "847050412@qq.com"
+        }
+    ],
+    "require": {
+    }
+}
