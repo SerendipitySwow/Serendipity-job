@@ -13,8 +13,13 @@ class SerendipityJobCommand extends Command
              ->setHelp('This command allows you start Serendipity Job...');
     }
 
-    public function handle() : void
+    public function handle() : int
     {
-        // TODO: Implement handle() method.
+        $this->output->writeln([
+            '<info>Serendipity Job</info>',
+            '<info>===============</info>',
+            ''
+        ]);
+        return Command::SUCCESS;
     }
 }

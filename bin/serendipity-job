@@ -2,8 +2,20 @@
 <?php
 
 declare(strict_types = 1);
+
+use Serendipity\Job\Application;
+
 define('SERENDIPITY_JOB_PATH', dirname(__DIR__));
 
-require_once SERENDIPITY_JOB_PATH . 'vendor/autoload.php';
+ini_set('display_errors', 'on');
+ini_set('display_startup_errors', 'on');
+ini_set('memory_limit', '1G');
+error_reporting(E_ALL);
+date_default_timezone_set('Asia/Shanghai');
 
+require_once SERENDIPITY_JOB_PATH . '/vendor/autoload.php';
 
+(static function ()
+{
+    (new Application())->run();
+})();

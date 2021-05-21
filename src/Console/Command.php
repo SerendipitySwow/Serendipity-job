@@ -10,15 +10,16 @@ use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use function Serendipity\Job\Kernel\call;
 
 abstract class Command extends SymfonyCommand
 {
     /**
      * The name of the command.
      *
-     * @var string
+     * @var string|null
      */
-    protected string $name;
+    protected string|null $name = null;
 
     /**
      * @var InputInterface
@@ -41,7 +42,7 @@ abstract class Command extends SymfonyCommand
     /**
      * Run the console command.
      */
-    public function run(InputInterface $input, OutputInterface $output): int
+    public function run(InputInterface $input, OutputInterface $output) : int
     {
         $this->output = new SymfonyStyle($input, $output);
 
@@ -56,7 +57,7 @@ abstract class Command extends SymfonyCommand
      * @param null|string $tableStyle
      * @param array       $columnStyles
      */
-    public function table(array $headers, array $rows, null|string $tableStyle = 'default', array $columnStyles = []): void
+    public function table(array $headers, array $rows, null|string $tableStyle = 'default', array $columnStyles = []) : void
     {
         $table = new Table($this->output);
 
@@ -134,7 +135,7 @@ abstract class Command extends SymfonyCommand
      */
     public function warn(mixed $string, mixed $verbosity = null) : void
     {
-        if (! $this->output->getFormatter()->hasStyle('warning')) {
+        if (!$this->output->getFormatter()->hasStyle('warning')) {
             $style = new OutputFormatterStyle('yellow');
             $this->output->getFormatter()->setStyle('warning', $style);
         }
@@ -155,9 +156,24 @@ abstract class Command extends SymfonyCommand
         $this->output->newLine();
     }
 
+    /**
+     * @param \Symfony\Component\Console\Input\InputInterface   $input
+     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     *
+     * @return mixed
+     */
+    protected function execute(InputInterface $input, OutputInterface $output) : mixed
+    {
+        $callback = function ()
+        {
+            return call([$this, 'handle']);
+        };
+        return $callback();
+    }
 
     /**
      * Handle the current command.
+     * @return mixed
      */
-    abstract public function handle();
+    abstract public function handle() : mixed;
 }
