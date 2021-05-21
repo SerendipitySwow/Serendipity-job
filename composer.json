@@ -18,7 +18,7 @@
             "Serendipity\\Job\\": "src"
         },
         "files": [
-            "./src/Kernel/function.php"
+            "src/Kernel/functions.php"
         ]
     },
 
@@ -35,12 +35,14 @@
         "symfony/yaml": "^5.2",
         "monolog/monolog": "^2.2",
         "swow/swow": "dev-develop",
-        "nette/utils": "^3.2"
+        "nette/utils": "^3.2",
+        "vlucas/phpdotenv": "^5.3"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",
         "phpunit/phpunit": "^9.5",
-        "friendsofphp/php-cs-fixer": "^3.0"
+        "friendsofphp/php-cs-fixer": "^3.0",
+        "symfony/var-dumper": "^5.2"
     },
     "scripts": {
         "post-root-package-install": [
