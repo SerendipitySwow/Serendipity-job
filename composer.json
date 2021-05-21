@@ -25,16 +25,16 @@
     },
     "require": {
         "php":">=8.0",
-        "ext-swoole":">=4.6",
         "ext-redis":">=5.3",
         "symfony/console": "^5.2",
         "symfony/serializer": "^5.2",
         "symfony/yaml": "^5.2",
-        "monolog/monolog": "^2.2"
+        "monolog/monolog": "^2.2",
+        "swow/swow": "dev-develop",
+        "nette/utils": "^3.2"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",
-        "phpunit/phpunit": "^9.5",
-        "swoole/ide-helper": "^4.6"
+        "phpunit/phpunit": "^9.5"
     }
 }
