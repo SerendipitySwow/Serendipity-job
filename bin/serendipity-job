@@ -4,6 +4,8 @@
 declare(strict_types = 1);
 
 use Serendipity\Job\Application;
+use Serendipity\Job\Container\Container;
+use Serendipity\Job\Util\ApplicationContext;
 
 define('SERENDIPITY_JOB_PATH', dirname(__DIR__));
 
@@ -17,5 +19,11 @@ require_once SERENDIPITY_JOB_PATH . '/vendor/autoload.php';
 
 (static function ()
 {
-    (new Application())->run();
+  $container = new Container();
+    /**
+     * @var Application $application
+     */
+  $application = $container->build(Application::class);
+  ApplicationContext::setContainer($container);
+  $application->run();
 })();

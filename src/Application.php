@@ -20,7 +20,7 @@ class  Application extends SymfonyApplication
      */
     protected Dotenv $dotenv;
 
-    public function __construct()
+    public function __construct(string $name)
     {
         parent::__construct('Serendipity Job Console Tool...');
         $this->addCommands([
@@ -31,6 +31,7 @@ class  Application extends SymfonyApplication
 
     public function initialize() : void
     {
+        // Non-thread-safe load
         $this->dotenv = Dotenv::createUnsafeImmutable(SERENDIPITY_JOB_PATH);
         $this->dotenv->safeLoad();
     }
