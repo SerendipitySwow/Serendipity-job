@@ -7,7 +7,6 @@ use Dotenv\Dotenv;
 use Serendipity\Job\Console\SerendipityJobCommand;
 use Swow\Socket;
 use Symfony\Component\Console\Application as SymfonyApplication;
-use function Serendipity\Job\Kernel\env;
 
 class  Application extends SymfonyApplication
 {
@@ -20,7 +19,7 @@ class  Application extends SymfonyApplication
      */
     protected Dotenv $dotenv;
 
-    public function __construct(string $name)
+    public function __construct()
     {
         parent::__construct('Serendipity Job Console Tool...');
         $this->addCommands([

@@ -3,6 +3,8 @@ declare(strict_types = 1);
 
 namespace Serendipity\Job\Kernel;
 
+use Serendipity\Job\Util\Arr;
+
 if (!function_exists('value')) {
     /**
      * Return the default value of the given value.
@@ -90,5 +92,104 @@ if (!function_exists('env')) {
             return substr($value, 1, -1);
         }
         return $value;
+    }
+}
+
+if (!function_exists('data_get')) {
+    /**
+     * Get an item from an array or object using "dot" notation.
+     *
+     * @param mixed                 $target
+     * @param null|array|int|string $key
+     * @param null|mixed            $default
+     *
+     * @return array|mixed
+     */
+    function data_get(mixed $target, array|int|string|null $key, mixed $default = null) : mixed
+    {
+        if (is_null($key)) {
+            return $target;
+        }
+
+        $key = is_array($key) ? $key : explode('.', is_int($key) ? (string)$key : $key);
+        while (!is_null($segment = array_shift($key))) {
+            if ($segment === '*') {
+                if ($target instanceof Collection) {
+                    $target = $target->all();
+                } elseif (!is_array($target)) {
+                    return value($default);
+                }
+                $result = [];
+                foreach ($target as $item) {
+                    $result[] = data_get($item, $key);
+                }
+                return in_array('*', $key, true) ? Arr::collapse($result) : $result;
+            }
+            if (Arr::accessible($target) && Arr::exists($target, $segment)) {
+                $target = $target[$segment];
+            } elseif (is_object($target) && isset($target->{$segment})) {
+                $target = $target->{$segment};
+            } else {
+                return value($default);
+            }
+        }
+        return $target;
+    }
+}
+if (!function_exists('data_set')) {
+    /**
+     * Set an item on an array or object using dot notation.
+     *
+     * @param mixed        $target
+     * @param array|string $key
+     * @param mixed        $value
+     * @param bool         $overwrite
+     *
+     * @return array|mixed
+     */
+    function data_set(mixed &$target, array|string $key, mixed $value, bool $overwrite = true) : mixed
+    {
+        $segments = is_array($key) ? $key : explode('.', $key);
+        if (($segment = array_shift($segments)) === '*') {
+            if (!Arr::accessible($target)) {
+                $target = [];
+            }
+            if ($segments) {
+                foreach ($target as &$inner) {
+                    data_set($inner, $segments, $value, $overwrite);
+                }
+            } elseif ($overwrite) {
+                foreach ($target as &$inner) {
+                    $inner = $value;
+                }
+            }
+        } elseif (Arr::accessible($target)) {
+            if ($segments) {
+                if (!Arr::exists($target, $segment)) {
+                    $target[$segment] = [];
+                }
+                data_set($target[$segment], $segments, $value, $overwrite);
+            } elseif ($overwrite || !Arr::exists($target, $segment)) {
+                $target[$segment] = $value;
+            }
+        } elseif (is_object($target)) {
+            if ($segments) {
+                if (!isset($target->{$segment})) {
+                    $target->{$segment} = [];
+                }
+                data_set($target->{$segment}, $segments, $value, $overwrite);
+            } elseif ($overwrite || !isset($target->{$segment})) {
+                $target->{$segment} = $value;
+            }
+        } else {
+            $target = [];
+            if ($segments) {
+                $target[$segment] = [];
+                data_set($target[$segment], $segments, $value, $overwrite);
+            } elseif ($overwrite) {
+                $target[$segment] = $value;
+            }
+        }
+        return $target;
     }
 }
