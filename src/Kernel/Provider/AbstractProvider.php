@@ -6,17 +6,17 @@ namespace Serendipity\Job\Kernel\Provider;
 abstract class AbstractProvider implements ProviderContract
 {
 
-    public static function bootApp() : void
+    public function bootApp() : void
     {
         echo __METHOD__;
     }
 
-    public static function bootRequest() : void
+    public function bootRequest() : void
     {
         echo __METHOD__;
     }
 
-    public static function shutdown() : void
+    public function shutdown() : void
     {
         echo __METHOD__;
     }

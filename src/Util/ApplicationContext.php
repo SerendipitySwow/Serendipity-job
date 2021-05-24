@@ -14,7 +14,7 @@ class ApplicationContext
     private static ?ContainerInterface $container = null;
 
     /**
-     * @throws \TypeError
+     * @return \DI\Container
      */
     public static function getContainer() : ContainerInterface
     {

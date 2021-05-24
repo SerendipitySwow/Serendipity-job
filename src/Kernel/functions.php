@@ -226,3 +226,17 @@ if (!function_exists('config')) {
         return $container->get(ConfigInterface::class)->get($key, $default);
     }
 }
+
+if (!function_exists('make')) {
+    function make(string $name, array $parameters = [])
+    {
+        if (ApplicationContext::hasContainer()) {
+            $container = ApplicationContext::getContainer();
+            if (method_exists($container, 'make')) {
+                return $container->make($name, $parameters);
+            }
+        }
+        $parameters = array_values($parameters);
+        return new $name(...$parameters);
+    }
+}

@@ -1,2 +1,3 @@
-Serendipity\Job\Contract\ConfigInterface: Serendipity\Job\Config\ConfigFactory
-
+BootApp:
+ - Serendipity\Job\Server\ServerProvider
+ - Serendipity\Job\Config\ConfigProvider

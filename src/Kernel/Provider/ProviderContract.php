@@ -5,9 +5,9 @@ namespace Serendipity\Job\Kernel\Provider;
 
 interface ProviderContract
 {
-    public static function bootApp();
+    public function bootApp();
 
-    public static function bootRequest();
+    public function bootRequest();
 
-    public static function shutdown();
+    public function shutdown();
 }

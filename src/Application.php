@@ -5,6 +5,7 @@ namespace Serendipity\Job;
 
 use Dotenv\Dotenv;
 use Psr\Container\ContainerInterface;
+use Serendipity\Job\Config\ProviderConfig;
 use Serendipity\Job\Console\SerendipityJobCommand;
 use Symfony\Component\Console\Application as SymfonyApplication;
 

@@ -3,6 +3,9 @@ declare(strict_types = 1);
 
 namespace Serendipity\Job\Console;
 
+use Serendipity\Job\Config\ConfigProvider;
+use Serendipity\Job\Config\ProviderConfig;
+use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\Util\ApplicationContext;
 
 class SerendipityJobCommand extends Command
@@ -22,6 +25,11 @@ class SerendipityJobCommand extends Command
             '<info>===============</info>',
             ''
         ]);
+        ProviderConfig::load();
+
+        $config = ApplicationContext::getContainer()->get(ConfigInterface::class);
+        dd($config);
+
         return Command::SUCCESS;
     }
 }
