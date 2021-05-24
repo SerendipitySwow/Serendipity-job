@@ -13,7 +13,7 @@ if (!function_exists('value')) {
      *
      * @return mixed
      */
-    function value(mixed $value)
+    function value(mixed $value) : mixed
     {
         return $value instanceof \Closure ? $value() : $value;
     }
@@ -103,7 +103,7 @@ if (!function_exists('data_get')) {
      * @param null|array|int|string $key
      * @param null|mixed            $default
      *
-     * @return array|mixed
+     * @return mixed
      */
     function data_get(mixed $target, array|int|string|null $key, mixed $default = null) : mixed
     {
@@ -145,7 +145,7 @@ if (!function_exists('data_set')) {
      * @param mixed        $value
      * @param bool         $overwrite
      *
-     * @return array|mixed
+     * @return mixed
      */
     function data_set(mixed &$target, array|string $key, mixed $value, bool $overwrite = true) : mixed
     {
