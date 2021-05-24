@@ -6,12 +6,9 @@ namespace Serendipity\Job\Config;
 
 use Serendipity\Job\Config\Loader\YamlLoader;
 use Serendipity\Job\Util\ApplicationContext;
-use Symfony\Component\Config\FileLocator;
-use Symfony\Component\Config\FileLocatorInterface;
 use function class_exists;
 use function is_string;
 use function method_exists;
-use function Serendipity\Job\Kernel\make;
 
 /**
  * Provider config allow the components set the configs to application.
@@ -23,7 +20,9 @@ class ProviderConfig
      */
     private static array $providerConfigs = [];
 
-    private static string $bootApp = 'BootApp';
+    public static string $bootApp = 'BootApp';
+
+    public static string $bootShutdown = 'BootShutdown';
 
     /**
      * Load and merge all provider configs from components.
@@ -33,12 +32,9 @@ class ProviderConfig
     public static function load() : array
     {
         if (!static::$providerConfigs) {
-            $fileLocator = make(FileLocator::class, ['paths' => [SERENDIPITY_JOB_PATH . '/config/']]);
-            $container   = ApplicationContext::getContainer();
-            $container->set(FileLocatorInterface::class, $fileLocator);
-            $loader                  = make(YamlLoader::class, []);
-            $providers               = $loader->load(SERENDIPITY_JOB_PATH . '/config/providers.yaml');
-            static::$providerConfigs = static::loadProviders($providers[static::$bootApp]);
+            $loader                  = ApplicationContext::getApplication()->getContainer()->get(YamlLoader::class);
+            static::$providerConfigs = $loader->load(SERENDIPITY_JOB_PATH . '/config/providers.yaml');
+
         }
         return static::$providerConfigs;
     }
@@ -48,28 +44,13 @@ class ProviderConfig
         static::$providerConfigs = [];
     }
 
-    protected static function loadProviders(array $providers) : array
+    public static function loadProviders(array $providers, string $method) : void
     {
-        $providerConfigs = [];
         foreach ($providers as $provider) {
-            if (is_string($provider) && class_exists($provider) && method_exists($provider, 'bootApp')) {
-                $providerConfigs[] = call_user_func([new $provider(), 'bootApp']);
+            if (is_string($provider) && class_exists($provider) && method_exists($provider, $method)) {
+                call_user_func([new $provider(), $method]);
             }
         }
-
-        return static::merge(...$providerConfigs);
     }
 
-    protected static function merge(...$arrays) : array
-    {
-        if (empty($arrays)) {
-            return [];
-        }
-        $result = array_merge_recursive(...$arrays);
-        if (isset($result['dependencies'])) {
-            $dependencies           = array_column($arrays, 'dependencies');
-            $result['dependencies'] = array_merge(...$dependencies);
-        }
-        return $result;
-    }
 }

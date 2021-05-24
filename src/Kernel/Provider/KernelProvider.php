@@ -3,18 +3,19 @@ declare(strict_types = 1);
 
 namespace Serendipity\Job\Kernel\Provider;
 
+use Serendipity\Job\Config\ProviderConfig;
+use Serendipity\Job\Kernel\Traits\Singleton;
+
 class KernelProvider extends AbstractProvider
 {
-    protected static array $providers = [];
+    use Singleton;
 
-    public static function init(array $providers = []) : void
-    {
-        static::$providers = $providers;
-    }
+    protected static array $providers = [];
 
     public function bootApp() : void
     {
-
+        static::$providers = ProviderConfig::load();
+        ProviderConfig::loadProviders(static::$providers[ProviderConfig::$bootApp], ProviderConfig::$bootApp);
     }
 
     public function bootRequest() : void
@@ -23,6 +24,7 @@ class KernelProvider extends AbstractProvider
 
     public function shutdown() : void
     {
-
+        ProviderConfig::loadProviders(static::$providers[ProviderConfig::$bootShutdown], ProviderConfig::$bootShutdown);
     }
+
 }

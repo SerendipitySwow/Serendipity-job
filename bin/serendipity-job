@@ -18,9 +18,7 @@ require_once SERENDIPITY_JOB_PATH . '/vendor/autoload.php';
 
 (static function ()
 {
-    $container = new Container();
-    $application = new Application();
-    $container->set(Application::class, $application);
-    ApplicationContext::setContainer($container);
-    $application->run();
+    $container   = new Container();
+    $application = new Application($container);
+    ApplicationContext::setApplication($application)->run();
 })();

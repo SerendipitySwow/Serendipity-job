@@ -3,11 +3,12 @@ declare(strict_types = 1);
 
 namespace Serendipity\Job\Config;
 
+use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\Util\Arr;
 use function Serendipity\Job\Kernel\data_get;
 use function Serendipity\Job\Kernel\data_set;
 
-class Config
+class Config implements ConfigInterface
 {
     /**
      * @var array
@@ -51,7 +52,7 @@ class Config
      * @param string $key   identifier of the entry to set
      * @param mixed  $value the value that save to container
      */
-    public function set(string $key, mixed $value) : void
+    public function set(string $key, mixed $value = null) : void
     {
         data_set($this->configs, $key, $value);
     }

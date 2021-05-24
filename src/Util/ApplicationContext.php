@@ -4,31 +4,31 @@ declare(strict_types = 1);
 
 namespace Serendipity\Job\Util;
 
-use Psr\Container\ContainerInterface;
+use Serendipity\Job\Application;
 
 class ApplicationContext
 {
     /**
-     * @var null|ContainerInterface
+     * @var null|Application
      */
-    private static ?ContainerInterface $container = null;
+    private static ?Application $application = null;
 
     /**
-     * @return \DI\Container
+     * @return \Serendipity\Job\Application
      */
-    public static function getContainer() : ContainerInterface
+    public static function getApplication() : Application
     {
-        return self::$container;
+        return self::$application;
     }
 
-    public static function hasContainer() : bool
+    public static function hasApplication() : bool
     {
-        return isset(self::$container);
+        return isset(self::$application);
     }
 
-    public static function setContainer(ContainerInterface $container) : ContainerInterface
+    public static function setApplication(Application $application) : Application
     {
-        self::$container = $container;
-        return $container;
+        self::$application = $application;
+        return $application;
     }
 }

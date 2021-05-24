@@ -3,10 +3,9 @@ declare(strict_types = 1);
 
 namespace Serendipity\Job\Console;
 
-use Serendipity\Job\Config\ConfigProvider;
-use Serendipity\Job\Config\ProviderConfig;
-use Serendipity\Job\Contract\ConfigInterface;
+use Serendipity\Job\Kernel\Provider\KernelProvider;
 use Serendipity\Job\Util\ApplicationContext;
+use function Serendipity\Job\Kernel\config;
 
 class SerendipityJobCommand extends Command
 {
@@ -25,11 +24,13 @@ class SerendipityJobCommand extends Command
             '<info>===============</info>',
             ''
         ]);
-        ProviderConfig::load();
-
-        $config = ApplicationContext::getContainer()->get(ConfigInterface::class);
-        dd($config);
-
+        $this->bootStrap();
+       dd(config('APP_VERSION'));
         return Command::SUCCESS;
+    }
+
+    protected function bootStrap() : void
+    {
+        KernelProvider::create()->bootApp();
     }
 }

@@ -4,7 +4,6 @@ declare(strict_types = 1);
 namespace Serendipity\Job\Kernel;
 
 use Closure;
-use Serendipity\Job\Config\ConfigFactory;
 use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\Util\ApplicationContext;
 use Serendipity\Job\Util\Arr;
@@ -216,10 +215,10 @@ if (!function_exists('collect')) {
 if (!function_exists('config')) {
     function config(string $key, $default = null)
     {
-        if (!ApplicationContext::hasContainer()) {
+        if (!ApplicationContext::hasApplication()) {
             throw new \RuntimeException('The application context lacks the container.');
         }
-        $container = ApplicationContext::getContainer();
+        $container = ApplicationContext::getApplication()->getContainer();
         if (!$container->has(ConfigInterface::class)) {
             throw new \RuntimeException('ConfigInterface is missing in container.');
         }
@@ -230,8 +229,8 @@ if (!function_exists('config')) {
 if (!function_exists('make')) {
     function make(string $name, array $parameters = [])
     {
-        if (ApplicationContext::hasContainer()) {
-            $container = ApplicationContext::getContainer();
+        if (ApplicationContext::hasApplication()) {
+            $container = ApplicationContext::getApplication()->getContainer();
             if (method_exists($container, 'make')) {
                 return $container->make($name, $parameters);
             }
