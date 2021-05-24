@@ -11,7 +11,7 @@ class Config
 { /**
  * @var array
  */
-    private array $configs = [];
+    private array $configs;
 
     public function __construct(array $configs)
     {

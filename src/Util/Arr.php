@@ -6,6 +6,7 @@ namespace Serendipity\Job\Util;
 
 use ArrayAccess;
 use InvalidArgumentException;
+use function Serendipity\Job\Kernel\data_get;
 use function Serendipity\Job\Kernel\value;
 
 /**
@@ -28,9 +29,14 @@ class Arr
 
     /**
      * Add an element to an array using "dot" notation if it doesn't exist.
-     * @param mixed $value
+     *
+     * @param array  $array
+     * @param string $key
+     * @param mixed  $value
+     *
+     * @return array
      */
-    public static function add(array $array, string $key, $value): array
+    public static function add(array $array, string $key, mixed $value): array
     {
         if (is_null(static::get($array, $key))) {
             static::set($array, $key, $value);
@@ -107,7 +113,10 @@ class Arr
     /**
      * Get all of the given array except for a specified array of keys.
      *
+     * @param array        $array
      * @param array|string $keys
+     *
+     * @return array
      */
     public static function except(array $array, array|string $keys): array
     {
@@ -169,9 +178,13 @@ class Arr
 
     /**
      * Flatten a multi-dimensional array into a single level.
+     *
+     * @param array     $array
      * @param float|int $depth
+     *
+     * @return array
      */
-    public static function flatten(array $array, $depth = INF): array
+    public static function flatten(array $array, float|int $depth): array
     {
         $result = [];
         foreach ($array as $item) {
@@ -254,10 +267,12 @@ class Arr
     /**
      * Check if an item or items exist in an array using "dot" notation.
      *
-     * @param array|\ArrayAccess $array
-     * @param null|array|string $keys
+     * @param \ArrayAccess|array $array
+     * @param null|array|string  $keys
+     *
+     * @return bool
      */
-    public static function has($array, $keys): bool
+    public static function has(ArrayAccess|array $array, array|string|null $keys): bool
     {
         if (is_null($keys)) {
             return false;
@@ -298,9 +313,12 @@ class Arr
     /**
      * Get a subset of the items from the given array.
      *
+     * @param array        $array
      * @param array|string $keys
+     *
+     * @return array
      */
-    public static function only(array $array, $keys): array
+    public static function only(array $array, array|string $keys): array
     {
         return array_intersect_key($array, array_flip((array) $keys));
     }
@@ -308,10 +326,13 @@ class Arr
     /**
      * Pluck an array of values from an array.
      *
-     * @param array|string $value
+     * @param array             $array
+     * @param array|string      $value
      * @param null|array|string $key
+     *
+     * @return array
      */
-    public static function pluck(array $array, $value, $key = null): array
+    public static function pluck(array $array, array|string $value, array|string $key = null): array
     {
         $results = [];
         [$value, $key] = static::explodePluckParameters($value, $key);
@@ -335,10 +356,14 @@ class Arr
 
     /**
      * Push an item onto the beginning of an array.
+     *
+     * @param array      $array
+     * @param mixed      $value
      * @param null|mixed $key
-     * @param mixed $value
+     *
+     * @return array
      */
-    public static function prepend(array $array, $value, $key = null): array
+    public static function prepend(array $array, mixed $value, mixed $key = null): array
     {
         if (is_null($key)) {
             array_unshift($array, $value);
@@ -390,10 +415,13 @@ class Arr
      * Set an array item to a given value using "dot" notation.
      * If no key is given to the method, the entire array will be replaced.
      *
+     * @param array           $array
      * @param null|int|string $key
-     * @param mixed $value
+     * @param mixed           $value
+     *
+     * @return array
      */
-    public static function set(array &$array, $key, $value): array
+    public static function set(array &$array, int|string|null $key, mixed $value): array
     {
         if (is_null($key)) {
             return $array = $value;
@@ -426,7 +454,7 @@ class Arr
             shuffle($array);
         } else {
             mt_srand($seed);
-            usort($array, function () {
+            usort($array, static function () {
                 return random_int(-1, 1);
             });
         }
@@ -479,7 +507,10 @@ class Arr
 
     /**
      * If the given value is not an array and not null, wrap it in one.
+     *
      * @param mixed $value
+     *
+     * @return array
      */
     public static function wrap(mixed $value): array
     {
