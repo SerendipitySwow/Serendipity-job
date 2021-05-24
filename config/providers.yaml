@@ -1,0 +1,2 @@
+Serendipity\Job\Contract\ConfigInterface: Serendipity\Job\Config\ConfigFactory
+

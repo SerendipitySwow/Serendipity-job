@@ -3,6 +3,10 @@ declare(strict_types = 1);
 
 namespace Serendipity\Job\Kernel;
 
+use Closure;
+use Serendipity\Job\Config\ConfigFactory;
+use Serendipity\Job\Contract\ConfigInterface;
+use Serendipity\Job\Util\ApplicationContext;
 use Serendipity\Job\Util\Arr;
 use Serendipity\Job\Util\Collection;
 
@@ -16,7 +20,7 @@ if (!function_exists('value')) {
      */
     function value(mixed $value) : mixed
     {
-        return $value instanceof \Closure ? $value() : $value;
+        return $value instanceof Closure ? $value() : $value;
     }
 }
 if (!function_exists('class_basename')) {
@@ -46,7 +50,7 @@ if (!function_exists('call')) {
      */
     function call(mixed $callback, array $args = []) : mixed
     {
-        if ($callback instanceof \Closure) {
+        if ($callback instanceof Closure) {
             $result = $callback(...$args);
         } elseif (is_object($callback) || (is_string($callback) && function_exists($callback))) {
             $result = $callback(...$args);
@@ -195,8 +199,7 @@ if (!function_exists('data_set')) {
     }
 }
 
-
-if (! function_exists('collect')) {
+if (!function_exists('collect')) {
     /**
      * Create a collection from the given value.
      *
@@ -207,5 +210,19 @@ if (! function_exists('collect')) {
     function collect(mixed $value = null) : Collection
     {
         return new Collection($value);
+    }
+}
+
+if (!function_exists('config')) {
+    function config(string $key, $default = null)
+    {
+        if (!ApplicationContext::hasContainer()) {
+            throw new \RuntimeException('The application context lacks the container.');
+        }
+        $container = ApplicationContext::getContainer();
+        if (!$container->has(ConfigInterface::class)) {
+            throw new \RuntimeException('ConfigInterface is missing in container.');
+        }
+        return $container->get(ConfigInterface::class)->get($key, $default);
     }
 }

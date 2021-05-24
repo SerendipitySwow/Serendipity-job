@@ -3,6 +3,8 @@ declare(strict_types = 1);
 
 namespace Serendipity\Job\Console;
 
+use Serendipity\Job\Util\ApplicationContext;
+
 class SerendipityJobCommand extends Command
 {
     protected static string $defaultName = 'serendipity-job:start';

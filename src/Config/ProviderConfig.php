@@ -1,16 +1,11 @@
 <?php
 
 declare(strict_types = 1);
-/**
- * This file is part of Hyperf.
- *
- * @link     https://www.hyperf.io
- * @document https://hyperf.wiki
- * @contact  group@hyperf.io
- * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
- */
+
 namespace Serendipity\Job\Config;
 
+use Serendipity\Job\Config\Loader\YamlLoader;
+use Serendipity\Job\Util\ApplicationContext;
 use Serendipity\Job\Util\Composer;
 use function class_exists;
 use function is_string;
@@ -24,7 +19,7 @@ class ProviderConfig
     /**
      * @var array
      */
-    private static $providerConfigs = [];
+    private static array $providerConfigs = [];
 
     /**
      * Load and merge all provider configs from components.
@@ -34,7 +29,8 @@ class ProviderConfig
     public static function load() : array
     {
         if (!static::$providerConfigs) {
-            $providers               = require SERENDIPITY_JOB_PATH . '/config/providers.php' ?? [];
+            $loader                  = ApplicationContext::getContainer()->get(YamlLoader::class);
+            $providers               = $loader->load(SERENDIPITY_JOB_PATH . '/config/providers.yaml');
             static::$providerConfigs = static::loadProviders($providers);
         }
         return static::$providerConfigs;

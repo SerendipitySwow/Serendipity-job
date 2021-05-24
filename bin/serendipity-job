@@ -3,13 +3,11 @@
 
 declare(strict_types = 1);
 
-use DI\ContainerBuilder;
 use DI\Container;
 use Serendipity\Job\Application;
 use Serendipity\Job\Util\ApplicationContext;
 
 define('SERENDIPITY_JOB_PATH', dirname(__DIR__));
-
 ini_set('display_errors', 'on');
 ini_set('display_startup_errors', 'on');
 ini_set('memory_limit', '1G');
@@ -20,7 +18,7 @@ require_once SERENDIPITY_JOB_PATH . '/vendor/autoload.php';
 
 (static function ()
 {
-    $container   = new Container();
+    $container = new Container();
     $application = new Application();
     $container->set(Application::class, $application);
     ApplicationContext::setContainer($container);

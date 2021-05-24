@@ -11,7 +11,7 @@ class ApplicationContext
     /**
      * @var null|ContainerInterface
      */
-    private static ?ContainerInterface $container;
+    private static ?ContainerInterface $container = null;
 
     /**
      * @throws \TypeError

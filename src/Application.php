@@ -6,15 +6,10 @@ namespace Serendipity\Job;
 use Dotenv\Dotenv;
 use Psr\Container\ContainerInterface;
 use Serendipity\Job\Console\SerendipityJobCommand;
-use Swow\Socket;
 use Symfony\Component\Console\Application as SymfonyApplication;
 
-class  Application extends SymfonyApplication
+final class  Application extends SymfonyApplication
 {
-    /**
-     * @var \Swow\Socket
-     */
-    protected Socket $server;
     /**
      * @var \Dotenv\Dotenv
      */
@@ -39,12 +34,6 @@ class  Application extends SymfonyApplication
         // Non-thread-safe load
         $this->dotenv = Dotenv::createUnsafeImmutable(SERENDIPITY_JOB_PATH);
         $this->dotenv->safeLoad();
-        $this->bootstrap();
-    }
-
-    protected function initConfig()
-    {
-
     }
 
 }

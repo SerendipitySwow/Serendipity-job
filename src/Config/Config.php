@@ -8,9 +8,10 @@ use function Serendipity\Job\Kernel\data_get;
 use function Serendipity\Job\Kernel\data_set;
 
 class Config
-{ /**
- * @var array
- */
+{
+    /**
+     * @var array
+     */
     private array $configs;
 
     public function __construct(array $configs)
@@ -36,6 +37,7 @@ class Config
      * Returns false otherwise.
      *
      * @param string $key identifier of the entry to look for
+     *
      * @return bool
      */
     public function has(string $key) : bool
@@ -46,8 +48,8 @@ class Config
     /**
      * Set a value to the container by its identifier.
      *
-     * @param string $key identifier of the entry to set
-     * @param mixed $value the value that save to container
+     * @param string $key   identifier of the entry to set
+     * @param mixed  $value the value that save to container
      */
     public function set(string $key, mixed $value) : void
     {
