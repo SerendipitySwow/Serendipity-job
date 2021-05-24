@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Serendipity\Job\Config;
 
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Finder\Finder;
 
 class ConfigFactory
@@ -14,9 +15,10 @@ class ConfigFactory
         return $this->instance->$name(...$arguments);
     }
 
-    public function __construct()
+    public function __construct(ContainerInterface $container)
     {
-        $this->instance = $this->initialize();
+        $this->container = $container;
+        $this->instance  = $this->initialize();
     }
 
     private function initialize() : Config

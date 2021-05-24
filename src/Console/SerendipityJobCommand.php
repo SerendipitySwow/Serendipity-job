@@ -25,7 +25,6 @@ class SerendipityJobCommand extends Command
             ''
         ]);
         $this->bootStrap();
-       dd(config('APP_VERSION'));
         return Command::SUCCESS;
     }
 

@@ -1,3 +1,4 @@
 BootApp:
- - Serendipity\Job\Server\ServerProvider
  - Serendipity\Job\Config\ConfigProvider
+ - Serendipity\Job\Server\ServerProvider
+
