@@ -11,7 +11,7 @@ class ConfigFactory
 
     public function __call(string $name, array $arguments)
     {
-        return $this->instance->$name($arguments);
+        return $this->instance->$name(...$arguments);
     }
 
     public function __construct()
