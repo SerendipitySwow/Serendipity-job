@@ -4,6 +4,7 @@ declare(strict_types = 1);
 namespace Serendipity\Job\Kernel;
 
 use Serendipity\Job\Util\Arr;
+use Serendipity\Job\Util\Collection;
 
 if (!function_exists('value')) {
     /**
@@ -191,5 +192,20 @@ if (!function_exists('data_set')) {
             }
         }
         return $target;
+    }
+}
+
+
+if (! function_exists('collect')) {
+    /**
+     * Create a collection from the given value.
+     *
+     * @param null|mixed $value
+     *
+     * @return \Serendipity\Job\Util\Collection
+     */
+    function collect(mixed $value = null) : Collection
+    {
+        return new Collection($value);
     }
 }

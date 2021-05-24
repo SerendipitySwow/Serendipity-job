@@ -14,7 +14,7 @@ class ConfigFactory
         $configPath = SERENDIPITY_JOB_PATH . '/config/';
         $config = $this->readConfig($configPath . 'config.php');
         $autoloadConfig = $this->readPaths([SERENDIPITY_JOB_PATH . '/config/autoload']);
-        $merged = array_merge_recursive(ProviderConfig::load(), $config, ...$autoloadConfig);
+        $merged = array_merge_recursive($config, ...$autoloadConfig);
         return new Config($merged);
     }
 
