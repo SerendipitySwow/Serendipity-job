@@ -33,7 +33,35 @@ class ServerProvider extends AbstractProvider
         $this->logger->debug('Serendipity-Job Start Successfully#');
         */
         while (true) {
+            /*
+             * 每个$client都不一样,参考如下:
+             */
             $client = $server->accept();
+            /*
+            dump($client);
+ Swow\Socket {#170
+  type: "TCP4"
+  fd: 18
+  timeout: array:5 [
+    "dns" => -1
+    "accept" => -1
+    "connect" => -1
+    "read" => -1
+    "write" => -1
+  ]
+  established: true
+  side: "none"
+  sockname: array:2 [
+    "address" => "127.0.0.1"
+    "port" => 9502
+  ]
+  peername: array:2 [
+    "address" => "127.0.0.1"
+    "port" => 53315
+  ]
+  io_state: "idle"
+}
+            */
             Coroutine::run(function () use ($client)
             {
                 $buffer = new Buffer();
