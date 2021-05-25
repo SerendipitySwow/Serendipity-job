@@ -6,6 +6,7 @@ namespace Serendipity\Job\Kernel\Swow;
 
 use Psr\Container\ContainerInterface;
 use Serendipity\Job\Contract\ConfigInterface;
+use Serendipity\Job\Contract\EventDispatcherInterface;
 use Serendipity\Job\Contract\ServerInterface;
 use Swow\Socket;
 
@@ -20,6 +21,8 @@ class ServerFactory
      * @var \Serendipity\Job\Contract\ServerInterface|null
      */
     protected ?ServerInterface $server = null;
+
+    protected ?EventDispatcherInterface $eventDispatcherInterface = null;
 
     /**
      * @var null|array

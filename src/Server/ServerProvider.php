@@ -5,6 +5,8 @@ namespace Serendipity\Job\Server;
 
 use Serendipity\Job\Kernel\Provider\AbstractProvider;
 use Serendipity\Job\Kernel\Swow\ServerFactory;
+use Swow\Buffer;
+use Swow\Coroutine;
 use Swow\Socket;
 use Swow\Socket\Exception;
 
@@ -18,14 +20,14 @@ class ServerProvider extends AbstractProvider
         $server = $this->container()->make(ServerFactory::class)->start();
         while (true) {
             $client = $server->accept();
-            \Swow\Coroutine::run(function () use ($client)
+            Coroutine::run(function () use ($client)
             {
-                $buffer = new \Swow\Buffer();
+                $buffer = new Buffer();
                 try {
                     while (true) {
-                        $length = $client->recv($buffer);
+                        $length  = $client->recv($buffer);
                         $content = $buffer->getContents();
-                         dump(sprintf('Buffer Content: %s',$content).PHP_EOL);
+                        echo(sprintf('Buffer Content: %s', $content) . PHP_EOL);
                         if ($length === 0) {
                             break;
                         }

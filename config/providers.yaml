@@ -1,4 +1,8 @@
 BootApp:
- - Serendipity\Job\Config\ConfigProvider
- - Serendipity\Job\Server\ServerProvider
+  - Serendipity\Job\Config\ConfigProvider
+  - Serendipity\Job\Event\EventProvider
+  - Serendipity\Job\Logger\LoggerProvider
+  ## 服务启动一定要在最后
+  - Serendipity\Job\Server\ServerProvider
+
 
