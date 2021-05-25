@@ -3,6 +3,7 @@ declare(strict_types = 1);
 
 namespace Serendipity\Job\Server;
 
+use Serendipity\Job\Contract\LoggerInterface;
 use Serendipity\Job\Kernel\Provider\AbstractProvider;
 use Serendipity\Job\Kernel\Swow\ServerFactory;
 use Swow\Buffer;
@@ -12,12 +13,16 @@ use Swow\Socket\Exception;
 
 class ServerProvider extends AbstractProvider
 {
+    protected LoggerInterface $logger;
+
     public function bootApp() : void
     {
         /**
          * @var Socket $server
          */
-        $server = $this->container()->make(ServerFactory::class)->start();
+        $server       = $this->container()->make(ServerFactory::class)->start();
+        $this->logger = $this->container()->get(LoggerInterface::class);
+        $this->logger->debug('Serendipity-Job Start Successfully#');
         while (true) {
             $client = $server->accept();
             Coroutine::run(function () use ($client)
@@ -27,7 +32,7 @@ class ServerProvider extends AbstractProvider
                     while (true) {
                         $length  = $client->recv($buffer);
                         $content = $buffer->getContents();
-                        echo(sprintf('Buffer Content: %s', $content) . PHP_EOL);
+                        $this->logger->debug(sprintf('Buffer Content: %s', $content) . PHP_EOL);
                         if ($length === 0) {
                             break;
                         }

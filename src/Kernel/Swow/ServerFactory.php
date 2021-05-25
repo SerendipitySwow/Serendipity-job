@@ -7,6 +7,7 @@ namespace Serendipity\Job\Kernel\Swow;
 use Psr\Container\ContainerInterface;
 use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\Contract\EventDispatcherInterface;
+use Serendipity\Job\Contract\LoggerInterface;
 use Serendipity\Job\Contract\ServerInterface;
 use Swow\Socket;
 
@@ -24,14 +25,17 @@ class ServerFactory
 
     protected ?EventDispatcherInterface $eventDispatcherInterface = null;
 
+    protected ?LoggerInterface $logger = null;
+
     /**
      * @var null|array
      */
     protected ?array $config;
 
-    public function __construct(ContainerInterface $container)
+    public function __construct(ContainerInterface $container, LoggerInterface $logger)
     {
         $this->container = $container;
+        $this->logger    = $logger;
         $this->config    = $container->get(ConfigInterface::class)->get('server');
     }
 
@@ -45,7 +49,8 @@ class ServerFactory
         if (!$this->server instanceof ServerInterface) {
 
             $this->server = new Server(
-                $this->container
+                $this->container,
+                $this->logger,
             );
             $this->server->setBacklog($this->config['backlog']);
             $this->server->setHost($this->config['host']);

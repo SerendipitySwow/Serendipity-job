@@ -1,3 +1,2 @@
-# SerendipitySwoole
-Run into the beauty of PHP8 and Swoole
-一定要好好写完这个项目.
+# Serendipity-Job  For Swow
+Run into the beauty of PHP8 and Swow

@@ -25,7 +25,9 @@ class  Server implements ServerInterface
 
     public function __construct(ContainerInterface $container, ?LoggerInterface $logger = null, ?EventDispatcherInterface $dispatcher = null)
     {
-        $this->container = $container;
+        $this->container  = $container;
+        $this->logger     = $logger;
+        $this->dispatcher = $dispatcher;
     }
 
     /**
@@ -71,10 +73,10 @@ class  Server implements ServerInterface
     public function getServer() : Server
     {
         if (!$this->type) {
-            throw new \InvalidArgumentException('Swow Socket Type UnKnown#');
+            $this->logger->warning('Swow Socket Type UnKnown#');
         }
         if (!$this->port) {
-            throw new \InvalidArgumentException('Swow Socket Port UnKnown#');
+            $this->logger->warning('Swow Socket Port UnKnown#');
         }
 
         $this->server = new Socket($this->type);
