@@ -12,9 +12,10 @@ class ServerProvider extends AbstractProvider
 {
     public function bootApp() : void
     {
+        /**
+         * @var Socket $server
+         */
         $server = $this->container()->make(ServerFactory::class)->start();
-        dd($server);
-        $server->bind('127.0.0.1', 9764)->listen();
         while (true) {
             $client = $server->accept();
             \Swow\Coroutine::run(function () use ($client)
@@ -23,6 +24,8 @@ class ServerProvider extends AbstractProvider
                 try {
                     while (true) {
                         $length = $client->recv($buffer);
+                        $content = $buffer->getContents();
+                         dump(sprintf('Buffer Content: %s',$content).PHP_EOL);
                         if ($length === 0) {
                             break;
                         }

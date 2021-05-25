@@ -38,7 +38,8 @@
         "nette/utils": "^3.2",
         "vlucas/phpdotenv": "^5.3",
         "php-di/php-di": "^6.3",
-        "symfony/config": "^5.2"
+        "symfony/config": "^5.2",
+      "ext-iconv": "*"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",

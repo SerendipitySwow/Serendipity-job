@@ -7,6 +7,7 @@ namespace Serendipity\Job\Kernel\Swow;
 use Psr\Container\ContainerInterface;
 use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\Contract\ServerInterface;
+use Swow\Socket;
 
 class ServerFactory
 {
@@ -31,9 +32,9 @@ class ServerFactory
         $this->config    = $container->get(ConfigInterface::class)->get('server');
     }
 
-    public function start() : void
+    public function start() : Socket
     {
-        $this->getServer()->start();
+        return $this->getServer()->start();
     }
 
     public function getServer() : ServerInterface
