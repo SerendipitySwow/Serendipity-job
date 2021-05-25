@@ -34,7 +34,6 @@ class ProviderConfig
         if (!static::$providerConfigs) {
             $loader                  = ApplicationContext::getApplication()->getContainer()->get(YamlLoader::class);
             static::$providerConfigs = $loader->load(SERENDIPITY_JOB_PATH . '/config/providers.yaml');
-
         }
         return static::$providerConfigs;
     }

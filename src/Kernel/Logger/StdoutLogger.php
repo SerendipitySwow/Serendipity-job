@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace Serendipity\Job\Kernel\Logger;
 
-use Serendipity\Job\Config\ConfigFactory;
 use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\Contract\LoggerInterface;
 use Psr\Log\LogLevel;
@@ -21,9 +20,9 @@ use function str_replace;
 class StdoutLogger implements LoggerInterface
 {
     /**
-     * @var ConfigInterface|ConfigFactory
+     * @var ConfigInterface
      */
-    private ConfigInterface|ConfigFactory $config;
+    private ConfigInterface $config;
 
     /**
      * @var OutputInterface
@@ -37,7 +36,7 @@ class StdoutLogger implements LoggerInterface
         'component',
     ];
 
-    public function __construct(ConfigFactory $config, $output = null)
+    public function __construct(ConfigInterface $config, $output = null)
     {
         $this->config = $config;
         $this->output = $output ? : new ConsoleOutput();

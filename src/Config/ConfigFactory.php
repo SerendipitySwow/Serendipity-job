@@ -10,18 +10,7 @@ use Symfony\Component\Finder\Finder;
 class ConfigFactory
 {
 
-    public function __call(string $name, array $arguments)
-    {
-        return $this->instance->$name(...$arguments);
-    }
-
-    public function __construct(ContainerInterface $container)
-    {
-        $this->container = $container;
-        $this->instance  = $this->initialize();
-    }
-
-    private function initialize() : Config
+    public function __invoke(ContainerInterface $container) : Config
     {
         $configPath     = SERENDIPITY_JOB_PATH . '/config/';
         $config         = $this->readConfig($configPath . 'config.php');
