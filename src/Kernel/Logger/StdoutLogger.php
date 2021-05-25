@@ -5,8 +5,8 @@ declare(strict_types = 1);
 namespace Serendipity\Job\Kernel\Logger;
 
 use Serendipity\Job\Contract\ConfigInterface;
-use Serendipity\Job\Contract\LoggerInterface;
 use Psr\Log\LogLevel;
+use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use function sprintf;
@@ -17,7 +17,7 @@ use function str_replace;
  * PSR-3 logger implementation that logs to STDOUT, using a newline after each
  * message. Priority is ignored.
  */
-class StdoutLogger implements LoggerInterface
+class StdoutLogger implements StdoutLoggerInterface
 {
     /**
      * @var ConfigInterface
@@ -111,7 +111,7 @@ class StdoutLogger implements LoggerInterface
      */
     public function log($level, $message, array $context = []) : void
     {
-        $config = $this->config->get(LoggerInterface::class, ['log_level' => []]);
+        $config = $this->config->get(StdoutLoggerInterface::class, ['log_level' => []]);
         if (!in_array($level, $config['log_level'], true)) {
             return;
         }
@@ -128,7 +128,6 @@ class StdoutLogger implements LoggerInterface
             return sprintf('{%s}', $key);
         }, $keys);
         $message = str_replace($search, $context, $this->getMessage((string)$message, $level, $tags));
-
         $this->output->writeln($message);
     }
 

@@ -2,12 +2,12 @@
 declare(strict_types = 1);
 
 use Psr\Log\LogLevel;
-use Serendipity\Job\Contract\LoggerInterface;
+use Serendipity\Job\Contract\StdoutLoggerInterface;
 use function Serendipity\Job\Kernel\env;
 
 return [
     'APP_VERSION'          => env('APP_VERSION'),
-    LoggerInterface::class => [
+    StdoutLoggerInterface::class => [
         'log_level' => [
             LogLevel::ALERT,
             LogLevel::CRITICAL,

@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Serendipity\Job\Kernel\Logger;
 
 use Monolog\Processor\ProcessorInterface;
+use Serendipity\Job\Util\Context;
 
 class AppendRequestIdProcessor implements ProcessorInterface
 {

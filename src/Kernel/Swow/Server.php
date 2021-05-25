@@ -5,8 +5,8 @@ namespace Serendipity\Job\Kernel\Swow;
 
 use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
-use Psr\Log\LoggerInterface;
 use Serendipity\Job\Contract\ServerInterface;
+use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Swow\Socket;
 
 class  Server implements ServerInterface
@@ -23,11 +23,11 @@ class  Server implements ServerInterface
 
     protected bool $multi = true;
 
-    public function __construct(ContainerInterface $container, ?LoggerInterface $logger = null, ?EventDispatcherInterface $dispatcher = null)
+    public function __construct(ContainerInterface $container, StdoutLoggerInterface $logger = null, ?EventDispatcherInterface $dispatcher = null)
     {
-        $this->container  = $container;
-        $this->logger     = $logger;
-        $this->dispatcher = $dispatcher;
+        $this->container    = $container;
+        $this->stdoutLogger = $logger;
+        $this->dispatcher   = $dispatcher;
     }
 
     /**
@@ -73,10 +73,10 @@ class  Server implements ServerInterface
     public function getServer() : Server
     {
         if (!$this->type) {
-            $this->logger->warning('Swow Socket Type UnKnown#');
+            $this->stdoutLogger->warning('Swow Socket Type UnKnown#');
         }
         if (!$this->port) {
-            $this->logger->warning('Swow Socket Port UnKnown#');
+            $this->stdoutLogger->warning('Swow Socket Port UnKnown#');
         }
 
         $this->server = new Socket($this->type);

@@ -39,7 +39,8 @@
         "vlucas/phpdotenv": "^5.3",
         "php-di/php-di": "^6.3",
         "symfony/config": "^5.2",
-      "ext-iconv": "*"
+      "ext-iconv": "*",
+        "hyperf/engine-swow": "^1.1"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",

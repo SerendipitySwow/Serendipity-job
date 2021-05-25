@@ -4,8 +4,10 @@ declare(strict_types = 1);
 namespace Serendipity\Job\Server;
 
 use Serendipity\Job\Contract\LoggerInterface;
+use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Serendipity\Job\Kernel\Provider\AbstractProvider;
 use Serendipity\Job\Kernel\Swow\ServerFactory;
+use Serendipity\Job\Logger\LoggerFactory;
 use Swow\Buffer;
 use Swow\Coroutine;
 use Swow\Socket;
@@ -13,6 +15,8 @@ use Swow\Socket\Exception;
 
 class ServerProvider extends AbstractProvider
 {
+    protected StdoutLoggerInterface $stdoutLogger;
+
     protected LoggerInterface $logger;
 
     public function bootApp() : void
@@ -20,9 +24,14 @@ class ServerProvider extends AbstractProvider
         /**
          * @var Socket $server
          */
-        $server       = $this->container()->make(ServerFactory::class)->start();
-        $this->logger = $this->container()->get(LoggerInterface::class);
+        $server             = $this->container()->make(ServerFactory::class)->start();
+        $this->stdoutLogger = $this->container()->get(StdoutLoggerInterface::class);
+        $this->logger       = $this->container()->get(LoggerFactory::class)->get();
+        $this->stdoutLogger->debug('Serendipity-Job Start Successfully#');
+        /*
+         * 测试日志
         $this->logger->debug('Serendipity-Job Start Successfully#');
+        */
         while (true) {
             $client = $server->accept();
             Coroutine::run(function () use ($client)
@@ -32,7 +41,7 @@ class ServerProvider extends AbstractProvider
                     while (true) {
                         $length  = $client->recv($buffer);
                         $content = $buffer->getContents();
-                        $this->logger->debug(sprintf('Buffer Content: %s', $content) . PHP_EOL);
+                        $this->stdoutLogger->debug(sprintf('Buffer Content: %s', $content) . PHP_EOL);
                         if ($length === 0) {
                             break;
                         }

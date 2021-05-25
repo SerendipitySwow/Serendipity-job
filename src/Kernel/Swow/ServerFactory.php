@@ -9,6 +9,7 @@ use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\Contract\EventDispatcherInterface;
 use Serendipity\Job\Contract\LoggerInterface;
 use Serendipity\Job\Contract\ServerInterface;
+use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Swow\Socket;
 
 class ServerFactory
@@ -25,18 +26,18 @@ class ServerFactory
 
     protected ?EventDispatcherInterface $eventDispatcherInterface = null;
 
-    protected ?LoggerInterface $logger = null;
+    protected ?StdoutLoggerInterface $stdoutLogger = null;
 
     /**
      * @var null|array
      */
     protected ?array $config;
 
-    public function __construct(ContainerInterface $container, LoggerInterface $logger)
+    public function __construct(ContainerInterface $container, StdoutLoggerInterface $logger)
     {
-        $this->container = $container;
-        $this->logger    = $logger;
-        $this->config    = $container->get(ConfigInterface::class)->get('server');
+        $this->container    = $container;
+        $this->stdoutLogger = $logger;
+        $this->config       = $container->get(ConfigInterface::class)->get('server');
     }
 
     public function start() : Socket
@@ -50,7 +51,7 @@ class ServerFactory
 
             $this->server = new Server(
                 $this->container,
-                $this->logger,
+                $this->stdoutLogger,
             );
             $this->server->setBacklog($this->config['backlog']);
             $this->server->setHost($this->config['host']);
