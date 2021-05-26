@@ -61,9 +61,9 @@ class MySqlPool
             throw new MySqlPoolException('Unknow MySQL connection.');
         }
         $connsPool = &self::$spareConns[$connName];
-        if ($conn->connected) {
+        if ($conn->getAttribute(PDO::ATTR_SERVER_INFO)) {
             if (count($connsPool) >= self::$connsConfig[$connName]['maxSpareConns']) {
-                $conn->close();
+               unset($conn);
             } else {
                 $connsPool[] = $conn;
                 if (count(self::$pendingFetchCount[$connName]) > 0) {
