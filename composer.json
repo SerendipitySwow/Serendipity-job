@@ -40,7 +40,8 @@
         "php-di/php-di": "^6.3",
         "symfony/config": "^5.2",
       "ext-iconv": "*",
-        "hyperf/engine-swow": "^1.1"
+        "hyperf/engine-swow": "^1.1",
+      "ext-pdo": "*"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",
