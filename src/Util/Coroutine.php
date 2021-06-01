@@ -28,7 +28,7 @@ class Coroutine
         Co::defer($callable);
     }
 
-    public static function sleep(float $seconds)
+    public static function sleep(float $seconds) : void
     {
         usleep((int)($seconds * 1000 * 1000));
     }
