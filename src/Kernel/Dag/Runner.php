@@ -6,5 +6,5 @@ namespace Serendipity\Job\Kernel\Dag;
 
 interface Runner
 {
-    public function Run();
+    public function run();
 }
