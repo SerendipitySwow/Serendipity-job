@@ -40,6 +40,9 @@ class ServerProvider extends AbstractProvider
                     $buffer = new Buffer();
                     try {
                         while (true) {
+                            if (!$session->isEstablished()) {
+                                break;
+                            }
                             $request = null;
                             try {
                                 $request = $session->recvHttpRequest();
@@ -49,10 +52,12 @@ class ServerProvider extends AbstractProvider
                                         $buffer->write(file_get_contents(SERENDIPITY_JOB_PATH . '/storage/task.php'));
                                         $response = new Response();
                                         $response->setStatus(Status::OK);
-                                        $response->setHeader('Server','Serendipity-Job');
+                                        $response->setHeader('Server', 'Serendipity-Job');
                                         $response->setBody($buffer);
                                         $session->sendHttpResponse($response);
+                                        ## clear buffer
                                         $buffer->clear();
+                                        $this->stdoutLogger->debug(sprintf('Http Client Fd[%s] Debug#', (string)$session->getFd()));
                                         break;
                                     }
                                     case '/greeter':
