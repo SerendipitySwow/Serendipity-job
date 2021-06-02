@@ -8,10 +8,14 @@ use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Serendipity\Job\Kernel\Provider\AbstractProvider;
 use Serendipity\Job\Kernel\Swow\ServerFactory;
 use Serendipity\Job\Logger\LoggerFactory;
-use Swow\Buffer;
 use Swow\Coroutine;
-use Swow\Socket;
+use Swow\Http\Buffer;
+use Swow\Http\Server\Response;
+use Swow\Http\Status;
 use Swow\Socket\Exception;
+use const Swow\Errno\EMFILE;
+use const Swow\Errno\ENFILE;
+use const Swow\Errno\ENOMEM;
 
 class ServerProvider extends AbstractProvider
 {
@@ -22,80 +26,103 @@ class ServerProvider extends AbstractProvider
     public function bootApp() : void
     {
         /**
-         * @var Socket $server
+         * @var \Swow\Http\Server $server
          */
         $server             = $this->container()->make(ServerFactory::class)->start();
         $this->stdoutLogger = $this->container()->get(StdoutLoggerInterface::class);
         $this->logger       = $this->container()->get(LoggerFactory::class)->get();
         $this->stdoutLogger->debug('Serendipity-Job Start Successfully#');
-        /*
-         * 测试日志
-        $this->logger->debug('Serendipity-Job Start Successfully#');
-        */
         while (true) {
-            /*
-             * 每个$client都不一样,参考如下:
-             */
-            $client = $server->accept();
-            /*
-            dump($client);
- Swow\Socket {#170
-  type: "TCP4"
-  fd: 18
-  timeout: array:5 [
-    "dns" => -1
-    "accept" => -1
-    "connect" => -1
-    "read" => -1
-    "write" => -1
-  ]
-  established: true
-  side: "none"
-  sockname: array:2 [
-    "address" => "127.0.0.1"
-    "port" => 9502
-  ]
-  peername: array:2 [
-    "address" => "127.0.0.1"
-    "port" => 53315
-  ]
-  io_state: "idle"
-}
-            */
-            Coroutine::run(function () use ($client)
-            {
-                $buffer = new Buffer();
-                try {
-                    while (true) {
-                        $length  = $client->recv($buffer);
-                        $content = $buffer->getContents();
-                        $this->stdoutLogger->debug(sprintf('Buffer Content: %s', $content) . PHP_EOL);
-                        if ($length === 0) {
-                            break;
-                        }
-                        $offset = 0;
+            try {
+                $session = $server->acceptSession();
+                Coroutine::run(function () use ($session)
+                {
+                    $buffer = new Buffer();
+                    try {
                         while (true) {
-                            $eof = strpos($buffer->toString(), "\r\n\r\n", $offset);
-                            if ($eof === false) {
+                            $request = null;
+                            try {
+                                $request = $session->recvHttpRequest();
+                                switch ($request->getPath()) {
+                                    case '/':
+                                    {
+                                        $buffer->write(file_get_contents(SERENDIPITY_JOB_PATH . '/storage/task.php'));
+                                        $response = new Response();
+                                        $response->setStatus(Status::OK);
+                                        $response->setHeader('Server','Serendipity-Job');
+                                        $response->setBody($buffer);
+                                        $session->sendHttpResponse($response);
+                                        $buffer->clear();
+                                        break;
+                                    }
+                                    case '/greeter':
+                                    {
+                                        $session->respond('Hello Swow');
+                                        break;
+                                    }
+                                    case '/echo':
+                                    {
+                                        $session->respond($request->getBodyAsString());
+                                        break;
+                                    }
+                                    ## websokcet
+                                    /*
+                                    case '/chat':
+                                    {
+                                        if ($upgrade = $request->getUpgrade()) {
+                                            if ($upgrade === $request::UPGRADE_WEBSOCKET) {
+                                                $session->upgradeToWebSocket($request);
+                                                $request = null;
+                                                while (true) {
+                                                    $frame = $session->recvWebSocketFrame();
+                                                    $opcode = $frame->getOpcode();
+                                                    switch ($opcode) {
+                                                        case WebSocketOpcode::PING:
+                                                            $session->sendString(WebSocketFrame::PONG);
+                                                            break;
+                                                        case WebSocketOpcode::PONG:
+                                                            break;
+                                                        case WebSocketOpcode::CLOSE:
+                                                            break 2;
+                                                        default:
+                                                            $frame->getPayloadData()->rewind()->write("You said: {$frame->getPayloadData()}");
+                                                            $session->sendWebSocketFrame($frame);
+                                                    }
+                                                }
+                                                break;
+                                            }
+                                            throw new HttpException(HttpStatus::BAD_REQUEST, 'Unsupported Upgrade Type');
+                                        }
+                                        $session->respond(file_get_contents(__DIR__ . '/chat.html'));
+                                        break;
+                                    }
+                                    */
+                                    default:
+                                    {
+                                        $session->error(Status::NOT_FOUND);
+                                    }
+                                }
+                            } catch (HttpException $exception) {
+                                $session->error($exception->getCode(), $exception->getMessage());
+                            }
+                            if (!$request || !$request->getKeepAlive()) {
                                 break;
                             }
-                            $client->sendString(
-                                "HTTP/1.1 200 OK\r\n" .
-                                "Connection: keep-alive\r\n" .
-                                "Content-Length: 0\r\n\r\n"
-                            );
-                            $requestLength = $eof + strlen("\r\n\r\n");
-                            if ($requestLength === $length) {
-                                $buffer->clear();
-                                break;
-                            }  /* < */
-                            $offset += $requestLength;
                         }
+                    } catch (Exception $exception) {
+                        // you can log error here
                     }
-                } catch (Exception $exception) {
-                    echo "No.{$client->getFd()} goaway! {$exception->getMessage()}" . PHP_EOL;
+                    finally {
+                        $session->close();
+                    }
+                });
+            } catch (SocketException | CoroutineException $exception) {
+                if (in_array($exception->getCode(), [EMFILE, ENFILE, ENOMEM], true)) {
+                    sleep(1);
+                } else {
+                    break;
                 }
-            });
+            }
         }
     }
 }

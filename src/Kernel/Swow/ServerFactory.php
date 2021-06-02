@@ -40,7 +40,7 @@ class ServerFactory
         $this->config       = $container->get(ConfigInterface::class)->get('server');
     }
 
-    public function start() : Socket
+    public function start() : Socket|\Swow\Http\Server
     {
         return $this->getServer()->start();
     }
@@ -53,6 +53,7 @@ class ServerFactory
                 $this->container,
                 $this->stdoutLogger,
             );
+            $this->server->setServer((new $this->config['server']()) ?? new Socket());
             $this->server->setBacklog($this->config['backlog']);
             $this->server->setHost($this->config['host']);
             $this->server->setPort($this->config['port']);

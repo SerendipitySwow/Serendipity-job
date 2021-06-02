@@ -11,7 +11,7 @@ use Swow\Socket;
 
 class  Server implements ServerInterface
 {
-    protected ?Socket $server = null;
+    protected \Swow\Http\Server|Socket|null $server;
 
     protected ?int $port = null;
 
@@ -46,6 +46,11 @@ class  Server implements ServerInterface
         $this->backlog = $backlog;
     }
 
+    public function setServer(?Socket $server) : void
+    {
+        $this->server = $server;
+    }
+
     /**
      * @param null|int $port
      */
@@ -72,15 +77,15 @@ class  Server implements ServerInterface
 
     public function getServer() : Server
     {
+        if (!$this->server instanceof Socket) {
+            $this->stdoutLogger->warning('Swow Server UnKnown#');
+        }
         if (!$this->type) {
             $this->stdoutLogger->warning('Swow Socket Type UnKnown#');
         }
         if (!$this->port) {
             $this->stdoutLogger->warning('Swow Socket Port UnKnown#');
         }
-
-        $this->server = new Socket($this->type);
-
         return $this;
     }
 
