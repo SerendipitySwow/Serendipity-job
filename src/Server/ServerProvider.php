@@ -124,7 +124,9 @@ class ServerProvider extends AbstractProvider
                                         $person->setSportsperson(false);
                                         $serializer = $this->container()->get(SymfonySerializer::class);
                                         $json       = $serializer->serialize($person);
-                                        $object     = $serializer->deserialize($json, $person::class);
+                                        $this->stdoutLogger->debug(sprintf('Class Serializer returned[%s]#', $json));
+                                        $object = $serializer->deserialize($json, $person::class);
+                                        $this->stdoutLogger->debug(sprintf('Class Deserializer returned[%s]#', get_class($object)));
                                         $session->respond($json);
                                         break;
                                     }
