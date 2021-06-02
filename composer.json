@@ -41,7 +41,8 @@
         "symfony/config": "^5.2",
       "ext-iconv": "*",
         "hyperf/engine-swow": "^1.1",
-      "ext-pdo": "*"
+      "ext-pdo": "*",
+        "symfony/serializer-pack": "^1.0"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",

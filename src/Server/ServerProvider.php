@@ -8,6 +8,8 @@ use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Serendipity\Job\Kernel\Provider\AbstractProvider;
 use Serendipity\Job\Kernel\Swow\ServerFactory;
 use Serendipity\Job\Logger\LoggerFactory;
+use Serendipity\Job\Serializer\Person;
+use Serendipity\Job\Serializer\SymfonySerializer;
 use Swow\Coroutine;
 use Swow\Http\Buffer;
 use Swow\Http\Server\Response;
@@ -60,9 +62,70 @@ class ServerProvider extends AbstractProvider
                                         $this->stdoutLogger->debug(sprintf('Http Client Fd[%s] Debug#', (string)$session->getFd()));
                                         break;
                                     }
-                                    case '/greeter':
+                                    case '/dag':
                                     {
                                         $session->respond('Hello Swow');
+                                        break;
+                                    }
+                                    ## serializable
+                                    case '/serializable':
+                                    {
+                                        $person = new class() {
+                                            private $age;
+                                            private $name;
+                                            private $sportsperson;
+                                            private $createdAt;
+
+                                            // Getters
+                                            public function getName()
+                                            {
+                                                return $this->name;
+                                            }
+
+                                            public function getAge()
+                                            {
+                                                return $this->age;
+                                            }
+
+                                            public function getCreatedAt()
+                                            {
+                                                return $this->createdAt;
+                                            }
+
+                                            // Issers
+                                            public function isSportsperson()
+                                            {
+                                                return $this->sportsperson;
+                                            }
+
+                                            // Setters
+                                            public function setName($name)
+                                            {
+                                                $this->name = $name;
+                                            }
+
+                                            public function setAge($age)
+                                            {
+                                                $this->age = $age;
+                                            }
+
+                                            public function setSportsperson($sportsperson)
+                                            {
+                                                $this->sportsperson = $sportsperson;
+                                            }
+
+                                            public function setCreatedAt($createdAt)
+                                            {
+                                                $this->createdAt = $createdAt;
+                                            }
+                                        };
+                                        $person->setName('foo');
+                                        $person->setAge(99);
+                                        $person->setSportsperson(false);
+                                        $serializer = $this->container()->get(SymfonySerializer::class);
+                                        $json       = $serializer->serialize($person);
+                                        $object     = $serializer->deserialize($json, $person::class);
+                                        $session->respond($json);
                                         break;
                                     }
                                     case '/echo':
@@ -118,6 +181,7 @@ class ServerProvider extends AbstractProvider
                         // you can log error here
                     }
                     finally {
+                        ## close session
                         $session->close();
                     }
                 });
