@@ -6,6 +6,7 @@ namespace Serendipity\Job\Console;
 use Serendipity\Job\Kernel\Provider\KernelProvider;
 use Serendipity\Job\Util\ApplicationContext;
 use function Serendipity\Job\Kernel\config;
+use Serendipity\Job\Constant\Logo;
 
 class SerendipityJobCommand extends Command
 {
@@ -19,6 +20,7 @@ class SerendipityJobCommand extends Command
 
     public function handle() : int
     {
+        $this->output->writeln(sprintf('<info>%s</info>', Logo::LOGO));
         $this->output->writeln([
             '<info>Serendipity Job</info>',
             '<info>===============</info>',
