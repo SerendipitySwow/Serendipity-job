@@ -5,6 +5,8 @@ namespace Serendipity\Job\Server;
 
 use Serendipity\Job\Contract\LoggerInterface;
 use Serendipity\Job\Contract\StdoutLoggerInterface;
+use Serendipity\Job\Kernel\Dag\Dag;
+use Serendipity\Job\Kernel\Dag\Vertex;
 use Serendipity\Job\Kernel\Provider\AbstractProvider;
 use Serendipity\Job\Kernel\Swow\ServerFactory;
 use Serendipity\Job\Logger\LoggerFactory;
@@ -64,7 +66,91 @@ class ServerProvider extends AbstractProvider
                                     }
                                     case '/dag':
                                     {
-                                        $session->respond('Hello Swow');
+                                        // return response
+                                        \Serendipity\Job\Util\Coroutine::create(function () use ($session)
+                                        {
+                                            $session->respond('Hello Swow');
+                                        });
+                                        ## Dag
+                                        $dag = new Dag();
+                                        ## 除了使用闭包外还可以实现 Serendipity\Job\Kernel\Dag\Runner接口来定义.并通过 Vertex::of 将其转化为一个顶点。
+                                        /**
+                                         * class MyJob implements \Hyperf\Dag\Runner {
+                                         * public function run($results = []) {
+                                         * return 'hello';
+                                         * }
+                                         * }
+                                         * \Hyperf\Dag\Vertex::of(new MyJob(), "greeting");
+                                         */
+                                        $a = Vertex::make(function ()
+                                        {
+                                            sleep(1);
+                                            echo "A\n";
+                                        });
+                                        $b = Vertex::make(function ()
+                                        {
+                                            sleep(1);
+                                            echo "B\n";
+                                        });
+                                        $c = Vertex::make(function ()
+                                        {
+                                            sleep(1);
+                                            echo "C\n";
+                                        });
+                                        $d = Vertex::make(function ()
+                                        {
+                                            sleep(1);
+                                            echo "D\n";
+                                        });
+                                        $e = Vertex::make(function ()
+                                        {
+                                            sleep(1);
+                                            echo "E\n";
+                                        });
+                                        $f = Vertex::make(function ()
+                                        {
+                                            sleep(1);
+                                            echo "F\n";
+                                        });
+                                        $g = Vertex::make(function ()
+                                        {
+                                            sleep(1);
+                                            echo "G\n";
+                                        });
+                                        $h = Vertex::make(function ()
+                                        {
+                                            sleep(1);
+                                            echo "H\n";
+                                        });
+                                        $i = Vertex::make(function ()
+                                        {
+                                            sleep(1);
+                                            echo "I\n";
+                                        });
+                                        $dag->addVertex($a)
+                                            ->addVertex($b)
+                                            ->addVertex($c)
+                                            ->addVertex($d)
+                                            ->addVertex($e)
+                                            ->addVertex($f)
+                                            ->addVertex($g)
+                                            ->addVertex($h)
+                                            ->addVertex($i)
+                                            ->addEdge($a, $b)
+                                            ->addEdge($a, $c)
+                                            ->addEdge($a, $d)
+                                            ->addEdge($b, $h)
+                                            ->addEdge($b, $e)
+                                            ->addEdge($b, $f)
+                                            ->addEdge($c, $f)
+                                            ->addEdge($c, $g)
+                                            ->addEdge($d, $g)
+                                            ->addEdge($h, $i)
+                                            ->addEdge($e, $i)
+                                            ->addEdge($f, $i)
+                                            ->addEdge($g, $i);
+                                        $dag->run();
+
                                         break;
                                     }
                                     ## serializable
