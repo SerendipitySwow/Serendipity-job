@@ -41,7 +41,6 @@ class ServerProvider extends AbstractProvider
                 $session = $server->acceptSession();
                 Coroutine::run(function () use ($session)
                 {
-                    $buffer = new Buffer();
                     try {
                         while (true) {
                             if (!$session->isEstablished()) {
@@ -53,6 +52,7 @@ class ServerProvider extends AbstractProvider
                                 switch ($request->getPath()) {
                                     case '/':
                                     {
+                                        $buffer = new Buffer();
                                         $buffer->write(file_get_contents(SERENDIPITY_JOB_PATH . '/storage/task.php'));
                                         $response = new Response();
                                         $response->setStatus(Status::OK);
@@ -255,7 +255,17 @@ class ServerProvider extends AbstractProvider
                                     */
                                     default:
                                     {
-                                        $session->error(Status::NOT_FOUND);
+                                        $buffer = new Buffer();
+                                        $buffer->write(file_get_contents(SERENDIPITY_JOB_PATH . '/storage/404.php'));
+                                        $response = new Response();
+                                        $response->setStatus(Status::NOT_FOUND);
+                                        $response->setHeader('Server', 'Serendipity-Job');
+                                        $response->setBody($buffer);
+                                        $session->sendHttpResponse($response);
+                                        ## clear buffer
+                                        $buffer->clear();
+                                        $this->stdoutLogger->debug(sprintf('Http Client Fd[%s] NotFound#', (string)$session->getFd()));
+                                        break;
                                     }
                                 }
                             } catch (HttpException $exception) {
