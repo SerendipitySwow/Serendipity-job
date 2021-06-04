@@ -4,6 +4,8 @@ declare(strict_types = 1);
 
 namespace Serendipity\Job\Util;
 
+use ArrayObject;
+use Closure;
 use Hyperf\Engine\Coroutine as Co;
 use function Serendipity\Job\Kernel\value;
 
@@ -64,7 +66,7 @@ class Context
     /**
      * Retrieve the value and override it by closure.
      */
-    public static function override(string $id, \Closure $closure)
+    public static function override(string $id, Closure $closure)
     {
         $value = null;
         if (self::has($id)) {
@@ -78,9 +80,12 @@ class Context
     /**
      * Retrieve the value and store it if not exists.
      *
-     * @param mixed $value
+     * @param string $id
+     * @param mixed  $value
+     *
+     * @return mixed
      */
-    public static function getOrSet(string $id, $value)
+    public static function getOrSet(string $id, mixed $value) : mixed
     {
         if (!self::has($id)) {
             return self::set($id, value($value));
@@ -88,7 +93,7 @@ class Context
         return self::get($id);
     }
 
-    public static function getContainer() : \ArrayObject|array|null
+    public static function getContainer() : ArrayObject|array|null
     {
         if (Coroutine::inCoroutine()) {
             return Co::getContextFor();

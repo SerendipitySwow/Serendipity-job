@@ -30,6 +30,7 @@
     "require": {
         "php":">=8.0",
         "ext-redis":">=5.3",
+        "ext-sockets": "*",
         "symfony/console": "^5.2",
         "symfony/serializer": "^5.2",
         "symfony/yaml": "^5.2",
@@ -42,7 +43,8 @@
       "ext-iconv": "*",
         "hyperf/engine-swow": "^1.1",
       "ext-pdo": "*",
-        "symfony/serializer-pack": "^1.0"
+        "symfony/serializer-pack": "^1.0",
+        "multiplex/multiplex": "^0.3.1"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",

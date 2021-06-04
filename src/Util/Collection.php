@@ -59,7 +59,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      *
      * @var array
      */
-    protected static $proxies
+    protected static array $proxies
         = [
             'average',
             'avg',
@@ -85,9 +85,11 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Create a new collection.
      *
-     * @param mixed $items
+     * @param null|array $items
+     *
+     * @throws \JsonException
      */
-    public function __construct($items = [])
+    public function __construct(null|array $items = [])
     {
         $this->items = $this->getArrayableItems($items);
     }
@@ -107,16 +109,29 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      */
     public function __get(string $key)
     {
-        if (!in_array($key, static::$proxies)) {
+        if (!in_array($key, static::$proxies, true)) {
             throw new Exception("Property [{$key}] does not exist on this collection instance.");
         }
         return new HigherOrderCollectionProxy($this, $key);
     }
 
+    public function __set($key, $value)
+    {
+
+    }
+
+    public function __isset($key)
+    {
+
+    }
+
     /**
-     * @param mixed $items
+     * @param null|array $items
+     *
+     * @return \Serendipity\Job\Util\Collection
+     * @throws \JsonException
      */
-    public function fill($items = [])
+    public function fill(null|array $items = []) : Collection
     {
         $this->items = $this->getArrayableItems($items);
         return $this;
@@ -125,9 +140,9 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Create a new collection instance if the value isn't one already.
      *
-     * @param mixed $items
+     * @param null|array $items
      */
-    public static function make($items = []) : self
+    public static function make(null|array $items = []) : self
     {
         return new static($items);
     }
@@ -136,8 +151,11 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      * Wrap the given value in a collection if applicable.
      *
      * @param mixed $value
+     *
+     * @return \Serendipity\Job\Util\Collection
+     * @throws \JsonException
      */
-    public static function wrap($value) : self
+    public static function wrap(mixed $value) : self
     {
         return $value instanceof self ? new static($value) : new static(Arr::wrap($value));
     }
@@ -147,7 +165,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      *
      * @param array|static $value
      */
-    public static function unwrap($value) : array
+    #[Pure] public static function unwrap(Collection|array $value) : array
     {
         return $value instanceof self ? $value->all() : $value;
     }
@@ -179,7 +197,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      *
      * @param null|callable|string $callback
      */
-    public function avg($callback = null)
+    public function avg(callable|string $callback = null) : float|int
     {
         $callback = $this->valueRetriever($callback);
         $items    = $this->map(function ($value) use ($callback)
@@ -199,7 +217,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      *
      * @param null|callable|string $callback
      */
-    public function average($callback = null)
+    public function average(callable|string $callback = null) : float|int
     {
         return $this->avg($callback);
     }
@@ -208,15 +226,18 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      * Get the median of a given key.
      *
      * @param null|mixed $key
+     *
+     * @return float|int|mixed|void
+     * @throws \JsonException
      */
-    public function median($key = null)
+    public function median(mixed $key = null)
     {
         $values = (isset($key) ? $this->pluck($key) : $this)->filter(function ($item)
         {
             return !is_null($item);
         })->sort()->values();
         $count  = $values->count();
-        if ($count == 0) {
+        if ($count === 0) {
             return;
         }
         $middle = (int)($count / 2);
@@ -1577,7 +1598,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      * @param       $offset
      * @param mixed $value
      */
-    public function offsetSet($offset, $value):void
+    public function offsetSet($offset, $value) : void
     {
         if (is_null($offset)) {
             $this->items[] = $value;
@@ -1591,7 +1612,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      *
      * @param string $offset
      */
-    public function offsetUnset($offset):void
+    public function offsetUnset($offset) : void
     {
         unset($this->items[$offset]);
     }
