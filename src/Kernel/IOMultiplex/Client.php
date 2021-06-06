@@ -53,9 +53,9 @@ class Client implements ClientInterface, HasHeartbeatInterface
     protected ?Channel $chan;
 
     /**
-     * @var \Swow\Socket
+     * @var null|resource
      */
-    protected Socket $client;
+    protected ?resource $client;
 
     /**
      * @var \Serendipity\Job\Util\Collection
@@ -166,7 +166,7 @@ class Client implements ClientInterface, HasHeartbeatInterface
 
     public function close() : void
     {
-        $this->client && $this->client->close();
+        $this->client && $this->client = null;
         $this->chan && $this->chan->close();
     }
 
@@ -207,23 +207,19 @@ class Client implements ClientInterface, HasHeartbeatInterface
         return $this;
     }
 
+    /**
+     * @return resource
+     */
     protected function makeClient()
     {
-        //TODO 研究php socket
-        $client = new Socket(SWOOLE_SOCK_TCP);
-        $client->setProtocol([
-            'open_length_check'     => true,
-            'package_length_type'   => 'N',
-            'package_length_offset' => 0,
-            'package_body_offset'   => 4,
-            'package_max_length'    => $this->config->get('package_max_length', 1024 * 1024 * 2),
-        ]);
-        $ret = $client->connect($this->name, $this->port, $this->config->get('connect_timeout', 0.5));
-        if ($ret === false) {
+
+        $fp = stream_socket_client(sprintf('tcp://%s:%s', $this->name, $this->port), $errno, $errstr, 1);
+        if ($fp === false) {
             $this->close();
-            throw new ClientConnectFailedException($client->errMsg, $client->errCode);
+            throw new ClientConnectFailedException($errstr, $errno);
         }
-        return $client;
+        stream_set_timeout($fp, $this->config->get('connect_timeout', 0.5));
+        return $fp;
     }
 
     protected function loop() : void
@@ -242,6 +238,7 @@ class Client implements ClientInterface, HasHeartbeatInterface
                 $chan   = $this->chan;
                 $client = $this->client;
                 while (true) {
+                    //TODO 待优化
                     $data = $client->recv(-1);
                     if (!$client->isConnected()) {
                         $reason = 'client disconnected. ' . $client->errMsg;
