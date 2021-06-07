@@ -90,8 +90,9 @@ class Client implements ClientInterface, HasSerializerInterface
         $this->serializer     = $serializer ?? new StringSerializer();
         $this->channelManager = new ChannelManager();
         $this->config         = new Collection([
-            'recv_timeout'       => 10,
-            'connect_timeout'    => 5,
+            'recv_timeout'    => 10,
+            'max_length'      => 2 * 1024 * 1024,
+            'connect_timeout' => 5,
             // 'heartbeat' => null,
         ]);
     }
@@ -172,7 +173,6 @@ class Client implements ClientInterface, HasSerializerInterface
         $this->client && $this->client->close();
         $this->chan && $this->chan->close();
     }
-
 
     /**
      * @param null|\Serendipity\Job\Contract\LoggerInterface $logger
