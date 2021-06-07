@@ -8,7 +8,6 @@ use Serendipity\Job\Kernel\Socket\Exceptions\WriteStreamException;
 use Serendipity\Job\Kernel\Socket\Interfaces\StreamInterface;
 use function error_get_last;
 use function fclose;
-use function fgetc;
 use function fwrite;
 use function is_resource;
 use function stream_set_timeout;
@@ -122,8 +121,7 @@ final class Socket implements StreamInterface
         if (!$this->isOpen()) {
             throw new StreamStateException('Stream not opened.');
         }
-        //TODO 待优化
-        $char = fgetc($this->socket);
+        $char = fread($this->socket,1024);
         if ($char === false) {
             return null;
         }

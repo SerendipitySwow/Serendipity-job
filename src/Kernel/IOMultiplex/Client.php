@@ -238,7 +238,7 @@ class Client implements ClientInterface, HasHeartbeatInterface
                 $chan   = $this->chan;
                 $client = $this->client;
                 while (true) {
-                    //TODO 待优化
+                    //TODO 待优化 设计包体加长度
                     $data = $client->recv(-1);
                     if (!$client->isConnected()) {
                         $reason = 'client disconnected. ' . $client->errMsg;

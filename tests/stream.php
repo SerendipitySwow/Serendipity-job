@@ -31,36 +31,16 @@ Coroutine::run(function () use ($wr)
         echo "{$errstr} ({$errno})\n";
     } else {
         $c = 0;
-        while ($conn = @stream_socket_accept($server, 1)) {
+        while ($conn = stream_socket_accept($server)) {
             Coroutine::run(function () use ($wr, $server, $conn, &$c)
             {
                 stream_set_timeout($conn, 5);
                 for ($n = N; $n--;) {
                     $data = fread($conn, tcp_length(fread($conn, 2)));
-                    assert($data === "Hello Swow Server #{$n}");
+                    var_dump($data);
                     fwrite($conn, tcp_pack("Hello Swow Client #{$n}"));
-                }
-                if (++$c === C) {
-                    fclose($server);
                 }
             });
         }
     }
 });
-for ($c = C; $c--;) {
-    Coroutine::run(function () use ($wr)
-    {
-        $fp = stream_socket_client('tcp://127.0.0.1:9502', $errno, $errstr, 1);
-        if (!$fp) {
-            echo "{$errstr} ({$errno})\n";
-        } else {
-            stream_set_timeout($fp, 5);
-            for ($n = N; $n--;) {
-                fwrite($fp, tcp_pack("Hello Swow Server #{$n}"));
-                $data = fread($fp, tcp_length(fread($fp, 2)));
-                assert($data === "Hello Swow Client #{$n}");
-            }
-            fclose($fp);
-        }
-    });
-}
