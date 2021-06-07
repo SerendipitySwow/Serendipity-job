@@ -239,3 +239,13 @@ if (!function_exists('make')) {
         return new $name(...$parameters);
     }
 }
+
+function tcp_pack(string $data) : string
+{
+    return pack('n', strlen($data)) . $data;
+}
+
+function tcp_length(string $head) : int
+{
+    return unpack('n', $head)[1];
+}

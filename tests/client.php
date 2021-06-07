@@ -26,14 +26,12 @@ for ($c = C; $c--;) {
             echo "{$errstr} ({$errno})\n";
         } else {
             stream_set_timeout($fp, 5);
-            for ($n = N; $n--;) {
-                var_dump(tcp_pack("Hello Swow Server #{$n}"));exit;
-                fwrite($fp, tcp_pack("Hello Swow Server #{$n}"));
-                $data = fread($fp, tcp_length(fread($fp, 2)));
+            while (true){
+                fwrite($fp, tcp_pack('Hello Swow Server #' .random_int(10000,99999)));
+                $length = tcp_length(fread($fp, 2));
+                $data = fread($fp,$length);
                 var_dump($data);
-                assert($data === "Hello Swow Client #{$n}");
             }
-            fclose($fp);
         }
     });
 }

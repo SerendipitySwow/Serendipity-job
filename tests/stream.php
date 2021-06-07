@@ -16,7 +16,6 @@ function tcp_length(string $head) : int
 {
     return unpack('n', $head)[1];
 }
-
 Coroutine::run(function () use ($wr)
 {
     $ctx    = stream_context_create(['socket' => ['so_reuseaddr' => true, 'backlog' => C]]);
@@ -35,10 +34,10 @@ Coroutine::run(function () use ($wr)
             Coroutine::run(function () use ($wr, $server, $conn, &$c)
             {
                 stream_set_timeout($conn, 5);
-                for ($n = N; $n--;) {
+                while (true) {
                     $data = fread($conn, tcp_length(fread($conn, 2)));
-                    var_dump($data);
-                    fwrite($conn, tcp_pack("Hello Swow Client #{$n}"));
+                    echo fwrite($conn, tcp_pack('Hello Swow Client #' .random_int(10000,99999)));
+                    echo PHP_EOL;
                 }
             });
         }

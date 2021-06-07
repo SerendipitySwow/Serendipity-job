@@ -3,10 +3,11 @@ declare(strict_types = 1);
 
 namespace Serendipity\Job\Kernel\IOMultiplex;
 
+use Exception;
 use Hyperf\Engine\Channel;
 use Multiplex\ChannelManager;
 use Multiplex\Constract\ClientInterface;
-use Multiplex\Constract\HasHeartbeatInterface;
+use Multiplex\Constract\HasSerializerInterface;
 use Multiplex\Constract\IdGeneratorInterface;
 use Multiplex\Constract\PackerInterface;
 use Multiplex\Constract\SerializerInterface;
@@ -17,10 +18,13 @@ use Multiplex\Packer;
 use Multiplex\Packet;
 use Multiplex\Serializer\StringSerializer;
 use Serendipity\Job\Contract\LoggerInterface;
+use Serendipity\Job\Kernel\Socket\Exceptions\OpenStreamException;
+use Serendipity\Job\Kernel\Socket\Exceptions\StreamStateException;
+use Serendipity\Job\Kernel\Socket\Streams\Socket;
 use Serendipity\Job\Util\Collection;
-use Swow\Socket;
+use Throwable;
 
-class Client implements ClientInterface, HasHeartbeatInterface
+class Client implements ClientInterface, HasSerializerInterface
 {
     /**
      * @var string
@@ -53,9 +57,9 @@ class Client implements ClientInterface, HasHeartbeatInterface
     protected ?Channel $chan;
 
     /**
-     * @var null|resource
+     * @var null|Socket
      */
-    protected ?resource $client;
+    protected ?Socket $client;
 
     /**
      * @var \Serendipity\Job\Util\Collection
@@ -86,9 +90,8 @@ class Client implements ClientInterface, HasHeartbeatInterface
         $this->serializer     = $serializer ?? new StringSerializer();
         $this->channelManager = new ChannelManager();
         $this->config         = new Collection([
-            'package_max_length' => 1024 * 1024 * 2,
             'recv_timeout'       => 10,
-            'connect_timeout'    => 0.5,
+            'connect_timeout'    => 5,
             // 'heartbeat' => null,
         ]);
     }
@@ -119,7 +122,7 @@ class Client implements ClientInterface, HasHeartbeatInterface
             );
 
             $this->chan->push($payload);
-        } catch (\Throwable $exception) {
+        } catch (Throwable $exception) {
             is_int($id) && $this->getChannelManager()->close($id);
             throw $exception;
         }
@@ -166,35 +169,10 @@ class Client implements ClientInterface, HasHeartbeatInterface
 
     public function close() : void
     {
-        $this->client && $this->client = null;
+        $this->client && $this->client->close();
         $this->chan && $this->chan->close();
     }
 
-    public function isHeartbeat() : bool
-    {
-        $heartbeat = $this->config->get('heartbeat');
-        if (!$this->heartbeat && is_numeric($heartbeat)) {
-            $this->heartbeat = true;
-
-            Coroutine::create(function () use ($heartbeat)
-            {
-                while (true) {
-
-                    try {
-                        // PING
-                        if ($chan = $this->chan and $chan->isEmpty()) {
-                            $payload = $this->packer->pack(
-                                new Packet(0, Packet::PING)
-                            );
-                            $chan->push($payload);
-                        }
-                    } catch (\Throwable $exception) {
-                        $this->logger && $this->logger->error((string)$exception);
-                    }
-                }
-            });
-        }
-    }
 
     /**
      * @param null|\Serendipity\Job\Contract\LoggerInterface $logger
@@ -208,18 +186,50 @@ class Client implements ClientInterface, HasHeartbeatInterface
     }
 
     /**
-     * @return resource
+     * @return Socket
      */
-    protected function makeClient()
+    protected function makeClient() : Socket
     {
-
-        $fp = stream_socket_client(sprintf('tcp://%s:%s', $this->name, $this->port), $errno, $errstr, 1);
-        if ($fp === false) {
+        $client = new Socket($this->name, $this->port, $this->config->get('connect_timeout'));
+        try {
+            $client->open();
+        } catch (Exception | OpenStreamException $e) {
             $this->close();
-            throw new ClientConnectFailedException($errstr, $errno);
+            $this->logger->error($e->getMessage());
         }
-        stream_set_timeout($fp, $this->config->get('connect_timeout', 0.5));
-        return $fp;
+        return $client;
+    }
+
+    protected function heartbeat() : void
+    {
+        $heartbeat = $this->config->get('heartbeat');
+        if (!$this->heartbeat && is_numeric($heartbeat)) {
+            $this->heartbeat = true;
+
+            Coroutine::create(function () use ($heartbeat)
+            {
+                while (true) {
+                    ## TODO
+                    /*
+                    if (CoordinatorManager::until(Constants::WORKER_EXIT)->yield($heartbeat)) {
+                        break;
+                    }
+                    */
+
+                    try {
+                        // PING
+                        if ($chan = $this->chan and $chan->isEmpty()) {
+                            $payload = $this->packer->pack(
+                                new Packet(0, Packet::PING)
+                            );
+                            $chan->push($payload);
+                        }
+                    } catch (Throwable $exception) {
+                        $this->logger && $this->logger->error((string)$exception);
+                    }
+                }
+            });
+        }
     }
 
     protected function loop() : void
@@ -238,19 +248,14 @@ class Client implements ClientInterface, HasHeartbeatInterface
                 $chan   = $this->chan;
                 $client = $this->client;
                 while (true) {
-                    //TODO 待优化 设计包体加长度
-                    $data = $client->recv(-1);
-                    if (!$client->isConnected()) {
-                        $reason = 'client disconnected. ' . $client->errMsg;
-                        break;
-                    }
+                    $data = $client->readChar();
                     if ($chan->isClosing()) {
                         $reason = 'channel closed.';
                         break;
                     }
 
-                    if ($data === false || $data === '') {
-                        $reason = 'client broken. ' . $client->errMsg;
+                    if ($data === null || $data === '') {
+                        $reason = 'client broken. ' . error_get_last();
                         break;
                     }
 
@@ -267,6 +272,8 @@ class Client implements ClientInterface, HasHeartbeatInterface
                         $this->logger && $this->logger->error(sprintf('Recv channel [%d] does not exists.', $packet->getId()));
                     }
                 }
+            } catch (StreamStateException $exception) {
+                $this->logger && $this->logger->error(sprintf('Recv error [%s]#', $exception->getMessage()));
             }
             finally {
                 $this->logger && $this->logger->warning('Recv loop broken, wait to restart in next time. The reason is ' . $reason);
@@ -287,8 +294,8 @@ class Client implements ClientInterface, HasHeartbeatInterface
                         $reason = 'channel closed.';
                         break;
                     }
-                    if (!$client->isConnected()) {
-                        $reason = 'client disconnected.' . $client->errMsg;
+                    if (!$client->isOpen()) {
+                        $reason = 'client disconnected.' . error_get_last();
                         break;
                     }
 
@@ -296,11 +303,13 @@ class Client implements ClientInterface, HasHeartbeatInterface
                         continue;
                     }
 
-                    $res = $client->send($data);
-                    if ($res === false) {
-                        $this->logger && $this->logger->warning('Send data failed. The reason is ' . $client->errMsg);
+                    $res = $client->write($data);
+                    if ($res) {
+                        $this->logger && $this->logger->warning('Send data failed. The reason is ' . error_get_last());
                     }
                 }
+            } catch (StreamStateException | OpenStreamException $e) {
+                $this->logger && $this->logger->warning($e->getMessage());
             }
             finally {
                 $this->logger && $this->logger->warning('Send loop broken, wait to restart in next time. The reason is ' . $reason);

@@ -11,14 +11,15 @@ use function fclose;
 use function fwrite;
 use function is_resource;
 use function stream_set_timeout;
-use function strlen;
+use function Serendipity\Job\Kernel\tcp_length;
+use function Serendipity\Job\Kernel\tcp_pack;
 
 final class Socket implements StreamInterface
 {
     /**
      * Default connection timeout in seconds.
      */
-    public const DEFAULT_CONNECTION_TIMEOUT = 2;
+    public const DEFAULT_CONNECTION_TIMEOUT = 5;
 
     /**
      * @var string Hostname/IP
@@ -43,15 +44,15 @@ final class Socket implements StreamInterface
     /**
      * Create a TCP socket.
      *
-     * @param string     $host    The hostname.
-     * @param int        $port    The port number.
-     * @param float|null $timeout The optional connection timeout, in seconds.
+     * @param string     $host The hostname.
+     * @param int        $port The port number.
+     * @param null|float $connectionTimeout
      */
-    public function __construct(string $host, int $port, float $timeout = null)
+    public function __construct(string $host, int $port, float $connectionTimeout = null)
     {
         $this->host              = $host;
         $this->port              = $port;
-        $this->connectionTimeout = $timeout ? : self::DEFAULT_CONNECTION_TIMEOUT;
+        $this->connectionTimeout = $connectionTimeout ? : self::DEFAULT_CONNECTION_TIMEOUT;
     }
 
     /**
@@ -105,8 +106,7 @@ final class Socket implements StreamInterface
         if (!$this->isOpen()) {
             throw new StreamStateException('Stream not opened.');
         }
-        $length = strlen($string);
-        $bytes  = fwrite($this->socket, $string, $length);
+        $bytes = fwrite($this->socket, tcp_pack($string));
         if ($bytes === false) {
             throw new WriteStreamException(error_get_last());
         }
@@ -121,7 +121,7 @@ final class Socket implements StreamInterface
         if (!$this->isOpen()) {
             throw new StreamStateException('Stream not opened.');
         }
-        $char = fread($this->socket,1024);
+        $char = fread($this->socket, tcp_length(fread($this->socket, 2)));
         if ($char === false) {
             return null;
         }
