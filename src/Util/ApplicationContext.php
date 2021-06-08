@@ -13,8 +13,6 @@ class ApplicationContext
      */
     private static ?Application $application = null;
 
-    private static ?\Swow\Coroutine $mainCoroutine = null;
-
     /**
      * @return \Serendipity\Job\Application
      */
@@ -32,17 +30,6 @@ class ApplicationContext
     {
         self::$application = $application;
         return $application;
-    }
-
-    public static function setMainCoroutine(?\Swow\Coroutine $coroutine) : \Swow\Coroutine
-    {
-        self::$mainCoroutine = $coroutine;
-        return $coroutine;
-    }
-
-    public static function getMainCoroutine() : \Swow\Coroutine
-    {
-        return self::$mainCoroutine;
     }
 
 }

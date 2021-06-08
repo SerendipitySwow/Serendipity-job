@@ -4,7 +4,6 @@ declare(strict_types = 1);
 namespace Serendipity\Job\Console;
 
 use Serendipity\Job\Kernel\Provider\KernelProvider;
-use Serendipity\Job\Util\ApplicationContext;
 use Swow\Debug\Debugger;
 use Serendipity\Job\Constant\Logo;
 use Swow\Coroutine;
@@ -40,7 +39,6 @@ class SerendipityJobCommand extends Command
         {
             $this->bootStrap();
         });
-        ApplicationContext::setMainCoroutine(Coroutine::getCurrent());
 
         return Command::SUCCESS;
     }
