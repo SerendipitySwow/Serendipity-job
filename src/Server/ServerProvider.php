@@ -3,6 +3,7 @@ declare(strict_types = 1);
 
 namespace Serendipity\Job\Server;
 
+use Hyperf\Engine\Channel;
 use Serendipity\Job\Contract\LoggerInterface;
 use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Serendipity\Job\Kernel\Dag\Dag;
@@ -12,11 +13,15 @@ use Serendipity\Job\Kernel\Swow\ServerFactory;
 use Serendipity\Job\Logger\LoggerFactory;
 use Serendipity\Job\Serializer\Person;
 use Serendipity\Job\Serializer\SymfonySerializer;
+use Serendipity\Job\Util\ApplicationContext;
 use Swow\Coroutine;
 use Swow\Http\Buffer;
 use Swow\Http\Server\Response;
 use Swow\Http\Status;
+use Swow\Signal;
 use Swow\Socket\Exception;
+use Swow\Socket\Exception as SocketException;
+use Swow\Coroutine\Exception as CoroutineException;
 use const Swow\Errno\EMFILE;
 use const Swow\Errno\ENFILE;
 use const Swow\Errno\ENOMEM;
@@ -36,9 +41,11 @@ class ServerProvider extends AbstractProvider
         $this->stdoutLogger = $this->container()->get(StdoutLoggerInterface::class);
         $this->logger       = $this->container()->get(LoggerFactory::class)->get();
         $this->stdoutLogger->debug('Serendipity-Job Start Successfully#');
+
         while (true) {
             try {
-                $session = $server->acceptSession();
+                $coroutine = Coroutine::getCurrent();
+                $session   = $server->acceptSession();
                 Coroutine::run(function () use ($session)
                 {
                     try {
@@ -281,6 +288,40 @@ class ServerProvider extends AbstractProvider
                     finally {
                         ## close session
                         $session->close();
+                    }
+                });
+                ## 监听协程退出
+                $exited = new Channel();
+                Signal::wait(Signal::INT);
+
+                \Hyperf\Engine\Coroutine::create(fn() => $exited->close());
+                \Hyperf\Engine\Coroutine::create(function () use ($exited)
+                {
+                    while (true) {
+                        if ($exited->isClosing()) {
+                            $tryAgain = false;
+                            do {
+                                $this->stdoutLogger->debug('Kill Start ============================');
+                                foreach (Coroutine::getAll() as $coroutine) {
+                                    if ($coroutine === Coroutine::getCurrent()) {
+                                        continue;
+                                    }
+                                    if ($coroutine->getState() === $coroutine::STATE_LOCKED) {
+                                        continue;
+                                    }
+                                    echo "Kill {$coroutine->getId()}..." . PHP_EOL;
+                                    $coroutine->kill();
+                                    if ($coroutine->isAvailable()) {
+                                        echo 'Not fully killed, try again later...' . PHP_EOL;
+                                        $tryAgain = true;
+                                    } else {
+                                        echo 'Killed' . PHP_EOL;
+                                    }
+                                }
+                            } while ($tryAgain);
+                            echo 'All coroutines has been killed' . PHP_EOL;
+                            break;
+                        }
                     }
                 });
             } catch (SocketException | CoroutineException $exception) {

@@ -4,8 +4,10 @@ declare(strict_types = 1);
 namespace Serendipity\Job\Console;
 
 use Serendipity\Job\Kernel\Provider\KernelProvider;
+use Serendipity\Job\Util\ApplicationContext;
 use Swow\Debug\Debugger;
 use Serendipity\Job\Constant\Logo;
+use Swow\Coroutine;
 use function Serendipity\Job\Kernel\serendipity_env;
 
 class SerendipityJobCommand extends Command
@@ -29,7 +31,17 @@ class SerendipityJobCommand extends Command
             '<info>===============</info>',
             ''
         ]);
-        $this->bootStrap();
+        $this->output->writeln([
+            '<comment>If You Want To Exit, You Can Press Ctrl + C To Exit#.<comment>',
+            '<info>===============</info>',
+        ]);
+
+        Coroutine::run(function ()
+        {
+            $this->bootStrap();
+        });
+        ApplicationContext::setMainCoroutine(Coroutine::getCurrent());
+
         return Command::SUCCESS;
     }
 
