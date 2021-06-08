@@ -6,7 +6,7 @@ namespace Serendipity\Job\Console;
 use Serendipity\Job\Kernel\Provider\KernelProvider;
 use Swow\Debug\Debugger;
 use Serendipity\Job\Constant\Logo;
-use function Serendipity\Job\Kernel\env;
+use function Serendipity\Job\Kernel\serendipity_env;
 
 class SerendipityJobCommand extends Command
 {
@@ -20,8 +20,8 @@ class SerendipityJobCommand extends Command
 
     public function handle() : int
     {
-        if (env('DEBUG') === true) {
-            Debugger::runOnTTY();
+        if (serendipity_env('DEBUG') === true) {
+            Debugger::runOnTTY('serendipity-job');
         }
         $this->output->writeln(sprintf('<info>%s</info>', Logo::LOGO));
         $this->output->writeln([

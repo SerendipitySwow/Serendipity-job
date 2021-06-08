@@ -7,7 +7,7 @@ namespace Serendipity\Job\Util;
 use ArrayObject;
 use Closure;
 use Hyperf\Engine\Coroutine as Co;
-use function Serendipity\Job\Kernel\value;
+use function Serendipity\Job\Kernel\serendipity_value;
 
 class Context
 {
@@ -88,7 +88,7 @@ class Context
     public static function getOrSet(string $id, mixed $value) : mixed
     {
         if (!self::has($id)) {
-            return self::set($id, value($value));
+            return self::set($id, serendipity_value($value));
         }
         return self::get($id);
     }

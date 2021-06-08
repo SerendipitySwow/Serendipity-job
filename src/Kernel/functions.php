@@ -4,20 +4,22 @@ declare(strict_types = 1);
 namespace Serendipity\Job\Kernel;
 
 use Closure;
+use RuntimeException;
 use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\Util\ApplicationContext;
 use Serendipity\Job\Util\Arr;
 use Serendipity\Job\Util\Collection;
 
-if (!function_exists('value')) {
+#-------------------------注意:所有的方法名称均以serendipity_开头避免和其他框架命名冲突 ----------------------------#
+if (!function_exists('serendipity_value')) {
     /**
-     * Return the default value of the given value.
+     * Return the default value of the given value for serendipity.
      *
      * @param mixed $value
      *
      * @return mixed
      */
-    function value(mixed $value) : mixed
+    function serendipity_value(mixed $value) : mixed
     {
         return $value instanceof Closure ? $value() : $value;
     }
@@ -37,8 +39,7 @@ if (!function_exists('class_basename')) {
         return basename(str_replace('\\', '/', $class));
     }
 }
-
-if (!function_exists('call')) {
+if (!function_exists('serendipity_call')) {
     /**
      * Call a callback with the arguments.
      *
@@ -47,7 +48,7 @@ if (!function_exists('call')) {
      *
      * @return mixed
      */
-    function call(mixed $callback, array $args = []) : mixed
+    function serendipity_call(mixed $callback, array $args = []) : mixed
     {
         if ($callback instanceof Closure) {
             $result = $callback(...$args);
@@ -62,8 +63,7 @@ if (!function_exists('call')) {
         return $result;
     }
 }
-
-if (!function_exists('env')) {
+if (!function_exists('serendipity_env')) {
     /**
      * Gets the value of an environment variable.
      *
@@ -72,11 +72,11 @@ if (!function_exists('env')) {
      *
      * @return array|bool|string|void
      */
-    function env(string $key, mixed $default = null)
+    function serendipity_env(string $key, mixed $default = null)
     {
         $value = getenv($key);
         if ($value === false) {
-            return value($default);
+            return serendipity_value($default);
         }
         switch (strtolower($value)) {
             case 'true':
@@ -98,8 +98,7 @@ if (!function_exists('env')) {
         return $value;
     }
 }
-
-if (!function_exists('data_get')) {
+if (!function_exists('serendipity_data_get')) {
     /**
      * Get an item from an array or object using "dot" notation.
      *
@@ -109,7 +108,7 @@ if (!function_exists('data_get')) {
      *
      * @return mixed
      */
-    function data_get(mixed $target, array|int|string|null $key, mixed $default = null) : mixed
+    function serendipity_data_get(mixed $target, array|int|string|null $key, mixed $default = null) : mixed
     {
         if (is_null($key)) {
             return $target;
@@ -121,11 +120,11 @@ if (!function_exists('data_get')) {
                 if ($target instanceof Collection) {
                     $target = $target->all();
                 } elseif (!is_array($target)) {
-                    return value($default);
+                    return serendipity_value($default);
                 }
                 $result = [];
                 foreach ($target as $item) {
-                    $result[] = data_get($item, $key);
+                    $result[] = serendipity_data_get($item, $key);
                 }
                 return in_array('*', $key, true) ? Arr::collapse($result) : $result;
             }
@@ -134,13 +133,13 @@ if (!function_exists('data_get')) {
             } elseif (is_object($target) && isset($target->{$segment})) {
                 $target = $target->{$segment};
             } else {
-                return value($default);
+                return serendipity_value($default);
             }
         }
         return $target;
     }
 }
-if (!function_exists('data_set')) {
+if (!function_exists('serendipity_data_set')) {
     /**
      * Set an item on an array or object using dot notation.
      *
@@ -151,7 +150,7 @@ if (!function_exists('data_set')) {
      *
      * @return mixed
      */
-    function data_set(mixed &$target, array|string $key, mixed $value, bool $overwrite = true) : mixed
+    function serendipity_data_set(mixed &$target, array|string $key, mixed $value, bool $overwrite = true) : mixed
     {
         $segments = is_array($key) ? $key : explode('.', $key);
         if (($segment = array_shift($segments)) === '*') {
@@ -160,7 +159,7 @@ if (!function_exists('data_set')) {
             }
             if ($segments) {
                 foreach ($target as &$inner) {
-                    data_set($inner, $segments, $value, $overwrite);
+                   serendipity_data_set($inner, $segments, $value, $overwrite);
                 }
             } elseif ($overwrite) {
                 foreach ($target as &$inner) {
@@ -172,7 +171,7 @@ if (!function_exists('data_set')) {
                 if (!Arr::exists($target, $segment)) {
                     $target[$segment] = [];
                 }
-                data_set($target[$segment], $segments, $value, $overwrite);
+               serendipity_data_set($target[$segment], $segments, $value, $overwrite);
             } elseif ($overwrite || !Arr::exists($target, $segment)) {
                 $target[$segment] = $value;
             }
@@ -181,7 +180,7 @@ if (!function_exists('data_set')) {
                 if (!isset($target->{$segment})) {
                     $target->{$segment} = [];
                 }
-                data_set($target->{$segment}, $segments, $value, $overwrite);
+               serendipity_data_set($target->{$segment}, $segments, $value, $overwrite);
             } elseif ($overwrite || !isset($target->{$segment})) {
                 $target->{$segment} = $value;
             }
@@ -189,7 +188,7 @@ if (!function_exists('data_set')) {
             $target = [];
             if ($segments) {
                 $target[$segment] = [];
-                data_set($target[$segment], $segments, $value, $overwrite);
+               serendipity_data_set($target[$segment], $segments, $value, $overwrite);
             } elseif ($overwrite) {
                 $target[$segment] = $value;
             }
@@ -198,36 +197,38 @@ if (!function_exists('data_set')) {
     }
 }
 
-if (!function_exists('collect')) {
+if (!function_exists('serendipity_collect')) {
     /**
      * Create a collection from the given value.
      *
      * @param null|mixed $value
      *
      * @return \Serendipity\Job\Util\Collection
+     * @throws \JsonException
      */
-    function collect(mixed $value = null) : Collection
+    function serendipity_collect(mixed $value = null) : Collection
     {
         return new Collection($value);
     }
 }
 
-if (!function_exists('config')) {
-    function config(string $key, $default = null)
+if (!function_exists('serendipity_config')) {
+    function serendipity_config(string $key, $default = null)
     {
         if (!ApplicationContext::hasApplication()) {
-            throw new \RuntimeException('The application context lacks the container.');
+            throw new RuntimeException('The application context lacks the container.');
         }
         $container = ApplicationContext::getApplication()->getContainer();
         if (!$container->has(ConfigInterface::class)) {
-            throw new \RuntimeException('ConfigInterface is missing in container.');
+            throw new RuntimeException('ConfigInterface is missing in container.');
         }
         return $container->get(ConfigInterface::class)->get($key, $default);
     }
 }
 
-if (!function_exists('make')) {
-    function make(string $name, array $parameters = [])
+
+if (!function_exists('serendipity_make')) {
+    function serendipity_make(string $name, array $parameters = [])
     {
         if (ApplicationContext::hasApplication()) {
             $container = ApplicationContext::getApplication()->getContainer();
@@ -240,12 +241,25 @@ if (!function_exists('make')) {
     }
 }
 
-function tcp_pack(string $data) : string
-{
-    return pack('n', strlen($data)) . $data;
+if (!function_exists('serendipity_tcp_pack')) {
+    /**
+     * @param string $data
+     *
+     * @return string
+     */
+    function serendipity_tcp_pack(string $data) : string
+    {
+        return pack('n', strlen($data)) . $data;
+    }
 }
-
-function tcp_length(string $head) : int
-{
-    return unpack('n', $head)[1];
+if (!function_exists('serendipity_tcp_length')) {
+    /**
+     * @param string $head
+     *
+     * @return int
+     */
+    function serendipity_tcp_length(string $head) : int
+    {
+        return unpack('n', $head)[1];
+    }
 }

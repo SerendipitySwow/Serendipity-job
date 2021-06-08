@@ -6,8 +6,9 @@ namespace Serendipity\Job\Util;
 
 use ArrayAccess;
 use InvalidArgumentException;
-use function Serendipity\Job\Kernel\data_get;
-use function Serendipity\Job\Kernel\value;
+use JetBrains\PhpStorm\Pure;
+use function Serendipity\Job\Kernel\serendipity_data_get;
+use function Serendipity\Job\Kernel\serendipity_value;
 
 /**
  * Most of the methods in this file come from illuminate/support,
@@ -47,7 +48,7 @@ class Arr
     /**
      * Collapse an array of arrays into a single array.
      */
-    public static function collapse(array $array): array
+    #[Pure] public static function collapse(array $array): array
     {
         $results = [];
         foreach ($array as $values) {
@@ -149,7 +150,7 @@ class Arr
     {
         if (is_null($callback)) {
             if (empty($array)) {
-                return value($default);
+                return serendipity_value($default);
             }
             foreach ($array as $item) {
                 return $item;
@@ -160,7 +161,7 @@ class Arr
                 return $value;
             }
         }
-        return value($default);
+        return serendipity_value($default);
     }
 
     /**
@@ -171,7 +172,7 @@ class Arr
     public static function last(array $array, callable $callback = null, mixed $default = null)
     {
         if (is_null($callback)) {
-            return empty($array) ? value($default) : end($array);
+            return empty($array) ? serendipity_value($default) : end($array);
         }
         return static::first(array_reverse($array, true), $callback, $default);
     }
@@ -203,6 +204,7 @@ class Arr
     /**
      * Remove one or many array items from a given array using "dot" notation.
      *
+     * @param array        $array
      * @param array|string $keys
      */
     public static function forget(array &$array, array|string $keys): void
@@ -239,11 +241,13 @@ class Arr
      * @param \ArrayAccess|array $array
      * @param null|int|string    $key
      * @param null|mixed         $default
+     *
+     * @return mixed
      */
-    public static function get(ArrayAccess|array $array, int|string $key = null, mixed $default = null)
+    public static function get(ArrayAccess|array $array, int|string $key = null, mixed $default = null) : mixed
     {
         if (! static::accessible($array)) {
-            return value($default);
+            return serendipity_value($default);
         }
         if (is_null($key)) {
             return $array;
@@ -252,13 +256,13 @@ class Arr
             return $array[$key];
         }
         if (! is_string($key) || !str_contains($key, '.')) {
-            return $array[$key] ?? value($default);
+            return $array[$key] ?? serendipity_value($default);
         }
         foreach (explode('.', $key) as $segment) {
             if (static::accessible($array) && static::exists($array, $segment)) {
                 $array = $array[$segment];
             } else {
-                return value($default);
+                return serendipity_value($default);
             }
         }
         return $array;
@@ -337,14 +341,14 @@ class Arr
         $results = [];
         [$value, $key] = static::explodePluckParameters($value, $key);
         foreach ($array as $item) {
-            $itemValue = data_get($item, $value);
+            $itemValue = serendipity_data_get($item, $value);
             // If the key is "null", we will just append the value to the array and keep
             // looping. Otherwise we will key the array using the value of the key we
             // received from the developer. Then we'll return the final array form.
             if (is_null($key)) {
                 $results[] = $itemValue;
             } else {
-                $itemKey = data_get($item, $key);
+                $itemKey = serendipity_data_get($item, $key);
                 if (is_object($itemKey) && method_exists($itemKey, '__toString')) {
                     $itemKey = (string) $itemKey;
                 }
@@ -395,12 +399,12 @@ class Arr
         $requested = is_null($number) ? 1 : $number;
         $count = count($array);
         if ($requested > $count) {
-            throw new InvalidArgumentException("You requested {$requested} items, but there are only {$count} items available.");
+            throw new InvalidArgumentException("You requested $requested items, but there are only $count items available.");
         }
         if (is_null($number)) {
             return $array[array_rand($array)];
         }
-        if ((int) $number === 0) {
+        if ($number === 0) {
             return [];
         }
         $keys = array_rand($array, $number);
@@ -553,7 +557,7 @@ class Arr
                 }
             }
         } else {
-            foreach ($array2 as $key => $value) {
+            foreach ($array2 as $value) {
                 if ($unique && in_array($value, $array1, true)) {
                     continue;
                 }

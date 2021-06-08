@@ -15,7 +15,7 @@ use Monolog\Handler\HandlerInterface;
 use Monolog\Handler\StreamHandler;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
-use function Serendipity\Job\Kernel\make;
+use function Serendipity\Job\Kernel\serendipity_make;
 
 class LoggerFactory
 {
@@ -51,7 +51,7 @@ class LoggerFactory
         $handlers   = $this->handlers($config);
         $processors = $this->processors($config);
 
-        return make(Logger::class, [
+        return serendipity_make(Logger::class, [
             'name'       => $name,
             'handlers'   => $handlers,
             'processors' => $processors,
@@ -103,7 +103,7 @@ class LoggerFactory
 
         foreach ($config['processors'] ?? [] as $value) {
             if (is_array($value) && isset($value['class'])) {
-                $value = make($value['class'], $value['constructor'] ?? []);
+                $value = serendipity_make($value['class'], $value['constructor'] ?? []);
             }
 
             $result[] = $value;
@@ -135,14 +135,14 @@ class LoggerFactory
     protected function handler($class, $constructor, $formatterConfig) : HandlerInterface
     {
         /** @var HandlerInterface $handler */
-        $handler = make($class, $constructor);
+        $handler = serendipity_make($class, $constructor);
 
         if ($handler instanceof FormattableHandlerInterface) {
             $formatterClass       = $formatterConfig['class'];
             $formatterConstructor = $formatterConfig['constructor'];
 
             /** @var FormatterInterface $formatter */
-            $formatter = make($formatterClass, $formatterConstructor);
+            $formatter = serendipity_make($formatterClass, $formatterConstructor);
 
             $handler->setFormatter($formatter);
         }

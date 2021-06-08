@@ -5,8 +5,8 @@ namespace Serendipity\Job\Config;
 
 use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\Util\Arr;
-use function Serendipity\Job\Kernel\data_get;
-use function Serendipity\Job\Kernel\data_set;
+use function Serendipity\Job\Kernel\serendipity_data_get;
+use function Serendipity\Job\Kernel\serendipity_data_set;
 
 class Config implements ConfigInterface
 {
@@ -30,7 +30,7 @@ class Config implements ConfigInterface
      */
     public function get(string $key, mixed $default = null) : mixed
     {
-        return data_get($this->configs, $key, $default);
+        return serendipity_data_get($this->configs, $key, $default);
     }
 
     /**
@@ -54,7 +54,7 @@ class Config implements ConfigInterface
      */
     public function set(string $key, mixed $value = null) : void
     {
-        data_set($this->configs, $key, $value);
+        serendipity_data_set($this->configs, $key, $value);
     }
 
 }

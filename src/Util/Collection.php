@@ -18,8 +18,8 @@ use JsonSerializable;
 use stdClass;
 use Symfony\Component\VarDumper\VarDumper;
 use Traversable;
-use function Serendipity\Job\Kernel\data_get;
-use function Serendipity\Job\Kernel\value;
+use function Serendipity\Job\Kernel\serendipity_data_get;
+use function Serendipity\Job\Kernel\serendipity_value;
 
 /**
  * Most of the methods in this file come from illuminate/support,
@@ -318,7 +318,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
         if (func_num_args() === 2) {
             return $this->contains(function ($item) use ($key, $value)
             {
-                return data_get($item, $key) === $value;
+                return serendipity_data_get($item, $key) === $value;
             });
         }
         if ($this->useAsCallable($key)) {
@@ -565,7 +565,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
         $values = $this->getArrayableItems($values);
         return $this->filter(function ($item) use ($key, $values, $strict)
         {
-            return in_array(data_get($item, $key), $values, $strict);
+            return in_array(serendipity_data_get($item, $key), $values, $strict);
         });
     }
 
@@ -593,7 +593,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
         $values = $this->getArrayableItems($values);
         return $this->reject(function ($item) use ($key, $values, $strict)
         {
-            return in_array(data_get($item, $key), $values, $strict);
+            return in_array(serendipity_data_get($item, $key), $values, $strict);
         });
     }
 
@@ -693,7 +693,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
         if ($this->offsetExists($key)) {
             return $this->items[$key];
         }
-        return value($default);
+        return serendipity_value($default);
     }
 
     /**
@@ -1138,7 +1138,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      * @param mixed      $key
      * @param null|mixed $default
      *
-     * @return array|\ArrayAccess|mixed
+     * @return mixed
      */
     public function pull(mixed $key, mixed $default = null) : mixed
     {
@@ -1643,7 +1643,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
         }
         return static function ($item) use ($key, $operator, $value)
         {
-            $retrieved = data_get($item, $key);
+            $retrieved = serendipity_data_get($item, $key);
             $strings   = array_filter([$retrieved, $value], static function ($value)
             {
                 return is_string($value) || (is_object($value) && method_exists($value, '__toString'));
@@ -1688,7 +1688,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
         }
         return static function ($item) use ($value)
         {
-            return data_get($item, $value);
+            return serendipity_data_get($item, $value);
         };
     }
 

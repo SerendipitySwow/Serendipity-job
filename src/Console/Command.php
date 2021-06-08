@@ -10,7 +10,7 @@ use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use function Serendipity\Job\Kernel\call;
+use function Serendipity\Job\Kernel\serendipity_call;
 
 abstract class Command extends SymfonyCommand
 {
@@ -166,7 +166,7 @@ abstract class Command extends SymfonyCommand
     {
         $callback = function ()
         {
-            return call([$this, 'handle']);
+            return serendipity_call([$this, 'handle']);
         };
         return $callback();
     }

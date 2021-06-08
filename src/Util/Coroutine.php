@@ -10,7 +10,7 @@ use Hyperf\Engine\Exception\CoroutineDestroyedException;
 use Hyperf\Engine\Exception\RunningInNonCoroutineException;
 use Psr\Log\LoggerInterface;
 use Throwable;
-use function Serendipity\Job\Kernel\call;
+use function Serendipity\Job\Kernel\serendipity_call;
 
 class Coroutine
 {
@@ -53,7 +53,7 @@ class Coroutine
         $coroutine = Co::create(function () use ($callable)
         {
             try {
-                call($callable);
+                serendipity_call($callable);
             } catch (Throwable $throwable) {
                 if (ApplicationContext::hasContainer()) {
                     $container = ApplicationContext::getApplication()->getContainer();

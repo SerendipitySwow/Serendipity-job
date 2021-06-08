@@ -11,8 +11,8 @@ use function fclose;
 use function fwrite;
 use function is_resource;
 use function stream_set_timeout;
-use function Serendipity\Job\Kernel\tcp_length;
-use function Serendipity\Job\Kernel\tcp_pack;
+use function Serendipity\Job\Kernel\serendipity_tcp_length;
+use function Serendipity\Job\Kernel\serendipity_tcp_pack;
 
 final class Socket implements StreamInterface
 {
@@ -106,7 +106,7 @@ final class Socket implements StreamInterface
         if (!$this->isOpen()) {
             throw new StreamStateException('Stream not opened.');
         }
-        $bytes = fwrite($this->socket, tcp_pack($string));
+        $bytes = fwrite($this->socket, serendipity_tcp_pack($string));
         if ($bytes === false) {
             throw new WriteStreamException(error_get_last());
         }
@@ -121,7 +121,7 @@ final class Socket implements StreamInterface
         if (!$this->isOpen()) {
             throw new StreamStateException('Stream not opened.');
         }
-        $char = fread($this->socket, tcp_length(fread($this->socket, 2)));
+        $char = fread($this->socket, serendipity_tcp_length(fread($this->socket, 2)));
         if ($char === false) {
             return null;
         }
