@@ -25,4 +25,6 @@ Homestead.json
 vendor
 runtimes
 composer.lock
+socket
+nsq
 

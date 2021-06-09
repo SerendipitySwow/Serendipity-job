@@ -18,9 +18,9 @@ use Multiplex\Packer;
 use Multiplex\Packet;
 use Multiplex\Serializer\StringSerializer;
 use Serendipity\Job\Contract\LoggerInterface;
-use Serendipity\Job\Kernel\Socket\Exceptions\OpenStreamException;
-use Serendipity\Job\Kernel\Socket\Exceptions\StreamStateException;
-use Serendipity\Job\Kernel\Socket\Streams\Socket;
+use SerendipitySwow\Socket\Exceptions\OpenStreamException;
+use SerendipitySwow\Socket\Exceptions\StreamStateException;
+use SerendipitySwow\Socket\Streams\Socket;
 use Serendipity\Job\Util\Collection;
 use Throwable;
 

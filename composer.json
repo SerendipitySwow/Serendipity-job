@@ -9,7 +9,7 @@
     ],
     "authors": [
         {
-            "name": "he ping",
+            "name": "codingheping",
             "email": "847050412@qq.com"
         }
     ],
@@ -21,7 +21,6 @@
             "src/Kernel/functions.php"
         ]
     },
-
     "autoload-dev": {
         "psr-4": {
             "Tests\\": "tests"
@@ -44,7 +43,9 @@
         "hyperf/engine-swow": "^1.1",
         "ext-pdo": "*",
         "symfony/serializer-pack": "^1.0",
-        "multiplex/multiplex": "^0.3.1"
+        "multiplex/multiplex": "^0.3.1",
+        "swow/nsq":"dev-main",
+        "swow/socket":"dev-main"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",
@@ -61,5 +62,15 @@
     },
     "bin": [
         "bin/serendipity-job"
-    ]
+    ],
+    "repositories": {
+        "swow/nsq": {
+            "type": "path",
+            "url": "./nsq"
+        },
+        "swow/socket": {
+            "type": "path",
+            "url": "./socket"
+        }
+    }
 }
