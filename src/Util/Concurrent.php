@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare( strict_types = 1 );
 
 namespace Serendipity\Job\Util;
 
@@ -23,57 +23,56 @@ class Concurrent
      */
     protected int $limit;
 
-    public function __construct(int $limit)
+    public function __construct (int $limit)
     {
-        $this->limit   = $limit;
+        $this->limit = $limit;
         $this->channel = new Channel($limit);
     }
 
-    public function __call($name, $arguments)
+    public function __call ($name, $arguments)
     {
-        if (in_array($name, ['isFull', 'isEmpty'])) {
+        if (in_array($name, [ 'isFull', 'isEmpty' ])) {
             return $this->channel->{$name}(...$arguments);
         }
     }
 
-    public function getLimit() : int
+    public function getLimit (): int
     {
         return $this->limit;
     }
 
-    public function length() : int
+    public function length (): int
     {
         return $this->channel->getLength();
     }
 
-    public function getLength() : int
+    public function getLength (): int
     {
         return $this->channel->getLength();
     }
 
-    public function getRunningCoroutineCount() : int
+    public function getRunningCoroutineCount (): int
     {
         return $this->getLength();
     }
 
-    public function create(callable $callable) : void
+    public function create (callable $callable): void
     {
         $this->channel->push(true);
 
-        Coroutine::create(function () use ($callable)
-        {
+        Coroutine::create(function () use ($callable) {
             try {
                 $callable();
             } catch (\Throwable $exception) {
                 if (ApplicationContext::hasContainer()) {
-                    $container = ApplicationContext::getApplication()->getContainer();
+                    $container = ApplicationContext::getApplication()
+                                                   ->getContainer();
                     if ($container->has(StdoutLoggerInterface::class)) {
                         $logger = $container->get(StdoutLoggerInterface::class);
                         $logger->error($exception->getMessage());
                     }
                 }
-            }
-            finally {
+            } finally {
                 $this->channel->pop();
             }
         });

@@ -1,11 +1,12 @@
 <?php
+
 class  TcpClient
 {
     private $server_port;
     private $server_addr;
     private $socket_handle;
 
-    public function __construct($port = 8001, $addr = "127.0.0.1")
+    public function __construct ($port = 8001, $addr = "127.0.0.1")
     {
         $this->server_addr = $addr;
         $this->server_port = $port;
@@ -14,7 +15,7 @@ class  TcpClient
     /**
      * @throws Exception
      */
-    private function createSocket()
+    private function createSocket ()
     {
         //创建socket套接字
         $this->socket_handle = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
@@ -26,7 +27,7 @@ class  TcpClient
         }
     }
 
-    public function connectToServer()
+    public function connectToServer ()
     {
         $this->createSocket();
         if (!socket_connect($this->socket_handle, $this->server_addr, $this->server_port)) {

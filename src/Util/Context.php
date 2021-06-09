@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare( strict_types = 1 );
 
 namespace Serendipity\Job\Util;
 
@@ -13,7 +13,7 @@ class Context
 {
     protected static array $nonCoContext = [];
 
-    public static function set(string $id, $value)
+    public static function set (string $id, $value)
     {
         if (Coroutine::inCoroutine()) {
             Co::getContextFor()[$id] = $value;
@@ -23,7 +23,7 @@ class Context
         return $value;
     }
 
-    public static function get(string $id, $default = null, $coroutineId = null)
+    public static function get (string $id, $default = null, $coroutineId = null)
     {
         if (Coroutine::inCoroutine()) {
             return Co::getContextFor($coroutineId)[$id] ?? $default;
@@ -32,7 +32,7 @@ class Context
         return static::$nonCoContext[$id] ?? $default;
     }
 
-    public static function has(string $id, $coroutineId = null) : bool
+    public static function has (string $id, $coroutineId = null): bool
     {
         if (Coroutine::inCoroutine()) {
             return isset(Co::getContextFor($coroutineId)[$id]);
@@ -44,7 +44,7 @@ class Context
     /**
      * Release the context when you are not in coroutine environment.
      */
-    public static function destroy(string $id) : void
+    public static function destroy (string $id): void
     {
         unset(static::$nonCoContext[$id]);
     }
@@ -52,7 +52,7 @@ class Context
     /**
      * Copy the context from a coroutine to current coroutine.
      */
-    public static function copy(int $fromCoroutineId, array $keys = []) : void
+    public static function copy (int $fromCoroutineId, array $keys = []): void
     {
         $from = Co::getContextFor($fromCoroutineId);
         if ($from === null) {
@@ -66,7 +66,7 @@ class Context
     /**
      * Retrieve the value and override it by closure.
      */
-    public static function override(string $id, Closure $closure)
+    public static function override (string $id, Closure $closure)
     {
         $value = null;
         if (self::has($id)) {
@@ -80,12 +80,12 @@ class Context
     /**
      * Retrieve the value and store it if not exists.
      *
-     * @param string $id
-     * @param mixed  $value
+     * @param  string  $id
+     * @param  mixed  $value
      *
      * @return mixed
      */
-    public static function getOrSet(string $id, mixed $value) : mixed
+    public static function getOrSet (string $id, mixed $value): mixed
     {
         if (!self::has($id)) {
             return self::set($id, serendipity_value($value));
@@ -93,7 +93,7 @@ class Context
         return self::get($id);
     }
 
-    public static function getContainer() : ArrayObject|array|null
+    public static function getContainer (): ArrayObject|array|null
     {
         if (Coroutine::inCoroutine()) {
             return Co::getContextFor();

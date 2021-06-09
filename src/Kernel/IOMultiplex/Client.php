@@ -1,5 +1,5 @@
 <?php
-declare(strict_types = 1);
+declare( strict_types = 1 );
 
 namespace Serendipity\Job\Kernel\IOMultiplex;
 
@@ -52,7 +52,7 @@ class Client implements ClientInterface, HasSerializerInterface
     protected IdGeneratorInterface $generator;
 
     /**
-     * @var ?\Hyperf\Engine\Channel
+     * @var ?Channel
      */
     protected ?Channel $chan;
 
@@ -62,7 +62,7 @@ class Client implements ClientInterface, HasSerializerInterface
     protected ?Socket $client;
 
     /**
-     * @var \Serendipity\Job\Util\Collection
+     * @var Collection
      */
     protected Collection $config;
 
@@ -81,62 +81,70 @@ class Client implements ClientInterface, HasSerializerInterface
      */
     protected ?LoggerInterface $logger;
 
-    public function __construct(string $name, int $port, ?IdGeneratorInterface $generator = null, ?SerializerInterface $serializer = null, ?PackerInterface $packer = null)
-    {
-        $this->name           = $name;
-        $this->port           = $port;
-        $this->packer         = $packer ?? new Packer();
-        $this->generator      = $generator ?? new IdGenerator();
-        $this->serializer     = $serializer ?? new StringSerializer();
+    public function __construct (
+        string $name,
+        int $port,
+        ?IdGeneratorInterface $generator = null,
+        ?SerializerInterface $serializer = null,
+        ?PackerInterface $packer = null
+    ) {
+        $this->name = $name;
+        $this->port = $port;
+        $this->packer = $packer ?? new Packer();
+        $this->generator = $generator ?? new IdGenerator();
+        $this->serializer = $serializer ?? new StringSerializer();
         $this->channelManager = new ChannelManager();
-        $this->config         = new Collection([
-            'recv_timeout'    => 10,
-            'max_length'      => 2 * 1024 * 1024,
+        $this->config = new Collection([
+            'recv_timeout' => 10,
+            'max_length' => 2 * 1024 * 1024,
             'connect_timeout' => 5,
             // 'heartbeat' => null,
         ]);
     }
 
-    public function set(array $settings) : Client|static
+    public function set (array $settings): Client|static
     {
         $this->config = new Collection($settings);
         return $this;
     }
 
-    public function request($data)
+    public function request ($data)
     {
         return $this->recv($this->send($data));
     }
 
-    public function send($data) : int
+    public function send ($data): int
     {
         $this->loop();
 
-        $this->getChannelManager()->get($id = $this->generator->generate(), true);
+        $this->getChannelManager()
+             ->get($id = $this->generator->generate(), true);
 
         try {
             $payload = $this->packer->pack(
                 new Packet(
                     $id,
-                    $this->getSerializer()->serialize($data)
+                    $this->getSerializer()
+                         ->serialize($data)
                 )
             );
 
             $this->chan->push($payload);
         } catch (Throwable $exception) {
-            is_int($id) && $this->getChannelManager()->close($id);
+            is_int($id) && $this->getChannelManager()
+                                ->close($id);
             throw $exception;
         }
 
         return $id;
     }
 
-    public function recv(int $id)
+    public function recv (int $id)
     {
         $this->loop();
 
         $manager = $this->getChannelManager();
-        $chan    = $manager->get($id);
+        $chan = $manager->get($id);
         if ($chan === null) {
             throw new ChannelClosedException();
         }
@@ -150,36 +158,35 @@ class Client implements ClientInterface, HasSerializerInterface
             if ($chan->isClosing()) {
                 throw new ChannelClosedException(sprintf('Recv channel [%d] closed.', $id));
             }
-        }
-        finally {
+        } finally {
             $manager->close($id);
         }
 
         return $data;
     }
 
-    public function getSerializer() : SerializerInterface
+    public function getSerializer (): SerializerInterface
     {
         return $this->serializer;
     }
 
-    public function getChannelManager() : ChannelManager
+    public function getChannelManager (): ChannelManager
     {
         return $this->channelManager;
     }
 
-    public function close() : void
+    public function close (): void
     {
         $this->client && $this->client->close();
         $this->chan && $this->chan->close();
     }
 
     /**
-     * @param null|\Serendipity\Job\Contract\LoggerInterface $logger
+     * @param  null|LoggerInterface  $logger
      *
      * @return static
      */
-    public function setLogger(?LoggerInterface $logger) : static
+    public function setLogger (?LoggerInterface $logger): static
     {
         $this->logger = $logger;
         return $this;
@@ -188,7 +195,7 @@ class Client implements ClientInterface, HasSerializerInterface
     /**
      * @return Socket
      */
-    protected function makeClient() : Socket
+    protected function makeClient (): Socket
     {
         $client = new Socket($this->name, $this->port, $this->config->get('connect_timeout'));
         try {
@@ -200,14 +207,13 @@ class Client implements ClientInterface, HasSerializerInterface
         return $client;
     }
 
-    protected function heartbeat() : void
+    protected function heartbeat (): void
     {
         $heartbeat = $this->config->get('heartbeat');
         if (!$this->heartbeat && is_numeric($heartbeat)) {
             $this->heartbeat = true;
 
-            Coroutine::create(function () use ($heartbeat)
-            {
+            Coroutine::create(function () use ($heartbeat) {
                 while (true) {
                     ## TODO
                     /*
@@ -225,27 +231,27 @@ class Client implements ClientInterface, HasSerializerInterface
                             $chan->push($payload);
                         }
                     } catch (Throwable $exception) {
-                        $this->logger && $this->logger->error((string)$exception);
+                        $this->logger && $this->logger->error((string) $exception);
                     }
                 }
             });
         }
     }
 
-    protected function loop() : void
+    protected function loop (): void
     {
         $this->heartbeat();
 
         if ($this->chan !== null && !$this->chan->isClosing()) {
             return;
         }
-        $this->chan   = $this->getChannelManager()->make(65535);
+        $this->chan = $this->getChannelManager()
+                           ->make(65535);
         $this->client = $this->makeClient();
-        Coroutine::create(function ()
-        {
+        Coroutine::create(function () {
             $reason = '';
             try {
-                $chan   = $this->chan;
+                $chan = $this->chan;
                 $client = $this->client;
                 while (true) {
                     $data = $client->readChar();
@@ -264,29 +270,29 @@ class Client implements ClientInterface, HasSerializerInterface
                         continue;
                     }
 
-                    if ($channel = $this->getChannelManager()->get($packet->getId())) {
+                    if ($channel = $this->getChannelManager()
+                                        ->get($packet->getId())) {
                         $channel->push(
                             $this->serializer->unserialize($packet->getBody())
                         );
                     } else {
-                        $this->logger && $this->logger->error(sprintf('Recv channel [%d] does not exists.', $packet->getId()));
+                        $this->logger && $this->logger->error(sprintf('Recv channel [%d] does not exists.',
+                            $packet->getId()));
                     }
                 }
             } catch (StreamStateException $exception) {
                 $this->logger && $this->logger->error(sprintf('Recv error [%s]#', $exception->getMessage()));
-            }
-            finally {
+            } finally {
                 $this->logger && $this->logger->warning('Recv loop broken, wait to restart in next time. The reason is ' . $reason);
                 $chan->close();
                 $client->close();
             }
         });
 
-        Coroutine::create(function ()
-        {
+        Coroutine::create(function () {
             $reason = '';
             try {
-                $chan   = $this->chan;
+                $chan = $this->chan;
                 $client = $this->client;
                 while (true) {
                     $data = $chan->pop();
@@ -310,8 +316,7 @@ class Client implements ClientInterface, HasSerializerInterface
                 }
             } catch (StreamStateException | OpenStreamException $e) {
                 $this->logger && $this->logger->warning($e->getMessage());
-            }
-            finally {
+            } finally {
                 $this->logger && $this->logger->warning('Send loop broken, wait to restart in next time. The reason is ' . $reason);
                 $chan->close();
                 $client->close();

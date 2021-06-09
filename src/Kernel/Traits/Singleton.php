@@ -1,19 +1,19 @@
 <?php
-declare(strict_types = 1);
+declare( strict_types = 1 );
 
 namespace Serendipity\Job\Kernel\Traits;
 
 trait Singleton
 {
     /**
-     * @var null|Singleton $instance
+     * @var Singleton|null $instance
      */
     private static ?self $instance = null;
 
     /**
      * @return static
      */
-    public static function create() : static
+    public static function create (): static
     {
         if (self::$instance instanceof self) {
             return self::$instance;

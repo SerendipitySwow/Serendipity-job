@@ -9,7 +9,7 @@
  * please view the LICENSE file that was distributed with this source code
  */
 
-declare(strict_types=1);
+declare( strict_types = 1 );
 
 use Swow\Signal;
 
@@ -20,7 +20,8 @@ echo "Press Ctrl + C\n";
 
 do {
     Signal::wait(Signal::INT);
-    var_dump(\Swow\Coroutine::getCurrent()->getId());
+    var_dump(\Swow\Coroutine::getCurrent()
+                            ->getId());
     echo "\n"; // for ^C
 } while ($count-- && print_r("Repeat {$count} times if you want to quit\n"));
 

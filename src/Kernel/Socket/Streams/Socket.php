@@ -1,5 +1,6 @@
 <?php
-declare(strict_types = 1);
+declare( strict_types = 1 );
+
 namespace Serendipity\Job\Kernel\Socket\Streams;
 
 use Serendipity\Job\Kernel\Socket\Exceptions\OpenStreamException;
@@ -44,21 +45,21 @@ final class Socket implements StreamInterface
     /**
      * Create a TCP socket.
      *
-     * @param string     $host The hostname.
-     * @param int        $port The port number.
-     * @param null|float $connectionTimeout
+     * @param  string  $host  The hostname.
+     * @param  int  $port  The port number.
+     * @param  null|float  $connectionTimeout
      */
-    public function __construct(string $host, int $port, float $connectionTimeout = null)
+    public function __construct (string $host, int $port, float $connectionTimeout = null)
     {
-        $this->host              = $host;
-        $this->port              = $port;
-        $this->connectionTimeout = $connectionTimeout ? : self::DEFAULT_CONNECTION_TIMEOUT;
+        $this->host = $host;
+        $this->port = $port;
+        $this->connectionTimeout = $connectionTimeout ?: self::DEFAULT_CONNECTION_TIMEOUT;
     }
 
     /**
      * Socket destructor
      */
-    public function __destruct()
+    public function __destruct ()
     {
         $this->close();
     }
@@ -66,7 +67,7 @@ final class Socket implements StreamInterface
     /**
      * @inheritDoc
      */
-    public function isOpen() : bool
+    public function isOpen (): bool
     {
         return is_resource($this->socket);
     }
@@ -74,7 +75,7 @@ final class Socket implements StreamInterface
     /**
      * @inheritDoc
      */
-    public function open() : void
+    public function open (): void
     {
         if ($this->isOpen()) {
             throw new StreamStateException('Stream already opened.');
@@ -90,7 +91,7 @@ final class Socket implements StreamInterface
     /**
      * @inheritDoc
      */
-    public function close() : void
+    public function close (): void
     {
         if ($this->isOpen()) {
             fclose($this->socket);
@@ -101,7 +102,7 @@ final class Socket implements StreamInterface
     /**
      * @inheritDoc
      */
-    public function write(string $string) : int
+    public function write (string $string): int
     {
         if (!$this->isOpen()) {
             throw new StreamStateException('Stream not opened.');
@@ -116,7 +117,7 @@ final class Socket implements StreamInterface
     /**
      * @inheritDoc
      */
-    public function readChar() : ?string
+    public function readChar (): ?string
     {
         if (!$this->isOpen()) {
             throw new StreamStateException('Stream not opened.');
@@ -131,7 +132,7 @@ final class Socket implements StreamInterface
     /**
      * @inheritDoc
      */
-    public function setTimeout(int $seconds, int $microseconds) : bool
+    public function setTimeout (int $seconds, int $microseconds): bool
     {
         if (!$this->isOpen()) {
             throw new StreamStateException('Stream not opened.');
@@ -142,12 +143,12 @@ final class Socket implements StreamInterface
     /**
      * @inheritDoc
      */
-    public function timedOut() : bool
+    public function timedOut (): bool
     {
         if (!$this->isOpen()) {
             throw new StreamStateException('Stream not opened.');
         }
         $metadata = stream_get_meta_data($this->socket);
-        return (bool)$metadata['timed_out'];
+        return (bool) $metadata['timed_out'];
     }
 }

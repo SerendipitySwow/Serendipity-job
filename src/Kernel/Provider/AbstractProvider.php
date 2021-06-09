@@ -1,5 +1,5 @@
 <?php
-declare(strict_types = 1);
+declare( strict_types = 1 );
 
 namespace Serendipity\Job\Kernel\Provider;
 
@@ -11,22 +11,24 @@ use Serendipity\Job\Util\ApplicationContext;
 abstract class AbstractProvider implements ProviderContract
 {
 
-    #[Pure] public function container() : ContainerInterface|Container
+    #[Pure]
+    public function container (): ContainerInterface|Container
     {
-        return ApplicationContext::getApplication()->getContainer();
+        return ApplicationContext::getApplication()
+                                 ->getContainer();
     }
 
-    public function bootApp() : void
-    {
-        echo __METHOD__;
-    }
-
-    public function bootRequest() : void
+    public function bootApp (): void
     {
         echo __METHOD__;
     }
 
-    public function shutdown() : void
+    public function bootRequest (): void
+    {
+        echo __METHOD__;
+    }
+
+    public function shutdown (): void
     {
         echo __METHOD__;
     }

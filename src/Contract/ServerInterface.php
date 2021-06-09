@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare( strict_types = 1 );
 
 namespace Serendipity\Job\Contract;
 
@@ -11,12 +11,16 @@ use Swow\Socket;
 interface ServerInterface
 {
 
-    public function __construct(ContainerInterface $container, StdoutLoggerInterface $logger, EventDispatcherInterface $dispatcher);
+    public function __construct (
+        ContainerInterface $container,
+        StdoutLoggerInterface $logger,
+        EventDispatcherInterface $dispatcher
+    );
 
     /**
-     * @return \Serendipity\Job\Contract\ServerInterface
+     * @return ServerInterface
      */
-    public function getServer() : self;
+    public function getServer (): self;
 
-    public function start() : Socket;
+    public function start (): Socket;
 }

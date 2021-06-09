@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare( strict_types = 1 );
 
 namespace Serendipity\Job\Kernel\Logger;
 
@@ -36,16 +36,16 @@ class StdoutLogger implements StdoutLoggerInterface
         'component',
     ];
 
-    public function __construct(ConfigInterface $config, $output = null)
+    public function __construct (ConfigInterface $config, $output = null)
     {
         $this->config = $config;
-        $this->output = $output ? : new ConsoleOutput();
+        $this->output = $output ?: new ConsoleOutput();
     }
 
     /**
      * {@inheritdoc}
      */
-    public function emergency($message, array $context = []) : void
+    public function emergency ($message, array $context = []): void
     {
         $this->log(LogLevel::EMERGENCY, $message, $context);
     }
@@ -53,7 +53,7 @@ class StdoutLogger implements StdoutLoggerInterface
     /**
      * {@inheritdoc}
      */
-    public function alert($message, array $context = []) : void
+    public function alert ($message, array $context = []): void
     {
         $this->log(LogLevel::ALERT, $message, $context);
     }
@@ -61,7 +61,7 @@ class StdoutLogger implements StdoutLoggerInterface
     /**
      * {@inheritdoc}
      */
-    public function critical($message, array $context = []) : void
+    public function critical ($message, array $context = []): void
     {
         $this->log(LogLevel::CRITICAL, $message, $context);
     }
@@ -69,7 +69,7 @@ class StdoutLogger implements StdoutLoggerInterface
     /**
      * {@inheritdoc}
      */
-    public function error($message, array $context = []) : void
+    public function error ($message, array $context = []): void
     {
         $this->log(LogLevel::ERROR, $message, $context);
     }
@@ -77,7 +77,7 @@ class StdoutLogger implements StdoutLoggerInterface
     /**
      * {@inheritdoc}
      */
-    public function warning($message, array $context = []) : void
+    public function warning ($message, array $context = []): void
     {
         $this->log(LogLevel::WARNING, $message, $context);
     }
@@ -85,7 +85,7 @@ class StdoutLogger implements StdoutLoggerInterface
     /**
      * {@inheritdoc}
      */
-    public function notice($message, array $context = []) : void
+    public function notice ($message, array $context = []): void
     {
         $this->log(LogLevel::NOTICE, $message, $context);
     }
@@ -93,7 +93,7 @@ class StdoutLogger implements StdoutLoggerInterface
     /**
      * {@inheritdoc}
      */
-    public function info($message, array $context = []) : void
+    public function info ($message, array $context = []): void
     {
         $this->log(LogLevel::INFO, $message, $context);
     }
@@ -101,7 +101,7 @@ class StdoutLogger implements StdoutLoggerInterface
     /**
      * {@inheritdoc}
      */
-    public function debug($message, array $context = []) : void
+    public function debug ($message, array $context = []): void
     {
         $this->log(LogLevel::DEBUG, $message, $context);
     }
@@ -109,9 +109,9 @@ class StdoutLogger implements StdoutLoggerInterface
     /**
      * {@inheritdoc}
      */
-    public function log($level, $message, array $context = []) : void
+    public function log ($level, $message, array $context = []): void
     {
-        $config = $this->config->get(StdoutLoggerInterface::class, ['log_level' => []]);
+        $config = $this->config->get(StdoutLoggerInterface::class, [ 'log_level' => [] ]);
         if (!in_array($level, $config['log_level'], true)) {
             return;
         }
@@ -123,27 +123,26 @@ class StdoutLogger implements StdoutLoggerInterface
                 unset($keys[$k]);
             }
         }
-        $search  = array_map(static function ($key)
-        {
+        $search = array_map(static function ($key) {
             return sprintf('{%s}', $key);
         }, $keys);
-        $message = str_replace($search, $context, $this->getMessage((string)$message, $level, $tags));
+        $message = str_replace($search, $context, $this->getMessage((string) $message, $level, $tags));
         $this->output->writeln($message);
     }
 
-    protected function getMessage(string $message, string $level = LogLevel::INFO, array $tags = []) : string
+    protected function getMessage (string $message, string $level = LogLevel::INFO, array $tags = []): string
     {
-        $tag = match ($level) {
+        $tag = match ( $level ) {
             LogLevel::EMERGENCY, LogLevel::ALERT, LogLevel::CRITICAL => 'error',
             LogLevel::ERROR => 'fg=red',
             LogLevel::WARNING, LogLevel::NOTICE => 'comment',
             default => 'info',
         };
 
-        $template     = sprintf('<%s>[%s]</>', $tag, strtoupper($level));
+        $template = sprintf('<%s>[%s]</>', $tag, strtoupper($level));
         $implodedTags = '';
         foreach ($tags as $value) {
-            $implodedTags .= (' [' . $value . ']');
+            $implodedTags .= ( ' [' . $value . ']' );
         }
 
         return sprintf($template . $implodedTags . ' %s', $message);

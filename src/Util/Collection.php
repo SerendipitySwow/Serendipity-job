@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare( strict_types = 1 );
 
 namespace Serendipity\Job\Util;
 
@@ -85,11 +85,11 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Create a new collection.
      *
-     * @param null|array $items
+     * @param  null|array  $items
      *
      * @throws \JsonException
      */
-    public function __construct(null|array $items = [])
+    public function __construct (null|array $items = [])
     {
         $this->items = $this->getArrayableItems($items);
     }
@@ -97,7 +97,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Convert the collection to its string representation.
      */
-    public function __toString() : string
+    public function __toString (): string
     {
         return $this->toJson();
     }
@@ -107,7 +107,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      *
      * @throws \Exception
      */
-    public function __get(string $key)
+    public function __get (string $key)
     {
         if (!in_array($key, static::$proxies, true)) {
             throw new Exception("Property [{$key}] does not exist on this collection instance.");
@@ -115,23 +115,23 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
         return new HigherOrderCollectionProxy($this, $key);
     }
 
-    public function __set($key, $value)
+    public function __set ($key, $value)
     {
 
     }
 
-    public function __isset($key)
+    public function __isset ($key)
     {
 
     }
 
     /**
-     * @param null|array $items
+     * @param  null|array  $items
      *
      * @return \Serendipity\Job\Util\Collection
      * @throws \JsonException
      */
-    public function fill(null|array $items = []) : Collection
+    public function fill (null|array $items = []): Collection
     {
         $this->items = $this->getArrayableItems($items);
         return $this;
@@ -140,9 +140,9 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Create a new collection instance if the value isn't one already.
      *
-     * @param null|array $items
+     * @param  null|array  $items
      */
-    public static function make(null|array $items = []) : self
+    public static function make (null|array $items = []): self
     {
         return new static($items);
     }
@@ -150,12 +150,12 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Wrap the given value in a collection if applicable.
      *
-     * @param mixed $value
+     * @param  mixed  $value
      *
      * @return \Serendipity\Job\Util\Collection
      * @throws \JsonException
      */
-    public static function wrap(mixed $value) : self
+    public static function wrap (mixed $value): self
     {
         return $value instanceof self ? new static($value) : new static(Arr::wrap($value));
     }
@@ -163,17 +163,19 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get the underlying items from the given collection if applicable.
      *
-     * @param array|static $value
+     * @param  array|static  $value
      */
-    #[Pure] public static function unwrap(Collection|array $value) : array
-    {
+    #[Pure]
+    public static function unwrap (
+        Collection|array $value
+    ): array {
         return $value instanceof self ? $value->all() : $value;
     }
 
     /**
      * Create a new collection by invoking the callback a given amount of times.
      */
-    public static function times(int $number, callable $callback = null) : self
+    public static function times (int $number, callable $callback = null): self
     {
         if ($number < 1) {
             return new static();
@@ -181,13 +183,13 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
         if (is_null($callback)) {
             return new static(range(1, $number));
         }
-        return (new static(range(1, $number)))->map($callback);
+        return ( new static(range(1, $number)) )->map($callback);
     }
 
     /**
      * Get all of the items in the collection.
      */
-    public function all() : array
+    public function all (): array
     {
         return $this->items;
     }
@@ -195,18 +197,17 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get the average value of a given key.
      *
-     * @param null|callable|string $callback
+     * @param  null|callable|string  $callback
      */
-    public function avg(callable|string $callback = null) : float|int
+    public function avg (callable|string $callback = null): float|int
     {
         $callback = $this->valueRetriever($callback);
-        $items    = $this->map(function ($value) use ($callback)
-        {
+        $items = $this->map(function ($value) use ($callback) {
             return $callback($value);
-        })->filter(function ($value)
-        {
-            return !is_null($value);
-        });
+        })
+                      ->filter(function ($value) {
+                          return !is_null($value);
+                      });
         if ($count = $items->count()) {
             return $items->sum() / $count;
         }
@@ -215,9 +216,9 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Alias for the "avg" method.
      *
-     * @param null|callable|string $callback
+     * @param  null|callable|string  $callback
      */
-    public function average(callable|string $callback = null) : float|int
+    public function average (callable|string $callback = null): float|int
     {
         return $this->avg($callback);
     }
@@ -225,61 +226,63 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get the median of a given key.
      *
-     * @param null|mixed $key
+     * @param  null|mixed  $key
      *
      * @return float|int|mixed|void
      * @throws \JsonException
      */
-    public function median(mixed $key = null)
+    public function median (mixed $key = null)
     {
-        $values = (isset($key) ? $this->pluck($key) : $this)->filter(function ($item)
-        {
+        $values = ( isset($key) ? $this->pluck($key) : $this )->filter(function ($item) {
             return !is_null($item);
-        })->sort()->values();
-        $count  = $values->count();
+        })
+                                                              ->sort()
+                                                              ->values();
+        $count = $values->count();
         if ($count === 0) {
             return;
         }
-        $middle = (int)($count / 2);
+        $middle = (int) ( $count / 2 );
         if ($count % 2) {
             return $values->get($middle);
         }
-        return (new static([
+        return ( new static([
             $values->get($middle - 1),
             $values->get($middle),
-        ]))->average();
+        ]) )->average();
     }
 
     /**
      * Get the mode of a given key.
      *
-     * @param null|mixed $key
+     * @param  null|mixed  $key
      *
      * @return null|array
      */
-    public function mode(mixed $key = null) : ?array
+    public function mode (mixed $key = null): ?array
     {
         if ($this->count() === 0) {
             return null;
         }
         $collection = isset($key) ? $this->pluck($key) : $this;
-        $counts     = new self();
-        $collection->each(function ($value) use ($counts)
-        {
+        $counts = new self();
+        $collection->each(function ($value) use ($counts) {
             $counts[$value] = isset($counts[$value]) ? $counts[$value] + 1 : 1;
         });
-        $sorted       = $counts->sort();
+        $sorted = $counts->sort();
         $highestValue = $sorted->last();
-        return $sorted->filter(function ($value) use ($highestValue)
-        {
+        return $sorted->filter(function ($value) use ($highestValue) {
             return $value === $highestValue;
-        })->sort()->keys()->all();
+        })
+                      ->sort()
+                      ->keys()
+                      ->all();
     }
 
     /**
      * Collapse the collection of items into a single array.
      */
-    public function collapse() : self
+    public function collapse (): self
     {
         return new static(Arr::collapse($this->items));
     }
@@ -287,13 +290,13 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Determine if an item exists in the collection.
      *
-     * @param mixed      $key
-     * @param null|mixed $operator
-     * @param null|mixed $value
+     * @param  mixed  $key
+     * @param  null|mixed  $operator
+     * @param  null|mixed  $value
      *
      * @return bool
      */
-    public function contains(mixed $key, mixed $operator = null, mixed $value = null) : bool
+    public function contains (mixed $key, mixed $operator = null, mixed $value = null): bool
     {
         if (func_num_args() === 1) {
             if ($this->useAsCallable($key)) {
@@ -308,16 +311,15 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Determine if an item exists in the collection using strict comparison.
      *
-     * @param mixed      $key
-     * @param null|mixed $value
+     * @param  mixed  $key
+     * @param  null|mixed  $value
      *
      * @return bool
      */
-    public function containsStrict(mixed $key, mixed $value = null) : bool
+    public function containsStrict (mixed $key, mixed $value = null): bool
     {
         if (func_num_args() === 2) {
-            return $this->contains(function ($item) use ($key, $value)
-            {
+            return $this->contains(function ($item) use ($key, $value) {
                 return serendipity_data_get($item, $key) === $value;
             });
         }
@@ -330,43 +332,45 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Cross join with the given lists, returning all possible permutations.
      */
-    public function crossJoin(...$lists) : self
+    public function crossJoin (...$lists): self
     {
-        return new static(Arr::crossJoin($this->items, ...array_map([$this, 'getArrayableItems'], $lists)));
+        return new static(Arr::crossJoin($this->items, ...array_map([ $this, 'getArrayableItems' ], $lists)));
     }
 
     /**
      * Dump the collection and end the script.
      */
-    #[NoReturn] public function dd(...$args) : void
-    {
-        call_user_func_array([$this, 'dump'], $args);
+    #[NoReturn]
+    public function dd (
+        ...$args
+    ): void {
+        call_user_func_array([ $this, 'dump' ], $args);
         exit(1);
     }
 
     /**
      * Dump the collection.
      */
-    public function dump() : self
+    public function dump (): self
     {
-        (new static(func_get_args()))->push($this)->each(function ($item)
-        {
-            if (!class_exists(VarDumper::class)) {
-                throw new \RuntimeException('symfony/var-dumper package required, please require the package via "composer require symfony/var-dumper"');
-            }
-            VarDumper::dump($item);
-        });
+        ( new static(func_get_args()) )->push($this)
+                                       ->each(function ($item) {
+                                           if (!class_exists(VarDumper::class)) {
+                                               throw new \RuntimeException('symfony/var-dumper package required, please require the package via "composer require symfony/var-dumper"');
+                                           }
+                                           VarDumper::dump($item);
+                                       });
         return $this;
     }
 
     /**
      * Get the items in the collection that are not present in the given items.
      *
-     * @param mixed $items
+     * @param  mixed  $items
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function diff(mixed $items) : self
+    public function diff (mixed $items): self
     {
         return new static(array_diff($this->items, $this->getArrayableItems($items)));
     }
@@ -374,12 +378,12 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get the items in the collection that are not present in the given items.
      *
-     * @param mixed    $items
-     * @param callable $callback
+     * @param  mixed  $items
+     * @param  callable  $callback
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function diffUsing(mixed $items, callable $callback) : self
+    public function diffUsing (mixed $items, callable $callback): self
     {
         return new static(array_udiff($this->items, $this->getArrayableItems($items), $callback));
     }
@@ -387,11 +391,11 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get the items in the collection whose keys and values are not present in the given items.
      *
-     * @param mixed $items
+     * @param  mixed  $items
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function diffAssoc(mixed $items) : self
+    public function diffAssoc (mixed $items): self
     {
         return new static(array_diff_assoc($this->items, $this->getArrayableItems($items)));
     }
@@ -399,12 +403,12 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get the items in the collection whose keys and values are not present in the given items.
      *
-     * @param mixed    $items
-     * @param callable $callback
+     * @param  mixed  $items
+     * @param  callable  $callback
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function diffAssocUsing(mixed $items, callable $callback) : self
+    public function diffAssocUsing (mixed $items, callable $callback): self
     {
         return new static(array_diff_uassoc($this->items, $this->getArrayableItems($items), $callback));
     }
@@ -412,11 +416,11 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get the items in the collection whose keys are not present in the given items.
      *
-     * @param mixed $items
+     * @param  mixed  $items
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function diffKeys(mixed $items) : self
+    public function diffKeys (mixed $items): self
     {
         return new static(array_diff_key($this->items, $this->getArrayableItems($items)));
     }
@@ -424,12 +428,12 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get the items in the collection whose keys are not present in the given items.
      *
-     * @param mixed    $items
-     * @param callable $callback
+     * @param  mixed  $items
+     * @param  callable  $callback
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function diffKeysUsing(mixed $items, callable $callback) : self
+    public function diffKeysUsing (mixed $items, callable $callback): self
     {
         return new static(array_diff_ukey($this->items, $this->getArrayableItems($items), $callback));
     }
@@ -437,7 +441,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Execute a callback over each item.
      */
-    public function each(callable $callback) : self
+    public function each (callable $callback): self
     {
         foreach ($this->items as $key => $item) {
             if ($callback($item, $key) === false) {
@@ -450,10 +454,9 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Execute a callback over each nested chunk of items.
      */
-    public function eachSpread(callable $callback) : self
+    public function eachSpread (callable $callback): self
     {
-        return $this->each(function ($chunk, $key) use ($callback)
-        {
+        return $this->each(function ($chunk, $key) use ($callback) {
             $chunk[] = $key;
             return $callback(...$chunk);
         });
@@ -462,13 +465,13 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Determine if all items in the collection pass the given test.
      *
-     * @param callable|string $key
-     * @param null|mixed      $operator
-     * @param null|mixed      $value
+     * @param  callable|string  $key
+     * @param  null|mixed  $operator
+     * @param  null|mixed  $value
      *
      * @return bool
      */
-    public function every(callable|string $key, mixed $operator = null, mixed $value = null) : bool
+    public function every (callable|string $key, mixed $operator = null, mixed $value = null): bool
     {
         if (func_num_args() === 1) {
             $callback = $this->valueRetriever($key);
@@ -485,9 +488,9 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get all items except for those with the specified keys.
      *
-     * @param Collection|mixed $keys
+     * @param  Collection|mixed  $keys
      */
-    public function except(mixed $keys) : self
+    public function except (mixed $keys): self
     {
         if ($keys instanceof self) {
             $keys = $keys->all();
@@ -500,7 +503,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Run a filter over each of the items.
      */
-    public function filter(callable $callback = null) : self
+    public function filter (callable $callback = null): self
     {
         if ($callback) {
             return new static(Arr::where($this->items, $callback));
@@ -511,7 +514,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Apply the callback if the value is truthy.
      */
-    public function when(bool $value, callable $callback, callable $default = null) : self
+    public function when (bool $value, callable $callback, callable $default = null): self
     {
         if ($value) {
             return $callback($this, $value);
@@ -525,7 +528,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Apply the callback if the value is falsy.
      */
-    public function unless(bool $value, callable $callback, callable $default = null) : self
+    public function unless (bool $value, callable $callback, callable $default = null): self
     {
         return $this->when(!$value, $callback, $default);
     }
@@ -533,10 +536,10 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Filter items by the given key value pair.
      *
-     * @param null|mixed $operator
-     * @param null|mixed $value
+     * @param  null|mixed  $operator
+     * @param  null|mixed  $value
      */
-    public function where(string $key, mixed $operator = null, mixed $value = null) : self
+    public function where (string $key, mixed $operator = null, mixed $value = null): self
     {
         return $this->filter($this->operatorForWhere(...func_get_args()));
     }
@@ -544,9 +547,9 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Filter items by the given key value pair using strict comparison.
      *
-     * @param mixed $value
+     * @param  mixed  $value
      */
-    public function whereStrict(string $key, $value) : self
+    public function whereStrict (string $key, $value): self
     {
         return $this->where($key, '===', $value);
     }
@@ -554,17 +557,16 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Filter items by the given key value pair.
      *
-     * @param string $key
-     * @param mixed  $values
-     * @param bool   $strict
+     * @param  string  $key
+     * @param  mixed  $values
+     * @param  bool  $strict
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function whereIn(string $key, mixed $values, bool $strict = false) : self
+    public function whereIn (string $key, mixed $values, bool $strict = false): self
     {
         $values = $this->getArrayableItems($values);
-        return $this->filter(function ($item) use ($key, $values, $strict)
-        {
+        return $this->filter(function ($item) use ($key, $values, $strict) {
             return in_array(serendipity_data_get($item, $key), $values, $strict);
         });
     }
@@ -572,9 +574,9 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Filter items by the given key value pair using strict comparison.
      *
-     * @param mixed $values
+     * @param  mixed  $values
      */
-    public function whereInStrict(string $key, $values) : self
+    public function whereInStrict (string $key, $values): self
     {
         return $this->whereIn($key, $values, true);
     }
@@ -582,17 +584,16 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Filter items by the given key value pair.
      *
-     * @param string $key
-     * @param mixed  $values
-     * @param bool   $strict
+     * @param  string  $key
+     * @param  mixed  $values
+     * @param  bool  $strict
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function whereNotIn(string $key, mixed $values, bool $strict = false) : self
+    public function whereNotIn (string $key, mixed $values, bool $strict = false): self
     {
         $values = $this->getArrayableItems($values);
-        return $this->reject(function ($item) use ($key, $values, $strict)
-        {
+        return $this->reject(function ($item) use ($key, $values, $strict) {
             return in_array(serendipity_data_get($item, $key), $values, $strict);
         });
     }
@@ -600,12 +601,12 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Filter items by the given key value pair using strict comparison.
      *
-     * @param string $key
-     * @param mixed  $values
+     * @param  string  $key
+     * @param  mixed  $values
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function whereNotInStrict(string $key, mixed $values) : self
+    public function whereNotInStrict (string $key, mixed $values): self
     {
         return $this->whereNotIn($key, $values, true);
     }
@@ -613,10 +614,9 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Filter the items, removing any items that don't match the given type.
      */
-    public function whereInstanceOf(string $type) : self
+    public function whereInstanceOf (string $type): self
     {
-        return $this->filter(function ($value) use ($type)
-        {
+        return $this->filter(function ($value) use ($type) {
             return $value instanceof $type;
         });
     }
@@ -624,9 +624,9 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get the first item from the collection.
      *
-     * @param null|mixed $default
+     * @param  null|mixed  $default
      */
-    public function first(callable $callback = null, mixed $default = null)
+    public function first (callable $callback = null, mixed $default = null)
     {
         return Arr::first($this->items, $callback, $default);
     }
@@ -634,13 +634,13 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get the first item by the given key value pair.
      *
-     * @param string     $key
-     * @param mixed      $operator
-     * @param null|mixed $value
+     * @param  string  $key
+     * @param  mixed  $operator
+     * @param  null|mixed  $value
      *
      * @return mixed
      */
-    public function firstWhere(string $key, mixed $operator, mixed $value = null) : mixed
+    public function firstWhere (string $key, mixed $operator, mixed $value = null): mixed
     {
         return $this->first($this->operatorForWhere(...func_get_args()));
     }
@@ -648,11 +648,11 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get a flattened array of the items in the collection.
      *
-     * @param float|int $depth
+     * @param  float|int  $depth
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function flatten(float|int $depth) : self
+    public function flatten (float|int $depth): self
     {
         return new static(Arr::flatten($this->items, $depth));
     }
@@ -660,7 +660,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Flip the items in the collection.
      */
-    public function flip() : self
+    public function flip (): self
     {
         return new static(array_flip($this->items));
     }
@@ -668,13 +668,13 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Remove an item from the collection by key.
      *
-     * @param array|string $keys
+     * @param  array|string  $keys
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function forget(array|string $keys) : self
+    public function forget (array|string $keys): self
     {
-        foreach ((array)$keys as $key) {
+        foreach ((array) $keys as $key) {
             $this->offsetUnset($key);
         }
         return $this;
@@ -683,12 +683,12 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get an item from the collection by key.
      *
-     * @param mixed      $key
-     * @param null|mixed $default
+     * @param  mixed  $key
+     * @param  null|mixed  $default
      *
      * @return mixed
      */
-    public function get(mixed $key, mixed $default = null) : mixed
+    public function get (mixed $key, mixed $default = null): mixed
     {
         if ($this->offsetExists($key)) {
             return $this->items[$key];
@@ -699,26 +699,26 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Group an associative array by a field or using a callback.
      *
-     * @param callable|string $groupBy
-     * @param bool            $preserveKeys
+     * @param  callable|string  $groupBy
+     * @param  bool  $preserveKeys
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function groupBy(callable|string $groupBy, bool $preserveKeys = false) : self
+    public function groupBy (callable|string $groupBy, bool $preserveKeys = false): self
     {
         if (is_array($groupBy)) {
             $nextGroups = $groupBy;
-            $groupBy    = array_shift($nextGroups);
+            $groupBy = array_shift($nextGroups);
         }
         $groupBy = $this->valueRetriever($groupBy);
         $results = [];
         foreach ($this->items as $key => $value) {
             $groupKeys = $groupBy($value, $key);
             if (!is_array($groupKeys)) {
-                $groupKeys = [$groupKeys];
+                $groupKeys = [ $groupKeys ];
             }
             foreach ($groupKeys as $groupKey) {
-                $groupKey = is_bool($groupKey) ? (int)$groupKey : $groupKey;
+                $groupKey = is_bool($groupKey) ? (int) $groupKey : $groupKey;
                 if (!array_key_exists($groupKey, $results)) {
                     $results[$groupKey] = new static();
                 }
@@ -735,18 +735,18 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Key an associative array by a field or using a callback.
      *
-     * @param callable|string $keyBy
+     * @param  callable|string  $keyBy
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function keyBy(callable|string $keyBy) : self
+    public function keyBy (callable|string $keyBy): self
     {
-        $keyBy   = $this->valueRetriever($keyBy);
+        $keyBy = $this->valueRetriever($keyBy);
         $results = [];
         foreach ($this->items as $key => $item) {
             $resolvedKey = $keyBy($item, $key);
             if (is_object($resolvedKey)) {
-                $resolvedKey = (string)$resolvedKey;
+                $resolvedKey = (string) $resolvedKey;
             }
             $results[$resolvedKey] = $item;
         }
@@ -756,12 +756,14 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Determine if an item exists in the collection by key.
      *
-     * @param mixed $key
+     * @param  mixed  $key
      *
      * @return bool
      */
-    #[Pure] public function has(mixed $key) : bool
-    {
+    #[Pure]
+    public function has (
+        mixed $key
+    ): bool {
         $keys = is_array($key) ? $key : func_get_args();
         foreach ($keys as $value) {
             if (!$this->offsetExists($value)) {
@@ -774,11 +776,12 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Concatenate values of a given key as a string.
      */
-    public function implode(string $value, string $glue = null) : string
+    public function implode (string $value, string $glue = null): string
     {
         $first = $this->first();
         if (is_array($first) || is_object($first)) {
-            return implode($glue, $this->pluck($value)->all());
+            return implode($glue, $this->pluck($value)
+                                       ->all());
         }
         return implode($value, $this->items);
     }
@@ -786,11 +789,11 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Intersect the collection with the given items.
      *
-     * @param mixed $items
+     * @param  mixed  $items
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function intersect(mixed $items) : self
+    public function intersect (mixed $items): self
     {
         return new static(array_intersect($this->items, $this->getArrayableItems($items)));
     }
@@ -798,9 +801,9 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Intersect the collection with the given items by key.
      *
-     * @param mixed $items
+     * @param  mixed  $items
      */
-    public function intersectByKeys($items) : self
+    public function intersectByKeys ($items): self
     {
         return new static(array_intersect_key($this->items, $this->getArrayableItems($items)));
     }
@@ -808,7 +811,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Determine if the collection is empty or not.
      */
-    public function isEmpty() : bool
+    public function isEmpty (): bool
     {
         return empty($this->items);
     }
@@ -816,7 +819,8 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Determine if the collection is not empty.
      */
-    #[Pure] public function isNotEmpty() : bool
+    #[Pure]
+    public function isNotEmpty (): bool
     {
         return !$this->isEmpty();
     }
@@ -824,7 +828,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get the keys of the collection items.
      */
-    public function keys() : self
+    public function keys (): self
     {
         return new static(array_keys($this->items));
     }
@@ -832,9 +836,9 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get the last item from the collection.
      *
-     * @param null|mixed $default
+     * @param  null|mixed  $default
      */
-    public function last(callable $callback = null, mixed $default = null)
+    public function last (callable $callback = null, mixed $default = null)
     {
         return Arr::last($this->items, $callback, $default);
     }
@@ -842,12 +846,12 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get the values of a given key.
      *
-     * @param array|string $value
-     * @param null|string  $key
+     * @param  array|string  $value
+     * @param  null|string  $key
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function pluck(array|string $value, ?string $key = null) : self
+    public function pluck (array|string $value, ?string $key = null): self
     {
         return new static(Arr::pluck($this->items, $value, $key));
     }
@@ -855,9 +859,9 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Run a map over each of the items.
      */
-    public function map(callable $callback) : self
+    public function map (callable $callback): self
     {
-        $keys  = array_keys($this->items);
+        $keys = array_keys($this->items);
         $items = array_map($callback, $this->items, $keys);
         return new static(array_combine($keys, $items));
     }
@@ -865,10 +869,9 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Run a map over each nested chunk of items.
      */
-    public function mapSpread(callable $callback) : self
+    public function mapSpread (callable $callback): self
     {
-        return $this->map(function ($chunk, $key) use ($callback)
-        {
+        return $this->map(function ($chunk, $key) use ($callback) {
             $chunk[] = $key;
             return $callback(...$chunk);
         });
@@ -878,12 +881,12 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      * Run a dictionary map over the items.
      * The callback should return an associative array with a single key/value pair.
      */
-    public function mapToDictionary(callable $callback) : self
+    public function mapToDictionary (callable $callback): self
     {
         $dictionary = [];
         foreach ($this->items as $key => $item) {
-            $pair  = $callback($item, $key);
-            $key   = key($pair);
+            $pair = $callback($item, $key);
+            $key = key($pair);
             $value = reset($pair);
             if (!isset($dictionary[$key])) {
                 $dictionary[$key] = [];
@@ -897,17 +900,17 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      * Run a grouping map over the items.
      * The callback should return an associative array with a single key/value pair.
      */
-    public function mapToGroups(callable $callback) : self
+    public function mapToGroups (callable $callback): self
     {
         $groups = $this->mapToDictionary($callback);
-        return $groups->map([$this, 'make']);
+        return $groups->map([ $this, 'make' ]);
     }
 
     /**
      * Run an associative map over each of the items.
      * The callback should return an associative array with a single key/value pair.
      */
-    public function mapWithKeys(callable $callback) : self
+    public function mapWithKeys (callable $callback): self
     {
         $result = [];
         foreach ($this->items as $key => $value) {
@@ -922,18 +925,18 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Map a collection and flatten the result by a single level.
      */
-    public function flatMap(callable $callback) : self
+    public function flatMap (callable $callback): self
     {
-        return $this->map($callback)->collapse();
+        return $this->map($callback)
+                    ->collapse();
     }
 
     /**
      * Map the values into a new class.
      */
-    public function mapInto(string $class) : self
+    public function mapInto (string $class): self
     {
-        return $this->map(function ($value, $key) use ($class)
-        {
+        return $this->map(function ($value, $key) use ($class) {
             return new $class($value, $key);
         });
     }
@@ -941,27 +944,26 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get the max value of a given key.
      *
-     * @param null|callable|string $callback
+     * @param  null|callable|string  $callback
      */
-    public function max(callable|string $callback = null)
+    public function max (callable|string $callback = null)
     {
         $callback = $this->valueRetriever($callback);
-        return $this->filter(function ($value)
-        {
+        return $this->filter(function ($value) {
             return !is_null($value);
-        })->reduce(function ($result, $item) use ($callback)
-        {
-            $value = $callback($item);
-            return is_null($result) || $value > $result ? $value : $result;
-        });
+        })
+                    ->reduce(function ($result, $item) use ($callback) {
+                        $value = $callback($item);
+                        return is_null($result) || $value > $result ? $value : $result;
+                    });
     }
 
     /**
      * Merge the collection with the given items.
      *
-     * @param mixed $items
+     * @param  mixed  $items
      */
-    public function merge(mixed $items) : self
+    public function merge (mixed $items): self
     {
         return new static(array_merge($this->items, $this->getArrayableItems($items)));
     }
@@ -969,11 +971,11 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Create a collection by using this collection for keys and another for its values.
      *
-     * @param mixed $values
+     * @param  mixed  $values
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function combine(mixed $values) : self
+    public function combine (mixed $values): self
     {
         return new static(array_combine($this->all(), $this->getArrayableItems($values)));
     }
@@ -981,11 +983,11 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Union the collection with the given items.
      *
-     * @param mixed $items
+     * @param  mixed  $items
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function union(mixed $items) : self
+    public function union (mixed $items): self
     {
         return new static($this->items + $this->getArrayableItems($items));
     }
@@ -993,29 +995,28 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get the min value of a given key.
      *
-     * @param null|callable|string $callback
+     * @param  null|callable|string  $callback
      */
-    public function min(callable|string $callback = null)
+    public function min (callable|string $callback = null)
     {
         $callback = $this->valueRetriever($callback);
-        return $this->map(function ($value) use ($callback)
-        {
+        return $this->map(function ($value) use ($callback) {
             return $callback($value);
-        })->filter(function ($value)
-        {
-            return !is_null($value);
-        })->reduce(function ($result, $value)
-        {
-            return is_null($result) || $value < $result ? $value : $result;
-        });
+        })
+                    ->filter(function ($value) {
+                        return !is_null($value);
+                    })
+                    ->reduce(function ($result, $value) {
+                        return is_null($result) || $value < $result ? $value : $result;
+                    });
     }
 
     /**
      * Create a new collection consisting of every n-th element.
      */
-    public function nth(int $step, int $offset = 0) : self
+    public function nth (int $step, int $offset = 0): self
     {
-        $new      = [];
+        $new = [];
         $position = 0;
         foreach ($this->items as $item) {
             if ($position % $step === $offset) {
@@ -1029,11 +1030,11 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get the items with the specified keys.
      *
-     * @param mixed $keys
+     * @param  mixed  $keys
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function only(mixed $keys) : self
+    public function only (mixed $keys): self
     {
         if (is_null($keys)) {
             return new static($this->items);
@@ -1048,27 +1049,27 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * "Paginate" the collection by slicing it into a smaller collection.
      */
-    public function forPage(int $page, int $perPage) : self
+    public function forPage (int $page, int $perPage): self
     {
-        $offset = max(0, ($page - 1) * $perPage);
+        $offset = max(0, ( $page - 1 ) * $perPage);
         return $this->slice($offset, $perPage);
     }
 
     /**
      * Partition the collection into two arrays using the given callback or key.
      *
-     * @param callable|string $key
-     * @param null|mixed      $operator
-     * @param null|mixed      $value
+     * @param  callable|string  $key
+     * @param  null|mixed  $operator
+     * @param  null|mixed  $value
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function partition(callable|string $key, mixed $operator = null, mixed $value = null) : self
+    public function partition (callable|string $key, mixed $operator = null, mixed $value = null): self
     {
-        $partitions = [new static(), new static()];
-        $callback   = func_num_args() === 1 ? $this->valueRetriever($key) : $this->operatorForWhere(...func_get_args());
+        $partitions = [ new static(), new static() ];
+        $callback = func_num_args() === 1 ? $this->valueRetriever($key) : $this->operatorForWhere(...func_get_args());
         foreach ($this->items as $key => $item) {
-            $partitions[(int)!$callback($item, $key)][$key] = $item;
+            $partitions[(int) !$callback($item, $key)][$key] = $item;
         }
         return new static($partitions);
     }
@@ -1076,7 +1077,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Pass the collection to the given callback and return the result.
      */
-    public function pipe(callable $callback)
+    public function pipe (callable $callback)
     {
         return $callback($this);
     }
@@ -1084,7 +1085,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get and remove the last item from the collection.
      */
-    public function pop()
+    public function pop ()
     {
         return array_pop($this->items);
     }
@@ -1092,12 +1093,12 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Push an item onto the beginning of the collection.
      *
-     * @param mixed      $value
-     * @param null|mixed $key
+     * @param  mixed  $value
+     * @param  null|mixed  $key
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function prepend(mixed $value, mixed $key = null) : self
+    public function prepend (mixed $value, mixed $key = null): self
     {
         $this->items = Arr::prepend($this->items, $value, $key);
         return $this;
@@ -1106,11 +1107,11 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Push an item onto the end of the collection.
      *
-     * @param mixed $value
+     * @param  mixed  $value
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function push(mixed $value) : self
+    public function push (mixed $value): self
     {
         $this->offsetSet(null, $value);
         return $this;
@@ -1119,11 +1120,11 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Push all of the given items onto the collection.
      *
-     * @param \Traversable|array $source
+     * @param  \Traversable|array  $source
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function concat(Traversable|array $source) : self
+    public function concat (Traversable|array $source): self
     {
         $result = new static($this);
         foreach ($source as $item) {
@@ -1135,12 +1136,12 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get and remove an item from the collection.
      *
-     * @param mixed      $key
-     * @param null|mixed $default
+     * @param  mixed  $key
+     * @param  null|mixed  $default
      *
      * @return mixed
      */
-    public function pull(mixed $key, mixed $default = null) : mixed
+    public function pull (mixed $key, mixed $default = null): mixed
     {
         return Arr::pull($this->items, $key, $default);
     }
@@ -1148,10 +1149,10 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Put an item in the collection by key.
      *
-     * @param mixed $key
-     * @param mixed $value
+     * @param  mixed  $key
+     * @param  mixed  $value
      */
-    public function put($key, $value) : self
+    public function put ($key, $value): self
     {
         $this->offsetSet($key, $value);
         return $this;
@@ -1160,11 +1161,11 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get one or a specified number of items randomly from the collection.
      *
-     * @param null|int $number
+     * @param  null|int  $number
      *
      * @return null|self
      */
-    public function random(int $number = null) : null|static
+    public function random (int $number = null): null|static
     {
         if (is_null($number)) {
             return Arr::random($this->items);
@@ -1175,9 +1176,9 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Reduce the collection to a single value.
      *
-     * @param null|mixed $initial
+     * @param  null|mixed  $initial
      */
-    public function reduce(callable $callback, mixed $initial = null)
+    public function reduce (callable $callback, mixed $initial = null)
     {
         return array_reduce($this->items, $callback, $initial);
     }
@@ -1185,18 +1186,16 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Create a collection of all elements that do not pass a given truth test.
      *
-     * @param callable|mixed $callback
+     * @param  callable|mixed  $callback
      */
-    public function reject(mixed $callback) : self
+    public function reject (mixed $callback): self
     {
         if ($this->useAsCallable($callback)) {
-            return $this->filter(function ($value, $key) use ($callback)
-            {
+            return $this->filter(function ($value, $key) use ($callback) {
                 return !$callback($value, $key);
             });
         }
-        return $this->filter(function ($item) use ($callback)
-        {
+        return $this->filter(function ($item) use ($callback) {
             return $item !== $callback;
         });
     }
@@ -1204,7 +1203,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Reverse items order.
      */
-    public function reverse() : self
+    public function reverse (): self
     {
         return new static(array_reverse($this->items, true));
     }
@@ -1212,12 +1211,12 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Search the collection for a given value and return the corresponding key if successful.
      *
-     * @param mixed $value
-     * @param bool  $strict
+     * @param  mixed  $value
+     * @param  bool  $strict
      *
      * @return bool|int|string
      */
-    public function search(mixed $value, bool $strict = false) : bool|int|string
+    public function search (mixed $value, bool $strict = false): bool|int|string
     {
         if (!$this->useAsCallable($value)) {
             return array_search($value, $this->items, $strict);
@@ -1233,7 +1232,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get and remove the first item from the collection.
      */
-    public function shift()
+    public function shift ()
     {
         return array_shift($this->items);
     }
@@ -1241,7 +1240,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Shuffle the items in the collection.
      */
-    public function shuffle(int $seed = null) : self
+    public function shuffle (int $seed = null): self
     {
         return new static(Arr::shuffle($this->items, $seed));
     }
@@ -1249,7 +1248,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Slice the underlying collection array.
      */
-    public function slice(int $offset, int $length = null) : self
+    public function slice (int $offset, int $length = null): self
     {
         return new static(array_slice($this->items, $offset, $length, true));
     }
@@ -1257,15 +1256,15 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Split a collection into a certain number of groups.
      */
-    public function split(int $numberOfGroups) : self
+    public function split (int $numberOfGroups): self
     {
         if ($this->isEmpty()) {
             return new static();
         }
-        $groups    = new static();
-        $groupSize = (int)floor($this->count() / $numberOfGroups);
-        $remain    = $this->count() % $numberOfGroups;
-        $start     = 0;
+        $groups = new static();
+        $groupSize = (int) floor($this->count() / $numberOfGroups);
+        $remain = $this->count() % $numberOfGroups;
+        $start = 0;
         for ($i = 0; $i < $numberOfGroups; ++$i) {
             $size = $groupSize;
             if ($i < $remain) {
@@ -1282,7 +1281,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Chunk the underlying collection array.
      */
-    public function chunk(int $size) : self
+    public function chunk (int $size): self
     {
         if ($size <= 0) {
             return new static();
@@ -1297,7 +1296,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Sort through each item with a callback.
      */
-    public function sort(callable $callback = null) : self
+    public function sort (callable $callback = null): self
     {
         $items = $this->items;
         $callback ? uasort($items, $callback) : asort($items);
@@ -1307,15 +1306,15 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Sort the collection using the given callback.
      *
-     * @param callable|string $callback
-     * @param int             $options
-     * @param bool            $descending
+     * @param  callable|string  $callback
+     * @param  int  $options
+     * @param  bool  $descending
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function sortBy(callable|string $callback, int $options = SORT_REGULAR, bool $descending = false) : self
+    public function sortBy (callable|string $callback, int $options = SORT_REGULAR, bool $descending = false): self
     {
-        $results  = [];
+        $results = [];
         $callback = $this->valueRetriever($callback);
         // First we will loop through the items and get the comparator from a callback
         // function which we were given. Then, we will sort the returned values and
@@ -1336,12 +1335,12 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Sort the collection in descending order using the given callback.
      *
-     * @param callable|string $callback
-     * @param int             $options
+     * @param  callable|string  $callback
+     * @param  int  $options
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function sortByDesc(callable|string $callback, int $options = SORT_REGULAR) : self
+    public function sortByDesc (callable|string $callback, int $options = SORT_REGULAR): self
     {
         return $this->sortBy($callback, $options, true);
     }
@@ -1349,7 +1348,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Sort the collection keys.
      */
-    public function sortKeys(int $options = SORT_REGULAR, bool $descending = false) : self
+    public function sortKeys (int $options = SORT_REGULAR, bool $descending = false): self
     {
         $items = $this->items;
         $descending ? krsort($items, $options) : ksort($items, $options);
@@ -1359,7 +1358,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Sort the collection keys in descending order.
      */
-    public function sortKeysDesc(int $options = SORT_REGULAR) : self
+    public function sortKeysDesc (int $options = SORT_REGULAR): self
     {
         return $this->sortKeys($options, true);
     }
@@ -1367,13 +1366,13 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Splice a portion of the underlying collection array.
      *
-     * @param int        $offset
-     * @param null|int   $length
-     * @param null|array $replacement
+     * @param  int  $offset
+     * @param  null|int  $length
+     * @param  null|array  $replacement
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function splice(int $offset, int $length = null, null|array $replacement = []) : self
+    public function splice (int $offset, int $length = null, null|array $replacement = []): self
     {
         if (func_num_args() === 1) {
             return new static(array_splice($this->items, $offset));
@@ -1384,16 +1383,15 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get the sum of the given values.
      *
-     * @param null|callable|string $callback
+     * @param  null|callable|string  $callback
      */
-    public function sum(callable|string $callback = null)
+    public function sum (callable|string $callback = null)
     {
         if (is_null($callback)) {
             return array_sum($this->items);
         }
         $callback = $this->valueRetriever($callback);
-        return $this->reduce(function ($result, $item) use ($callback)
-        {
+        return $this->reduce(function ($result, $item) use ($callback) {
             return $result + $callback($item);
         }, 0);
     }
@@ -1401,7 +1399,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Take the first or last {$limit} items.
      */
-    public function take(int $limit) : self
+    public function take (int $limit): self
     {
         if ($limit < 0) {
             return $this->slice($limit, abs($limit));
@@ -1412,7 +1410,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Pass the collection to the given callback and then return it.
      */
-    public function tap(callable $callback) : self
+    public function tap (callable $callback): self
     {
         $callback(new static($this->items));
         return $this;
@@ -1421,23 +1419,23 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Transform each item in the collection using a callback.
      */
-    public function transform(callable $callback) : self
+    public function transform (callable $callback): self
     {
-        $this->items = $this->map($callback)->all();
+        $this->items = $this->map($callback)
+                            ->all();
         return $this;
     }
 
     /**
      * Return only unique items from the collection array.
      *
-     * @param null|callable|string $key
+     * @param  null|callable|string  $key
      */
-    public function unique(callable|string $key = null, bool $strict = false) : self
+    public function unique (callable|string $key = null, bool $strict = false): self
     {
         $callback = $this->valueRetriever($key);
-        $exists   = [];
-        return $this->reject(function ($item, $key) use ($callback, $strict, &$exists)
-        {
+        $exists = [];
+        return $this->reject(function ($item, $key) use ($callback, $strict, &$exists) {
             if (in_array($id = $callback($item, $key), $exists, $strict)) {
                 return true;
             }
@@ -1448,9 +1446,9 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Return only unique items from the collection array using strict comparison.
      *
-     * @param null|callable|string $key
+     * @param  null|callable|string  $key
      */
-    public function uniqueStrict(callable|string $key = null) : self
+    public function uniqueStrict (callable|string $key = null): self
     {
         return $this->unique($key, true);
     }
@@ -1458,7 +1456,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Reset the keys on the underlying array.
      */
-    public function values() : self
+    public function values (): self
     {
         return new static(array_values($this->items));
     }
@@ -1468,17 +1466,15 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      * e.g. new Collection([1, 2, 3])->zip([4, 5, 6]);
      *      => [[1, 4], [2, 5], [3, 6]].
      *
-     * @param mixed ...$items
+     * @param  mixed  ...$items
      */
-    public function zip(mixed ...$items) : self
+    public function zip (mixed ...$items): self
     {
-        $arrayableItems = array_map(function ($items)
-        {
+        $arrayableItems = array_map(function ($items) {
             return $this->getArrayableItems($items);
         }, func_get_args());
-        $params         = array_merge([
-            function ()
-            {
+        $params = array_merge([
+            function () {
                 return new static(func_get_args());
             },
             $this->items,
@@ -1489,12 +1485,12 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Pad collection to the specified length with a value.
      *
-     * @param int   $size
-     * @param mixed $value
+     * @param  int  $size
+     * @param  mixed  $value
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function pad(int $size, mixed $value) : self
+    public function pad (int $size, mixed $value): self
     {
         return new static(array_pad($this->items, $size, $value));
     }
@@ -1502,10 +1498,9 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get the collection of items as a plain array.
      */
-    public function toArray() : array
+    public function toArray (): array
     {
-        return array_map(static function ($value)
-        {
+        return array_map(static function ($value) {
             return $value instanceof Arrayable ? $value->toArray() : $value;
         }, $this->items);
     }
@@ -1513,10 +1508,9 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Convert the object into something JSON serializable.
      */
-    public function jsonSerialize() : array
+    public function jsonSerialize (): array
     {
-        return array_map(static function ($value)
-        {
+        return array_map(static function ($value) {
             if ($value instanceof JsonSerializable) {
                 return $value->jsonSerialize();
             }
@@ -1533,7 +1527,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get the collection of items as JSON.
      */
-    public function toJson(int $options = 0) : string
+    public function toJson (int $options = 0): string
     {
         return json_encode($this->jsonSerialize(), JSON_THROW_ON_ERROR | $options);
     }
@@ -1541,7 +1535,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get an iterator for the items.
      */
-    public function getIterator() : ArrayIterator
+    public function getIterator (): ArrayIterator
     {
         return new ArrayIterator($this->items);
     }
@@ -1549,7 +1543,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get a CachingIterator instance.
      */
-    public function getCachingIterator(int $flags = CachingIterator::CALL_TOSTRING) : CachingIterator
+    public function getCachingIterator (int $flags = CachingIterator::CALL_TOSTRING): CachingIterator
     {
         return new CachingIterator($this->getIterator(), $flags);
     }
@@ -1557,7 +1551,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Count the number of items in the collection.
      */
-    public function count() : int
+    public function count (): int
     {
         return count($this->items);
     }
@@ -1565,7 +1559,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get a base Support collection instance from this collection.
      */
-    public function toBase() : Collection
+    public function toBase (): Collection
     {
         return new self($this);
     }
@@ -1573,11 +1567,11 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Determine if an item exists at an offset.
      *
-     * @param mixed $offset
+     * @param  mixed  $offset
      *
      * @return bool
      */
-    public function offsetExists($offset) : bool
+    public function offsetExists ($offset): bool
     {
         return array_key_exists($offset, $this->items);
     }
@@ -1585,9 +1579,9 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get an item at a given offset.
      *
-     * @param mixed $offset
+     * @param  mixed  $offset
      */
-    public function offsetGet($offset)
+    public function offsetGet ($offset)
     {
         return $this->items[$offset];
     }
@@ -1596,9 +1590,9 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      * Set the item at a given offset.
      *
      * @param       $offset
-     * @param mixed $value
+     * @param  mixed  $value
      */
-    public function offsetSet($offset, $value) : void
+    public function offsetSet ($offset, $value): void
     {
         if (is_null($offset)) {
             $this->items[] = $value;
@@ -1610,9 +1604,9 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Unset the item at a given offset.
      *
-     * @param string $offset
+     * @param  string  $offset
      */
-    public function offsetUnset($offset) : void
+    public function offsetUnset ($offset): void
     {
         unset($this->items[$offset]);
     }
@@ -1620,7 +1614,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Add a method to the list of proxied methods.
      */
-    public static function proxy(string $method) : void
+    public static function proxy (string $method): void
     {
         static::$proxies[] = $method;
     }
@@ -1628,30 +1622,28 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get an operator checker callback.
      *
-     * @param null|mixed $operator
-     * @param null|mixed $value
+     * @param  null|mixed  $operator
+     * @param  null|mixed  $value
      */
-    protected function operatorForWhere(string $key, mixed $operator = null, mixed $value = null) : \Closure
+    protected function operatorForWhere (string $key, mixed $operator = null, mixed $value = null): \Closure
     {
         if (func_num_args() === 1) {
-            $value    = true;
+            $value = true;
             $operator = '=';
         }
         if (func_num_args() === 2) {
-            $value    = $operator;
+            $value = $operator;
             $operator = '=';
         }
-        return static function ($item) use ($key, $operator, $value)
-        {
+        return static function ($item) use ($key, $operator, $value) {
             $retrieved = serendipity_data_get($item, $key);
-            $strings   = array_filter([$retrieved, $value], static function ($value)
-            {
-                return is_string($value) || (is_object($value) && method_exists($value, '__toString'));
+            $strings = array_filter([ $retrieved, $value ], static function ($value) {
+                return is_string($value) || ( is_object($value) && method_exists($value, '__toString') );
             });
-            if (count($strings) < 2 && count(array_filter([$retrieved, $value], 'is_object')) === 1) {
-                return in_array($operator, ['!=', '<>', '!==']);
+            if (count($strings) < 2 && count(array_filter([ $retrieved, $value ], 'is_object')) === 1) {
+                return in_array($operator, [ '!=', '<>', '!==' ]);
             }
-            return match ($operator) {
+            return match ( $operator ) {
                 default => $retrieved === $value,
                 '!=', '<>', '!==' => $retrieved !== $value,
                 '<' => $retrieved < $value,
@@ -1665,11 +1657,11 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Determine if the given value is callable, but not a string.
      *
-     * @param mixed $value
+     * @param  mixed  $value
      *
      * @return bool
      */
-    protected function useAsCallable(mixed $value) : bool
+    protected function useAsCallable (mixed $value): bool
     {
         return !is_string($value) && is_callable($value);
     }
@@ -1677,17 +1669,16 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get a value retrieving callback.
      *
-     * @param mixed $value
+     * @param  mixed  $value
      *
      * @return callable
      */
-    protected function valueRetriever(mixed $value) : callable
+    protected function valueRetriever (mixed $value): callable
     {
         if ($this->useAsCallable($value)) {
             return $value;
         }
-        return static function ($item) use ($value)
-        {
+        return static function ($item) use ($value) {
             return serendipity_data_get($item, $value);
         };
     }
@@ -1695,12 +1686,12 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Results array of items from Collection or Arrayable.
      *
-     * @param mixed $items
+     * @param  mixed  $items
      *
      * @return array
      * @throws \JsonException
      */
-    protected function getArrayableItems(mixed $items) : array
+    protected function getArrayableItems (mixed $items): array
     {
         if (is_array($items)) {
             return $items;
@@ -1720,6 +1711,6 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
         if ($items instanceof Traversable) {
             return iterator_to_array($items);
         }
-        return (array)$items;
+        return (array) $items;
     }
 }

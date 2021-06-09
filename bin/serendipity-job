@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
 
-declare(strict_types = 1);
+declare( strict_types = 1 );
 
 use DI\Container;
 use Serendipity\Job\Application;
@@ -16,9 +16,9 @@ date_default_timezone_set('Asia/Shanghai');
 
 require_once SERENDIPITY_JOB_PATH . '/vendor/autoload.php';
 
-(static function ()
-{
-    $container   = new Container();
+( static function () {
+    $container = new Container();
     $application = new Application($container);
-    ApplicationContext::setApplication($application)->run();
-})();
+    ApplicationContext::setApplication($application)
+                      ->run();
+} )();

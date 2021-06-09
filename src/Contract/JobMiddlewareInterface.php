@@ -1,17 +1,19 @@
 <?php
-declare(strict_types = 1);
+declare( strict_types = 1 );
 
 namespace Serendipity\Job\Contract;
+
+use Closure;
 
 interface JobMiddlewareInterface
 {
     /**
      * Handle current middleware.
      *
-     * @param \Serendipity\Job\Contract\JobInterface $job
-     * @param \Closure                               $next
+     * @param  JobInterface  $job
+     * @param  Closure  $next
      *
      * @return mixed
      */
-    public function handle(JobInterface $job, \Closure $next) : mixed;
+    public function handle (JobInterface $job, Closure $next): mixed;
 }

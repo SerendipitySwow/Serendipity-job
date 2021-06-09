@@ -1,13 +1,12 @@
 <?php
 
-declare(strict_types = 1);
+declare( strict_types = 1 );
 
 namespace Serendipity\Job\Kernel\Swow;
 
 use Psr\Container\ContainerInterface;
 use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\Contract\EventDispatcherInterface;
-use Serendipity\Job\Contract\LoggerInterface;
 use Serendipity\Job\Contract\ServerInterface;
 use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Swow\Socket;
@@ -20,7 +19,7 @@ class ServerFactory
     protected ContainerInterface $container;
 
     /**
-     * @var \Serendipity\Job\Contract\ServerInterface|null
+     * @var ServerInterface|null
      */
     protected ?ServerInterface $server = null;
 
@@ -33,19 +32,21 @@ class ServerFactory
      */
     protected ?array $config;
 
-    public function __construct(ContainerInterface $container, StdoutLoggerInterface $logger)
+    public function __construct (ContainerInterface $container, StdoutLoggerInterface $logger)
     {
-        $this->container    = $container;
+        $this->container = $container;
         $this->stdoutLogger = $logger;
-        $this->config       = $container->get(ConfigInterface::class)->get('server');
+        $this->config = $container->get(ConfigInterface::class)
+                                  ->get('server');
     }
 
-    public function start() : Socket|\Swow\Http\Server
+    public function start (): Socket|\Swow\Http\Server
     {
-        return $this->getServer()->start();
+        return $this->getServer()
+                    ->start();
     }
 
-    public function getServer() : ServerInterface
+    public function getServer (): ServerInterface
     {
         if (!$this->server instanceof ServerInterface) {
 
@@ -53,7 +54,7 @@ class ServerFactory
                 $this->container,
                 $this->stdoutLogger,
             );
-            $this->server->setServer((new $this->config['server']()) ?? new Socket());
+            $this->server->setServer(( new $this->config['server']() ) ?? new Socket());
             $this->server->setBacklog($this->config['backlog']);
             $this->server->setHost($this->config['host']);
             $this->server->setPort($this->config['port']);

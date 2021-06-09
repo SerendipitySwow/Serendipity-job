@@ -1,5 +1,5 @@
 <?php
-declare(strict_types = 1);
+declare( strict_types = 1 );
 
 namespace Serendipity\Job\Server;
 
@@ -13,9 +13,9 @@ use Serendipity\Job\Kernel\Swow\ServerFactory;
 use Serendipity\Job\Logger\LoggerFactory;
 use Serendipity\Job\Serializer\Person;
 use Serendipity\Job\Serializer\SymfonySerializer;
-use Serendipity\Job\Util\ApplicationContext;
 use Swow\Coroutine;
 use Swow\Http\Buffer;
+use Swow\Http\Server;
 use Swow\Http\Server\Response;
 use Swow\Http\Status;
 use Swow\Signal;
@@ -32,22 +32,26 @@ class ServerProvider extends AbstractProvider
 
     protected LoggerInterface $logger;
 
-    public function bootApp() : void
+    public function bootApp (): void
     {
         /**
-         * @var \Swow\Http\Server $server
+         * @var Server $server
          */
-        $server             = $this->container()->make(ServerFactory::class)->start();
-        $this->stdoutLogger = $this->container()->get(StdoutLoggerInterface::class);
-        $this->logger       = $this->container()->get(LoggerFactory::class)->get();
+        $server = $this->container()
+                       ->make(ServerFactory::class)
+                       ->start();
+        $this->stdoutLogger = $this->container()
+                                   ->get(StdoutLoggerInterface::class);
+        $this->logger = $this->container()
+                             ->get(LoggerFactory::class)
+                             ->get();
         $this->stdoutLogger->debug('Serendipity-Job Start Successfully#');
 
         while (true) {
             try {
                 $coroutine = Coroutine::getCurrent();
-                $session   = $server->acceptSession();
-                Coroutine::run(function () use ($session)
-                {
+                $session = $server->acceptSession();
+                Coroutine::run(function () use ($session) {
                     try {
                         while (true) {
                             if (!$session->isEstablished()) {
@@ -68,14 +72,14 @@ class ServerProvider extends AbstractProvider
                                         $session->sendHttpResponse($response);
                                         ## clear buffer
                                         $buffer->clear();
-                                        $this->stdoutLogger->debug(sprintf('Http Client Fd[%s] Debug#', (string)$session->getFd()));
+                                        $this->stdoutLogger->debug(sprintf('Http Client Fd[%s] Debug#',
+                                            (string) $session->getFd()));
                                         break;
                                     }
                                     case '/dag':
                                     {
                                         // return response
-                                        \Serendipity\Job\Util\Coroutine::create(function () use ($session)
-                                        {
+                                        \Serendipity\Job\Util\Coroutine::create(function () use ($session) {
                                             $session->respond('Hello Swow');
                                         });
                                         ## Dag
@@ -89,48 +93,39 @@ class ServerProvider extends AbstractProvider
                                          * }
                                          * \Hyperf\Dag\Vertex::of(new MyJob(), "greeting");
                                          */
-                                        $a = Vertex::make(function ()
-                                        {
+                                        $a = Vertex::make(function () {
                                             sleep(1);
                                             echo "A\n";
                                         });
-                                        $b = Vertex::make(function ()
-                                        {
+                                        $b = Vertex::make(function () {
                                             sleep(1);
                                             echo "B\n";
                                         });
-                                        $c = Vertex::make(function ()
-                                        {
+                                        $c = Vertex::make(function () {
                                             sleep(1);
                                             echo "C\n";
                                         });
-                                        $d = Vertex::make(function ()
-                                        {
+                                        $d = Vertex::make(function () {
                                             sleep(1);
                                             echo "D\n";
                                         });
-                                        $e = Vertex::make(function ()
-                                        {
+                                        $e = Vertex::make(function () {
                                             sleep(1);
                                             echo "E\n";
                                         });
-                                        $f = Vertex::make(function ()
-                                        {
+                                        $f = Vertex::make(function () {
                                             sleep(1);
                                             echo "F\n";
                                         });
-                                        $g = Vertex::make(function ()
-                                        {
+                                        $g = Vertex::make(function () {
                                             sleep(1);
                                             echo "G\n";
                                         });
-                                        $h = Vertex::make(function ()
-                                        {
+                                        $h = Vertex::make(function () {
                                             sleep(1);
                                             echo "H\n";
                                         });
-                                        $i = Vertex::make(function ()
-                                        {
+                                        $i = Vertex::make(function () {
                                             sleep(1);
                                             echo "I\n";
                                         });
@@ -170,44 +165,44 @@ class ServerProvider extends AbstractProvider
                                             private $createdAt;
 
                                             // Getters
-                                            public function getName()
+                                            public function getName ()
                                             {
                                                 return $this->name;
                                             }
 
-                                            public function getAge()
+                                            public function getAge ()
                                             {
                                                 return $this->age;
                                             }
 
-                                            public function getCreatedAt()
+                                            public function getCreatedAt ()
                                             {
                                                 return $this->createdAt;
                                             }
 
                                             // Issers
-                                            public function isSportsperson()
+                                            public function isSportsperson ()
                                             {
                                                 return $this->sportsperson;
                                             }
 
                                             // Setters
-                                            public function setName($name)
+                                            public function setName ($name)
                                             {
                                                 $this->name = $name;
                                             }
 
-                                            public function setAge($age)
+                                            public function setAge ($age)
                                             {
                                                 $this->age = $age;
                                             }
 
-                                            public function setSportsperson($sportsperson)
+                                            public function setSportsperson ($sportsperson)
                                             {
                                                 $this->sportsperson = $sportsperson;
                                             }
 
-                                            public function setCreatedAt($createdAt)
+                                            public function setCreatedAt ($createdAt)
                                             {
                                                 $this->createdAt = $createdAt;
                                             }
@@ -215,11 +210,14 @@ class ServerProvider extends AbstractProvider
                                         $person->setName('foo');
                                         $person->setAge(99);
                                         $person->setSportsperson(false);
-                                        $serializer = $this->container()->get(SymfonySerializer::class);
-                                        $json       = $serializer->serialize($person);
-                                        $this->stdoutLogger->debug(sprintf('Class Serializer returned[%s]#', $json));
+                                        $serializer = $this->container()
+                                                           ->get(SymfonySerializer::class);
+                                        $json = $serializer->serialize($person);
+                                        $this->stdoutLogger->debug(sprintf('Class Serializer returned[%s]#',
+                                            $json));
                                         $object = $serializer->deserialize($json, $person::class);
-                                        $this->stdoutLogger->debug(sprintf('Class Deserializer returned[%s]#', get_class($object)));
+                                        $this->stdoutLogger->debug(sprintf('Class Deserializer returned[%s]#',
+                                            get_class($object)));
                                         $session->respond($json);
                                         break;
                                     }
@@ -271,7 +269,8 @@ class ServerProvider extends AbstractProvider
                                         $session->sendHttpResponse($response);
                                         ## clear buffer
                                         $buffer->clear();
-                                        $this->stdoutLogger->debug(sprintf('Http Client Fd[%s] NotFound#', (string)$session->getFd()));
+                                        $this->stdoutLogger->debug(sprintf('Http Client Fd[%s] NotFound#',
+                                            (string) $session->getFd()));
                                         break;
                                     }
                                 }
@@ -284,8 +283,7 @@ class ServerProvider extends AbstractProvider
                         }
                     } catch (Exception $exception) {
                         // you can log error here
-                    }
-                    finally {
+                    } finally {
                         ## close session
                         $session->close();
                     }
@@ -294,9 +292,8 @@ class ServerProvider extends AbstractProvider
                 $exited = new Channel();
                 Signal::wait(Signal::INT);
 
-                \Hyperf\Engine\Coroutine::create(fn() => $exited->close());
-                \Hyperf\Engine\Coroutine::create(function () use ($exited)
-                {
+                \Hyperf\Engine\Coroutine::create(fn () => $exited->close());
+                \Hyperf\Engine\Coroutine::create(function () use ($exited) {
                     while (true) {
                         if ($exited->isClosing()) {
                             $tryAgain = false;
@@ -325,7 +322,7 @@ class ServerProvider extends AbstractProvider
                     }
                 });
             } catch (SocketException | CoroutineException $exception) {
-                if (in_array($exception->getCode(), [EMFILE, ENFILE, ENOMEM], true)) {
+                if (in_array($exception->getCode(), [ EMFILE, ENFILE, ENOMEM ], true)) {
                     sleep(1);
                 } else {
                     break;

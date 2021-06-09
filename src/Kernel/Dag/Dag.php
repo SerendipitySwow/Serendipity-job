@@ -1,6 +1,7 @@
 <?php
 
-declare(strict_types=1);
+declare( strict_types = 1 );
+
 namespace Serendipity\Job\Kernel\Dag;
 
 use Serendipity\Job\Kernel\Dag\Exception\InvalidArgumentException;
@@ -27,7 +28,7 @@ class Dag implements Runner
      * It doesn't make sense to add a vertex with the same key more than once.
      * If so they are simply ignored.
      */
-    public function addVertex(Vertex $vertex): self
+    public function addVertex (Vertex $vertex): self
     {
         $this->vertexes[$vertex->key] = $vertex;
         return $this;
@@ -36,7 +37,7 @@ class Dag implements Runner
     /**
      * Add an edge to the DAG.
      */
-    public function addEdge(Vertex $from, Vertex $to): self
+    public function addEdge (Vertex $from, Vertex $to): self
     {
         $from->children[] = $to;
         $to->parents[] = $from;
@@ -46,13 +47,13 @@ class Dag implements Runner
     /**
      * Run the DAG.
      *
-     * @param array $args while using the nested dag, $args contains results from the parent dag.
+     * @param  array  $args  while using the nested dag, $args contains results from the parent dag.
      *                    in other cases, args can be used to modify dag behavior at run time.
      *
      * @return array
      * @throws \Throwable
      */
-    public function run(array $args = []): array
+    public function run (array $args = []): array
     {
         $queue = new Channel(1);
         Coroutine::create(function () use ($queue) {
@@ -76,7 +77,7 @@ class Dag implements Runner
             $visited[$element->key] = new Channel();
             $concurrent->create(function () use ($queue, $visited, $element, &$results) {
                 try {
-                    $results[$element->key] = serendipity_call($element->value, [$results]);
+                    $results[$element->key] = serendipity_call($element->value, [ $results ]);
                 } catch (Throwable $e) {
                     $queue->push($e);
                     throw $e;
@@ -97,18 +98,18 @@ class Dag implements Runner
         return $results;
     }
 
-    public function getConcurrency(): int
+    public function getConcurrency (): int
     {
         return $this->concurrency;
     }
 
-    public function setConcurrency(int $concurrency): self
+    public function setConcurrency (int $concurrency): self
     {
         $this->concurrency = $concurrency;
         return $this;
     }
 
-    private function scheduleChildren(Vertex $element, Channel $queue, array $visited): void
+    private function scheduleChildren (Vertex $element, Channel $queue, array $visited): void
     {
         foreach ($element->children as $child) {
             // Only schedule child if all parents but this one is complete
@@ -116,7 +117,7 @@ class Dag implements Runner
                 if ($parent->key === $element->key) {
                     continue;
                 }
-                if (! isset($visited[$parent->key])) {
+                if (!isset($visited[$parent->key])) {
                     continue 2;
                 }
                 // Parent might be running. Wait until completion.
@@ -126,7 +127,7 @@ class Dag implements Runner
         }
     }
 
-    private function buildInitialQueue(Channel $queue): void
+    private function buildInitialQueue (Channel $queue): void
     {
         $roots = [];
         foreach ($this->vertexes as $vertex) {

@@ -1,5 +1,5 @@
 <?php
-declare(strict_types = 1);
+declare( strict_types = 1 );
 
 namespace Serendipity\Job\Serializer;
 
@@ -15,7 +15,7 @@ abstract class Serializer implements SerializerInterface
     protected array $encoders = [];
     protected \Symfony\Component\Serializer\Serializer $serializer;
 
-    public function __construct(
+    public function __construct (
         array $normalizers = [
             ObjectNormalizer::class,
         ],
