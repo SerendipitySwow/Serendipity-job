@@ -44,7 +44,8 @@
         "hyperf/engine-swow": "^1.1",
         "ext-pdo": "*",
         "symfony/serializer-pack": "^1.0",
-        "multiplex/multiplex": "^0.3.1"
+        "multiplex/multiplex": "^0.3.1",
+        "nsq/nsq": "^0.5.1"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",
