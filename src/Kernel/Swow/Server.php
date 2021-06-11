@@ -1,5 +1,10 @@
 <?php
-declare( strict_types = 1 );
+/**
+ * This file is part of Serendipity Job
+ * @license  https://github.com/Hyperf-Glory/SerendipityJob/main/LICENSE
+ */
+
+declare(strict_types=1);
 
 namespace Serendipity\Job\Kernel\Swow;
 
@@ -9,9 +14,9 @@ use Serendipity\Job\Contract\ServerInterface;
 use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Swow\Socket;
 
-class  Server implements ServerInterface
+class Server implements ServerInterface
 {
-    protected \Swow\Http\Server|Socket|null $server;
+    protected \Swow\Http\Server | Socket | null $server;
 
     protected ?int $port = null;
 
@@ -23,7 +28,7 @@ class  Server implements ServerInterface
 
     protected bool $multi = true;
 
-    public function __construct (
+    public function __construct(
         ContainerInterface $container,
         StdoutLoggerInterface $logger = null,
         ?EventDispatcherInterface $dispatcher = null
@@ -33,52 +38,37 @@ class  Server implements ServerInterface
         $this->dispatcher = $dispatcher;
     }
 
-    /**
-     * @param  bool  $multi
-     */
-    public function setMulti (bool $multi): void
+    public function setMulti(bool $multi): void
     {
         $this->multi = $multi;
     }
 
-    /**
-     * @param  int  $backlog
-     */
-    public function setBacklog (int $backlog): void
+    public function setBacklog(int $backlog): void
     {
         $this->backlog = $backlog;
     }
 
-    public function setServer (?Socket $server): void
+    public function setServer(?Socket $server): void
     {
         $this->server = $server;
     }
 
-    /**
-     * @param  null|int  $port
-     */
-    public function setPort (?int $port): void
+    public function setPort(?int $port): void
     {
         $this->port = $port;
     }
 
-    /**
-     * @param  int  $type
-     */
-    public function setType (int $type): void
+    public function setType(int $type): void
     {
         $this->type = $type;
     }
 
-    /**
-     * @param  null|string  $host
-     */
-    public function setHost (?string $host): void
+    public function setHost(?string $host): void
     {
         $this->host = $host;
     }
 
-    public function getServer (): Server
+    public function getServer(): Server
     {
         if (!$this->server instanceof Socket) {
             $this->stdoutLogger->warning('Swow Server UnKnown#');
@@ -89,10 +79,11 @@ class  Server implements ServerInterface
         if (!$this->port) {
             $this->stdoutLogger->warning('Swow Socket Port UnKnown#');
         }
+
         return $this;
     }
 
-    public function start (): Socket
+    public function start(): Socket
     {
         $bindFlag = Socket::BIND_FLAG_NONE;
         if ($this->multi) {
@@ -100,8 +91,8 @@ class  Server implements ServerInterface
             $bindFlag |= Socket::BIND_FLAG_REUSEPORT;
         }
         $this->server->bind($this->host, $this->port, $bindFlag)
-                     ->listen($this->backlog);
+            ->listen($this->backlog);
+
         return $this->server;
     }
-
 }

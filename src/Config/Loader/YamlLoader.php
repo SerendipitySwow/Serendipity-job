@@ -1,5 +1,10 @@
 <?php
-declare( strict_types = 1 );
+/**
+ * This file is part of Serendipity Job
+ * @license  https://github.com/Hyperf-Glory/SerendipityJob/main/LICENSE
+ */
+
+declare(strict_types=1);
 
 namespace Serendipity\Job\Config\Loader;
 
@@ -8,20 +13,20 @@ use Symfony\Component\Yaml\Yaml;
 
 class YamlLoader extends FileLoader
 {
-
-    public function load ($resource, string $type = null)
+    public function load($resource, string $type = null)
     {
         if ($this->supports($resource, $type)) {
             return Yaml::parse(file_get_contents($resource));
         }
+
         return [];
     }
 
-    public function supports ($resource, string $type = null): bool
+    public function supports($resource, string $type = null): bool
     {
-        return is_string($resource) && 'yaml' === pathinfo(
-                $resource,
-                PATHINFO_EXTENSION
-            );
+        return is_string($resource) && pathinfo(
+            $resource,
+            PATHINFO_EXTENSION
+        ) === 'yaml';
     }
 }

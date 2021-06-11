@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 $header = <<<'EOF'
 This file is part of Serendipity Job
 @license  https://github.com/Hyperf-Glory/SerendipityJob/main/LICENSE
 EOF;
 
-return PhpCsFixer\Config::create()
+return (new PhpCsFixer\Config())
     ->setRiskyAllowed(true)
     ->setRules([
         '@PSR2' => true,
@@ -13,33 +15,40 @@ return PhpCsFixer\Config::create()
         '@DoctrineAnnotation' => true,
         '@PhpCsFixer' => true,
         'header_comment' => [
-            'commentType' => 'PHPDoc',
+            'comment_type' => 'PHPDoc',
             'header' => $header,
-            'separate' => 'none',
-            'location' => 'after_declare_strict',
+            'separate' => 'bottom',
+            'location' => 'after_open',
         ],
         'array_syntax' => [
-            'syntax' => 'short'
+            'syntax' => 'short',
         ],
         'list_syntax' => [
-            'syntax' => 'short'
+            'syntax' => 'short',
         ],
         'concat_space' => [
-            'spacing' => 'one'
+            'spacing' => 'one',
         ],
         'blank_line_before_statement' => [
             'statements' => [
                 'declare',
+                'return',
             ],
+        ],
+        'blank_line_after_namespace' => true,
+        'braces' => [
+            'allow_single_line_closure' => true,
         ],
         'general_phpdoc_annotation_remove' => [
             'annotations' => [
-                'author'
+                'author',
             ],
         ],
         'ordered_imports' => [
             'imports_order' => [
-                'class', 'function', 'const',
+                'class',
+                'function',
+                'const',
             ],
             'sort_algorithm' => 'alpha',
         ],
@@ -61,6 +70,10 @@ return PhpCsFixer\Config::create()
         'constant_case' => [
             'case' => 'lower',
         ],
+        'operator_linebreak' => [
+            'only_booleans' => true,
+            'position' => 'end',
+        ],
         'class_attributes_separation' => true,
         'combine_consecutive_unsets' => true,
         'declare_strict_types' => true,
@@ -68,19 +81,26 @@ return PhpCsFixer\Config::create()
         'lowercase_static_reference' => true,
         'no_useless_else' => true,
         'no_unused_imports' => true,
-        'not_operator_with_successor_space' => true,
+        'no_unneeded_curly_braces' => false,
         'not_operator_with_space' => false,
-        'ordered_class_elements' => true,
+        'not_operator_with_successor_space' => false,
+        'ordered_class_elements' => false,
         'php_unit_strict' => false,
         'phpdoc_separation' => false,
+        'phpdoc_summary' => false,
         'single_quote' => true,
+        'increment_style' => false,
+        'standardize_increment' => false,
         'standardize_not_equals' => true,
         'multiline_comment_opening_closing' => true,
+        // NOTE: this is for anonymous functions using WaitReference, maybe there's better solution
+        'lambda_not_used_import' => false,
     ])
     ->setFinder(
         PhpCsFixer\Finder::create()
-            ->exclude('bin')
-            ->exclude('vendor')
-            ->in(__DIR__)
+                         ->exclude('vendor')
+                         ->exclude('storage')
+                         ->exclude('runtimes')
+                         ->in(__DIR__)
     )
     ->setUsingCache(false);

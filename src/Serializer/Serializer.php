@@ -1,5 +1,10 @@
 <?php
-declare( strict_types = 1 );
+/**
+ * This file is part of Serendipity Job
+ * @license  https://github.com/Hyperf-Glory/SerendipityJob/main/LICENSE
+ */
+
+declare(strict_types=1);
 
 namespace Serendipity\Job\Serializer;
 
@@ -12,10 +17,12 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 abstract class Serializer implements SerializerInterface
 {
     protected array $normalizer = [];
+
     protected array $encoders = [];
+
     protected \Symfony\Component\Serializer\Serializer $serializer;
 
-    public function __construct (
+    public function __construct(
         array $normalizers = [
             ObjectNormalizer::class,
         ],

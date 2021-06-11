@@ -1,5 +1,10 @@
 <?php
-declare( strict_types = 1 );
+/**
+ * This file is part of Serendipity Job
+ * @license  https://github.com/Hyperf-Glory/SerendipityJob/main/LICENSE
+ */
+
+declare(strict_types=1);
 
 namespace Serendipity\Job\Contract;
 
@@ -9,11 +14,6 @@ interface JobMiddlewareInterface
 {
     /**
      * Handle current middleware.
-     *
-     * @param  JobInterface  $job
-     * @param  Closure  $next
-     *
-     * @return mixed
      */
-    public function handle (JobInterface $job, Closure $next): mixed;
+    public function handle(JobInterface $job, Closure $next): mixed;
 }

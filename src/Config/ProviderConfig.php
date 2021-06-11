@@ -1,6 +1,10 @@
 <?php
+/**
+ * This file is part of Serendipity Job
+ * @license  https://github.com/Hyperf-Glory/SerendipityJob/main/LICENSE
+ */
 
-declare( strict_types = 1 );
+declare(strict_types=1);
 
 namespace Serendipity\Job\Config;
 
@@ -15,9 +19,6 @@ use function method_exists;
  */
 class ProviderConfig
 {
-    /**
-     * @var array
-     */
     private static array $providerConfigs = [];
 
     public static string $bootApp = 'BootApp';
@@ -29,28 +30,28 @@ class ProviderConfig
      * Notice that this method will cached the config result into a static property,
      * call ProviderConfig::clear() method if you want to reset the static property.
      */
-    public static function load (): array
+    public static function load(): array
     {
         if (!static::$providerConfigs) {
             $loader = ApplicationContext::getContainer()
-                                        ->get(YamlLoader::class);
+                ->get(YamlLoader::class);
             static::$providerConfigs = $loader->load(BASE_PATH . '/config/providers.yaml');
         }
+
         return static::$providerConfigs;
     }
 
-    public static function clear (): void
+    public static function clear(): void
     {
         static::$providerConfigs = [];
     }
 
-    public static function loadProviders (array $providers, string $method): void
+    public static function loadProviders(array $providers, string $method): void
     {
         foreach ($providers as $provider) {
             if (is_string($provider) && class_exists($provider) && method_exists($provider, $method)) {
-                call_user_func([ new $provider(), $method ]);
+                call_user_func([new $provider(), $method]);
             }
         }
     }
-
 }

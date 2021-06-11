@@ -1,13 +1,14 @@
 <?php
+/**
+ * This file is part of Serendipity Job
+ * @license  https://github.com/Hyperf-Glory/SerendipityJob/main/LICENSE
+ */
 
-declare( strict_types = 1 );
+declare(strict_types=1);
 
 namespace Serendipity\Job\Logger;
 
 use JetBrains\PhpStorm\ArrayShape;
-use Serendipity\Job\Contract\ConfigInterface;
-use Serendipity\Job\Logger\Exception\InvalidConfigException;
-use Serendipity\Job\Util\Arr;
 use Monolog\Formatter\FormatterInterface;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\FormattableHandlerInterface;
@@ -15,13 +16,13 @@ use Monolog\Handler\HandlerInterface;
 use Monolog\Handler\StreamHandler;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
+use Serendipity\Job\Contract\ConfigInterface;
+use Serendipity\Job\Logger\Exception\InvalidConfigException;
+use Serendipity\Job\Util\Arr;
 use function Serendipity\Job\Kernel\serendipity_make;
 
 class LoggerFactory
 {
-    /**
-     * @var ContainerInterface
-     */
     protected ContainerInterface $container;
 
     /**
@@ -29,18 +30,15 @@ class LoggerFactory
      */
     protected mixed $config;
 
-    /**
-     * @var array
-     */
     protected array $loggers;
 
-    public function __construct (ContainerInterface $container)
+    public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
         $this->config = $container->get(ConfigInterface::class);
     }
 
-    public function make ($name = 'serendipity', $group = 'default'): LoggerInterface
+    public function make($name = 'serendipity', $group = 'default'): LoggerInterface
     {
         $config = $this->config->get('logger');
         if (!isset($config[$group])) {
@@ -58,7 +56,7 @@ class LoggerFactory
         ]);
     }
 
-    public function get ($name = 'serendipity', $group = 'default'): LoggerInterface
+    public function get($name = 'serendipity', $group = 'default'): LoggerInterface
     {
         if (isset($this->loggers[$group][$name]) && $this->loggers[$group][$name] instanceof Logger) {
             return $this->loggers[$group][$name];
@@ -67,8 +65,8 @@ class LoggerFactory
         return $this->loggers[$group][$name] = $this->make($name, $group);
     }
 
-    #[ArrayShape( [ 'class' => 'array|\ArrayAccess|mixed', 'constructor' => 'array|\ArrayAccess|mixed' ] )]
-    protected function getDefaultFormatterConfig (
+    #[ArrayShape(['class' => 'array|\ArrayAccess|mixed', 'constructor' => 'array|\ArrayAccess|mixed'])]
+    protected function getDefaultFormatterConfig(
         $config
     ): array {
         $formatterClass = Arr::get($config, 'formatter.class', LineFormatter::class);
@@ -80,8 +78,8 @@ class LoggerFactory
         ];
     }
 
-    #[ArrayShape( [ 'class' => 'array|\ArrayAccess|mixed', 'constructor' => 'array|\ArrayAccess|mixed' ] )]
-    protected function getDefaultHandlerConfig (
+    #[ArrayShape(['class' => 'array|\ArrayAccess|mixed', 'constructor' => 'array|\ArrayAccess|mixed'])]
+    protected function getDefaultHandlerConfig(
         $config
     ): array {
         $handlerClass = Arr::get($config, 'handler.class', StreamHandler::class);
@@ -96,11 +94,11 @@ class LoggerFactory
         ];
     }
 
-    protected function processors (array $config): array
+    protected function processors(array $config): array
     {
         $result = [];
         if (!isset($config['processors']) && isset($config['processor'])) {
-            $config['processors'] = [ $config['processor'] ];
+            $config['processors'] = [$config['processor']];
         }
 
         foreach ($config['processors'] ?? [] as $value) {
@@ -114,9 +112,9 @@ class LoggerFactory
         return $result;
     }
 
-    protected function handlers (array $config): array
+    protected function handlers(array $config): array
     {
-        $handlerConfigs = $config['handlers'] ?? [ [] ];
+        $handlerConfigs = $config['handlers'] ?? [[]];
         $handlers = [];
         $defaultHandlerConfig = $this->getDefaultHandlerConfig($config);
         $defaultFormatterConfig = $this->getDefaultFormatterConfig($config);
@@ -134,7 +132,7 @@ class LoggerFactory
         return $handlers;
     }
 
-    protected function handler ($class, $constructor, $formatterConfig): HandlerInterface
+    protected function handler($class, $constructor, $formatterConfig): HandlerInterface
     {
         /** @var HandlerInterface $handler */
         $handler = serendipity_make($class, $constructor);

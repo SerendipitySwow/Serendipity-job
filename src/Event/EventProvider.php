@@ -1,5 +1,10 @@
 <?php
-declare( strict_types = 1 );
+/**
+ * This file is part of Serendipity Job
+ * @license  https://github.com/Hyperf-Glory/SerendipityJob/main/LICENSE
+ */
+
+declare(strict_types=1);
 
 namespace Serendipity\Job\Event;
 
@@ -8,9 +13,9 @@ use Serendipity\Job\Kernel\Provider\AbstractProvider;
 
 class EventProvider extends AbstractProvider
 {
-    public function bootApp (): void
+    public function bootApp(): void
     {
         $this->container()
-             ->set(EventDispatcherInterface::class, new EventDispatcher());
+            ->set(EventDispatcherInterface::class, new EventDispatcher());
     }
 }

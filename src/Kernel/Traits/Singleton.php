@@ -1,19 +1,21 @@
 <?php
-declare( strict_types = 1 );
+/**
+ * This file is part of Serendipity Job
+ * @license  https://github.com/Hyperf-Glory/SerendipityJob/main/LICENSE
+ */
+
+declare(strict_types=1);
 
 namespace Serendipity\Job\Kernel\Traits;
 
 trait Singleton
 {
     /**
-     * @var Singleton|null $instance
+     * @var null|Singleton
      */
     private static ?self $instance = null;
 
-    /**
-     * @return static
-     */
-    public static function create (): static
+    public static function create(): static
     {
         if (self::$instance instanceof self) {
             return self::$instance;

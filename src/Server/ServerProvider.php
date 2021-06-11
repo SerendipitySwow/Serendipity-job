@@ -1,5 +1,10 @@
 <?php
-declare( strict_types = 1 );
+/**
+ * This file is part of Serendipity Job
+ * @license  https://github.com/Hyperf-Glory/SerendipityJob/main/LICENSE
+ */
+
+declare(strict_types=1);
 
 namespace Serendipity\Job\Server;
 
@@ -12,12 +17,12 @@ use Serendipity\Job\Kernel\Dag\Vertex;
 use Serendipity\Job\Kernel\Provider\AbstractProvider;
 use Serendipity\Job\Kernel\Swow\ServerFactory;
 use Serendipity\Job\Logger\LoggerFactory;
-use Serendipity\Job\Serializer\Person;
 use Serendipity\Job\Serializer\SymfonySerializer;
 use SerendipitySwow\Nsq\Message;
 use SerendipitySwow\Nsq\Nsq;
 use SerendipitySwow\Nsq\Result;
 use Swow\Coroutine;
+use Swow\Coroutine\Exception as CoroutineException;
 use Swow\Http\Buffer;
 use Swow\Http\Server;
 use Swow\Http\Server\Response;
@@ -25,7 +30,6 @@ use Swow\Http\Status;
 use Swow\Signal;
 use Swow\Socket\Exception;
 use Swow\Socket\Exception as SocketException;
-use Swow\Coroutine\Exception as CoroutineException;
 use const Swow\Errno\EMFILE;
 use const Swow\Errno\ENFILE;
 use const Swow\Errno\ENOMEM;
@@ -36,19 +40,19 @@ class ServerProvider extends AbstractProvider
 
     protected LoggerInterface $logger;
 
-    public function bootApp (): void
+    public function bootApp(): void
     {
         /**
          * @var Server $server
          */
         $server = $this->container()
-                       ->make(ServerFactory::class)
-                       ->start();
+            ->make(ServerFactory::class)
+            ->start();
         $this->stdoutLogger = $this->container()
-                                   ->get(StdoutLoggerInterface::class);
+            ->get(StdoutLoggerInterface::class);
         $this->logger = $this->container()
-                             ->get(LoggerFactory::class)
-                             ->get();
+            ->get(LoggerFactory::class)
+            ->get();
         $this->stdoutLogger->debug('Serendipity-Job Start Successfully#');
 
         while (true) {
@@ -76,42 +80,45 @@ class ServerProvider extends AbstractProvider
                                         $session->sendHttpResponse($response);
                                         ## clear buffer
                                         $buffer->clear();
-                                        $this->stdoutLogger->debug(sprintf('Http Client Fd[%s] Debug#',
-                                            (string) $session->getFd()));
+                                        $this->stdoutLogger->debug(sprintf(
+                                            'Http Client Fd[%s] Debug#',
+                                            (string) $session->getFd()
+                                        ));
                                         break;
                                     }
                                     case '/nsq/publish':
                                     {
                                         $config = $this->container()
-                                                       ->get(ConfigInterface::class)
-                                                       ->get('nsq.default');
+                                            ->get(ConfigInterface::class)
+                                            ->get('nsq.default');
                                         /**
                                          * @var Nsq $nsq
                                          */
-                                        $nsq = make(Nsq::class, [ $this->container(), $config ]);
+                                        $nsq = make(Nsq::class, [$this->container(), $config]);
                                         $string = (string) random_int(100000, 999999999);
                                         $this->stdoutLogger->debug('Publish ' . $string . PHP_EOL);
                                         ($nsq->publish('test', $string));
-                                        ($nsq ->publish('test',[
+                                        ($nsq->publish('test', [
                                             $string,
-                                            (string)random_int(10000,90000)
-                                        ],10));
+                                            (string) random_int(10000, 90000),
+                                        ], 10));
                                         $session->respond('Hello Nsq!');
                                         break;
                                     }
                                     case '/nsq/subscribe':
                                     {
                                         $config = $this->container()
-                                                       ->get(ConfigInterface::class)
-                                                       ->get('nsq.default');
+                                            ->get(ConfigInterface::class)
+                                            ->get('nsq.default');
                                         /**
                                          * @var Nsq $nsq
                                          */
-                                        $nsq = make(Nsq::class, [ $this->container(), $config ]);
+                                        $nsq = make(Nsq::class, [$this->container(), $config]);
 
                                         Coroutine::run(function () use ($nsq) {
                                             $nsq->subscribe('test', 'v2', function (Message $data) {
                                                 $this->stdoutLogger->error('Subscribe ' . $data->getBody() . PHP_EOL);
+
                                                 return Result::ACK;
                                             });
                                         });
@@ -202,49 +209,52 @@ class ServerProvider extends AbstractProvider
                                     {
                                         $person = new class() {
                                             private $age;
+
                                             private $name;
+
                                             private $sportsperson;
+
                                             private $createdAt;
 
                                             // Getters
-                                            public function getName ()
+                                            public function getName()
                                             {
                                                 return $this->name;
                                             }
 
-                                            public function getAge ()
+                                            public function getAge()
                                             {
                                                 return $this->age;
                                             }
 
-                                            public function getCreatedAt ()
+                                            public function getCreatedAt()
                                             {
                                                 return $this->createdAt;
                                             }
 
                                             // Issers
-                                            public function isSportsperson ()
+                                            public function isSportsperson()
                                             {
                                                 return $this->sportsperson;
                                             }
 
                                             // Setters
-                                            public function setName ($name)
+                                            public function setName($name)
                                             {
                                                 $this->name = $name;
                                             }
 
-                                            public function setAge ($age)
+                                            public function setAge($age)
                                             {
                                                 $this->age = $age;
                                             }
 
-                                            public function setSportsperson ($sportsperson)
+                                            public function setSportsperson($sportsperson)
                                             {
                                                 $this->sportsperson = $sportsperson;
                                             }
 
-                                            public function setCreatedAt ($createdAt)
+                                            public function setCreatedAt($createdAt)
                                             {
                                                 $this->createdAt = $createdAt;
                                             }
@@ -253,13 +263,17 @@ class ServerProvider extends AbstractProvider
                                         $person->setAge(99);
                                         $person->setSportsperson(false);
                                         $serializer = $this->container()
-                                                           ->get(SymfonySerializer::class);
+                                            ->get(SymfonySerializer::class);
                                         $json = $serializer->serialize($person);
-                                        $this->stdoutLogger->debug(sprintf('Class Serializer returned[%s]#',
-                                            $json));
+                                        $this->stdoutLogger->debug(sprintf(
+                                            'Class Serializer returned[%s]#',
+                                            $json
+                                        ));
                                         $object = $serializer->deserialize($json, $person::class);
-                                        $this->stdoutLogger->debug(sprintf('Class Deserializer returned[%s]#',
-                                            get_class($object)));
+                                        $this->stdoutLogger->debug(sprintf(
+                                            'Class Deserializer returned[%s]#',
+                                            get_class($object)
+                                        ));
                                         $session->respond($json);
                                         break;
                                     }
@@ -311,8 +325,10 @@ class ServerProvider extends AbstractProvider
                                         $session->sendHttpResponse($response);
                                         ## clear buffer
                                         $buffer->clear();
-                                        $this->stdoutLogger->debug(sprintf('Http Client Fd[%s] NotFound#',
-                                            (string) $session->getFd()));
+                                        $this->stdoutLogger->debug(sprintf(
+                                            'Http Client Fd[%s] NotFound#',
+                                            (string) $session->getFd()
+                                        ));
                                         break;
                                     }
                                 }
@@ -364,7 +380,7 @@ class ServerProvider extends AbstractProvider
                     }
                 });
             } catch (SocketException | CoroutineException $exception) {
-                if (in_array($exception->getCode(), [ EMFILE, ENFILE, ENOMEM ], true)) {
+                if (in_array($exception->getCode(), [EMFILE, ENFILE, ENOMEM], true)) {
                     sleep(1);
                 } else {
                     break;

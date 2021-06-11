@@ -1,6 +1,10 @@
 <?php
+/**
+ * This file is part of Serendipity Job
+ * @license  https://github.com/Hyperf-Glory/SerendipityJob/main/LICENSE
+ */
 
-declare( strict_types = 1 );
+declare(strict_types=1);
 
 namespace Serendipity\Job\Kernel\Swow;
 
@@ -13,43 +17,33 @@ use Swow\Socket;
 
 class ServerFactory
 {
-    /**
-     * @var ContainerInterface
-     */
     protected ContainerInterface $container;
 
-    /**
-     * @var ServerInterface|null
-     */
     protected ?ServerInterface $server = null;
 
     protected ?EventDispatcherInterface $eventDispatcherInterface = null;
 
     protected ?StdoutLoggerInterface $stdoutLogger = null;
 
-    /**
-     * @var null|array
-     */
     protected ?array $config;
 
-    public function __construct (ContainerInterface $container, StdoutLoggerInterface $logger)
+    public function __construct(ContainerInterface $container, StdoutLoggerInterface $logger)
     {
         $this->container = $container;
         $this->stdoutLogger = $logger;
         $this->config = $container->get(ConfigInterface::class)
-                                  ->get('server');
+            ->get('server');
     }
 
-    public function start (): Socket|\Swow\Http\Server
+    public function start(): Socket | \Swow\Http\Server
     {
         return $this->getServer()
-                    ->start();
+            ->start();
     }
 
-    public function getServer (): ServerInterface
+    public function getServer(): ServerInterface
     {
         if (!$this->server instanceof ServerInterface) {
-
             $this->server = new Server(
                 $this->container,
                 $this->stdoutLogger,
@@ -64,5 +58,4 @@ class ServerFactory
 
         return $this->server->getServer();
     }
-
 }

@@ -1,5 +1,10 @@
 <?php
-declare( strict_types = 1 );
+/**
+ * This file is part of Serendipity Job
+ * @license  https://github.com/Hyperf-Glory/SerendipityJob/main/LICENSE
+ */
+
+declare(strict_types=1);
 
 namespace Serendipity\Job\Kernel\IOMultiplex;
 
@@ -18,37 +23,22 @@ use Multiplex\Packer;
 use Multiplex\Packet;
 use Multiplex\Serializer\StringSerializer;
 use Serendipity\Job\Contract\LoggerInterface;
+use Serendipity\Job\Util\Collection;
 use SerendipitySwow\Socket\Exceptions\OpenStreamException;
 use SerendipitySwow\Socket\Exceptions\StreamStateException;
 use SerendipitySwow\Socket\Streams\Socket;
-use Serendipity\Job\Util\Collection;
 use Throwable;
 
 class Client implements ClientInterface, HasSerializerInterface
 {
-    /**
-     * @var string
-     */
     protected string $name;
 
-    /**
-     * @var int
-     */
     protected int $port;
 
-    /**
-     * @var Packer
-     */
     protected Packer $packer;
 
-    /**
-     * @var SerializerInterface
-     */
     protected SerializerInterface $serializer;
 
-    /**
-     * @var IdGeneratorInterface
-     */
     protected IdGeneratorInterface $generator;
 
     /**
@@ -56,32 +46,17 @@ class Client implements ClientInterface, HasSerializerInterface
      */
     protected ?Channel $chan;
 
-    /**
-     * @var null|Socket
-     */
     protected ?Socket $client;
 
-    /**
-     * @var Collection
-     */
     protected Collection $config;
 
-    /**
-     * @var ChannelManager
-     */
     protected ChannelManager $channelManager;
 
-    /**
-     * @var bool
-     */
     protected bool $heartbeat = false;
 
-    /**
-     * @var null|LoggerInterface
-     */
     protected ?LoggerInterface $logger;
 
-    public function __construct (
+    public function __construct(
         string $name,
         int $port,
         ?IdGeneratorInterface $generator = null,
@@ -102,44 +77,45 @@ class Client implements ClientInterface, HasSerializerInterface
         ]);
     }
 
-    public function set (array $settings): Client|static
+    public function set(array $settings): Client | static
     {
         $this->config = new Collection($settings);
+
         return $this;
     }
 
-    public function request ($data)
+    public function request($data)
     {
         return $this->recv($this->send($data));
     }
 
-    public function send ($data): int
+    public function send($data): int
     {
         $this->loop();
 
         $this->getChannelManager()
-             ->get($id = $this->generator->generate(), true);
+            ->get($id = $this->generator->generate(), true);
 
         try {
             $payload = $this->packer->pack(
                 new Packet(
                     $id,
                     $this->getSerializer()
-                         ->serialize($data)
+                        ->serialize($data)
                 )
             );
 
             $this->chan->push($payload);
         } catch (Throwable $exception) {
             is_int($id) && $this->getChannelManager()
-                                ->close($id);
+                ->close($id);
             throw $exception;
         }
 
         return $id;
     }
 
-    public function recv (int $id)
+    public function recv(int $id)
     {
         $this->loop();
 
@@ -165,37 +141,30 @@ class Client implements ClientInterface, HasSerializerInterface
         return $data;
     }
 
-    public function getSerializer (): SerializerInterface
+    public function getSerializer(): SerializerInterface
     {
         return $this->serializer;
     }
 
-    public function getChannelManager (): ChannelManager
+    public function getChannelManager(): ChannelManager
     {
         return $this->channelManager;
     }
 
-    public function close (): void
+    public function close(): void
     {
         $this->client && $this->client->close();
         $this->chan && $this->chan->close();
     }
 
-    /**
-     * @param  null|LoggerInterface  $logger
-     *
-     * @return static
-     */
-    public function setLogger (?LoggerInterface $logger): static
+    public function setLogger(?LoggerInterface $logger): static
     {
         $this->logger = $logger;
+
         return $this;
     }
 
-    /**
-     * @return Socket
-     */
-    protected function makeClient (): Socket
+    protected function makeClient(): Socket
     {
         $client = new Socket($this->name, $this->port, $this->config->get('connect_timeout'));
         try {
@@ -204,10 +173,11 @@ class Client implements ClientInterface, HasSerializerInterface
             $this->close();
             $this->logger->error($e->getMessage());
         }
+
         return $client;
     }
 
-    protected function heartbeat (): void
+    protected function heartbeat(): void
     {
         $heartbeat = $this->config->get('heartbeat');
         if (!$this->heartbeat && is_numeric($heartbeat)) {
@@ -238,7 +208,7 @@ class Client implements ClientInterface, HasSerializerInterface
         }
     }
 
-    protected function loop (): void
+    protected function loop(): void
     {
         $this->heartbeat();
 
@@ -246,7 +216,7 @@ class Client implements ClientInterface, HasSerializerInterface
             return;
         }
         $this->chan = $this->getChannelManager()
-                           ->make(65535);
+            ->make(65535);
         $this->client = $this->makeClient();
         Coroutine::create(function () {
             $reason = '';
@@ -271,13 +241,15 @@ class Client implements ClientInterface, HasSerializerInterface
                     }
 
                     if ($channel = $this->getChannelManager()
-                                        ->get($packet->getId())) {
+                        ->get($packet->getId())) {
                         $channel->push(
                             $this->serializer->unserialize($packet->getBody())
                         );
                     } else {
-                        $this->logger && $this->logger->error(sprintf('Recv channel [%d] does not exists.',
-                            $packet->getId()));
+                        $this->logger && $this->logger->error(sprintf(
+                            'Recv channel [%d] does not exists.',
+                            $packet->getId()
+                        ));
                     }
                 }
             } catch (StreamStateException $exception) {

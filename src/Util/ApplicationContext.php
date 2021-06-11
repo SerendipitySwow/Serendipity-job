@@ -1,6 +1,10 @@
 <?php
+/**
+ * This file is part of Serendipity Job
+ * @license  https://github.com/Hyperf-Glory/SerendipityJob/main/LICENSE
+ */
 
-declare( strict_types = 1 );
+declare(strict_types=1);
 
 namespace Serendipity\Job\Util;
 
@@ -9,31 +13,25 @@ use TypeError;
 
 class ApplicationContext
 {
-
-    /**
-     * @var null|ContainerInterface
-     */
     private static ?ContainerInterface $container;
-
 
     /**
      * @throws TypeError
      */
-    public static function getContainer (): ContainerInterface
+    public static function getContainer(): ContainerInterface
     {
         return self::$container;
     }
 
-    public static function hasContainer (): bool
+    public static function hasContainer(): bool
     {
         return isset(self::$container);
     }
 
-    public static function setContainer (ContainerInterface $container): ContainerInterface
+    public static function setContainer(ContainerInterface $container): ContainerInterface
     {
         self::$container = $container;
+
         return $container;
     }
-
-
 }

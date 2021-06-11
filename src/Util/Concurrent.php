@@ -1,11 +1,15 @@
 <?php
+/**
+ * This file is part of Serendipity Job
+ * @license  https://github.com/Hyperf-Glory/SerendipityJob/main/LICENSE
+ */
 
-declare( strict_types = 1 );
+declare(strict_types=1);
 
 namespace Serendipity\Job\Util;
 
-use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Hyperf\Engine\Channel;
+use Serendipity\Job\Contract\StdoutLoggerInterface;
 
 /**
  * @method bool isFull()
@@ -13,50 +17,44 @@ use Hyperf\Engine\Channel;
  */
 class Concurrent
 {
-    /**
-     * @var Channel
-     */
     protected Channel $channel;
 
-    /**
-     * @var int
-     */
     protected int $limit;
 
-    public function __construct (int $limit)
+    public function __construct(int $limit)
     {
         $this->limit = $limit;
         $this->channel = new Channel($limit);
     }
 
-    public function __call ($name, $arguments)
+    public function __call($name, $arguments)
     {
-        if (in_array($name, [ 'isFull', 'isEmpty' ])) {
+        if (in_array($name, ['isFull', 'isEmpty'])) {
             return $this->channel->{$name}(...$arguments);
         }
     }
 
-    public function getLimit (): int
+    public function getLimit(): int
     {
         return $this->limit;
     }
 
-    public function length (): int
+    public function length(): int
     {
         return $this->channel->getLength();
     }
 
-    public function getLength (): int
+    public function getLength(): int
     {
         return $this->channel->getLength();
     }
 
-    public function getRunningCoroutineCount (): int
+    public function getRunningCoroutineCount(): int
     {
         return $this->getLength();
     }
 
-    public function create (callable $callable): void
+    public function create(callable $callable): void
     {
         $this->channel->push(true);
 
