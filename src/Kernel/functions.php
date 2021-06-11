@@ -215,11 +215,10 @@ if (!function_exists('serendipity_collect')) {
 if (!function_exists('serendipity_config')) {
     function serendipity_config (string $key, $default = null)
     {
-        if (!ApplicationContext::hasApplication()) {
+        if (!ApplicationContext::hasContainer()) {
             throw new RuntimeException('The application context lacks the container.');
         }
-        $container = ApplicationContext::getApplication()
-                                       ->getContainer();
+        $container = ApplicationContext::getContainer();
         if (!$container->has(ConfigInterface::class)) {
             throw new RuntimeException('ConfigInterface is missing in container.');
         }
@@ -232,9 +231,8 @@ if (!function_exists('serendipity_config')) {
 if (!function_exists('serendipity_make')) {
     function serendipity_make (string $name, array $parameters = [])
     {
-        if (ApplicationContext::hasApplication()) {
-            $container = ApplicationContext::getApplication()
-                                           ->getContainer();
+        if (ApplicationContext::hasContainer()) {
+            $container = ApplicationContext::getContainer();
             if (method_exists($container, 'make')) {
                 return $container->make($name, $parameters);
             }

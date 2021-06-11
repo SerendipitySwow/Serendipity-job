@@ -37,7 +37,6 @@
         "swow/swow": "dev-develop",
         "nette/utils": "^3.2",
         "vlucas/phpdotenv": "^5.3",
-        "php-di/php-di": "^6.3",
         "symfony/config": "^5.2",
         "ext-iconv": "*",
         "hyperf/engine-swow": "^1.1",
@@ -45,7 +44,9 @@
         "symfony/serializer-pack": "^1.0",
         "multiplex/multiplex": "^0.3.1",
         "swow/nsq":"dev-main",
-        "swow/socket":"dev-main"
+        "swow/socket":"dev-main",
+        "ext-bcmath": "*",
+        "hyperf/di": "v2.2.0-beta1"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",

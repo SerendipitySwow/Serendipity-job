@@ -11,7 +11,7 @@ use function Serendipity\Job\Kernel\serendipity_env;
 
 class SerendipityJobCommand extends Command
 {
-    protected static string $defaultName = 'serendipity-job:start';
+    protected static $defaultName = 'serendipity-job:start';
 
     protected function configure (): void
     {

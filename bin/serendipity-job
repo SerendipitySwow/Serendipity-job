@@ -3,22 +3,23 @@
 
 declare( strict_types = 1 );
 
-use DI\Container;
-use Serendipity\Job\Application;
-use Serendipity\Job\Util\ApplicationContext;
 
-define('SERENDIPITY_JOB_PATH', dirname(__DIR__));
+use Psr\Container\ContainerInterface;
+use Serendipity\Job\Application;
+
+define('BASE_PATH', dirname(__DIR__));
 ini_set('display_errors', 'on');
 ini_set('display_startup_errors', 'on');
 ini_set('memory_limit', '1G');
 error_reporting(E_ALL);
 date_default_timezone_set('Asia/Shanghai');
 
-require_once SERENDIPITY_JOB_PATH . '/vendor/autoload.php';
+require_once BASE_PATH . '/vendor/autoload.php';
 
 ( static function () {
-    $container = new Container();
-    $application = new Application($container);
-    ApplicationContext::setApplication($application)
-                      ->run();
+    Hyperf\Di\ClassLoader::init();
+    /** @var ContainerInterface $container */
+    $container = require BASE_PATH . '/config/container.php';
+    $application = $container->get(Application::class);
+    $application->run();
 } )();

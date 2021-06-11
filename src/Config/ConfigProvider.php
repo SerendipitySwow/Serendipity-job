@@ -12,9 +12,8 @@ class  ConfigProvider extends AbstractProvider
 
     public function bootApp (): void
     {
-        $call = $this->container()
-                     ->call(ConfigFactory::class);
         $this->container()
-             ->set(ConfigInterface::class, $call);
+             ->make(ConfigFactory::class);
+
     }
 }

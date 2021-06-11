@@ -86,7 +86,7 @@ class LoggerFactory
     ): array {
         $handlerClass = Arr::get($config, 'handler.class', StreamHandler::class);
         $handlerConstructor = Arr::get($config, 'handler.constructor', [
-            'stream' => SERENDIPITY_JOB_PATH . '/runtime/logs/hyperf.log',
+            'stream' => BASE_PATH . '/runtime/logs/hyperf.log',
             'level' => Logger::DEBUG,
         ]);
 

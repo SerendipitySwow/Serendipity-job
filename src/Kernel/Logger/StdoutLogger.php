@@ -7,6 +7,7 @@ namespace Serendipity\Job\Kernel\Logger;
 use Serendipity\Job\Contract\ConfigInterface;
 use Psr\Log\LogLevel;
 use Serendipity\Job\Contract\StdoutLoggerInterface;
+use Serendipity\Job\Util\ApplicationContext;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use function sprintf;

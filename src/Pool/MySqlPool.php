@@ -184,8 +184,6 @@ class MySqlPool
      * @param  string  $connName
      *
      * @return ?PDO
-     * @throws \DI\DependencyException
-     * @throws \DI\NotFoundException
      */
     protected static function getConnection (string $connName): ?PDO
     {
@@ -195,8 +193,7 @@ class MySqlPool
         try {
             return new PDO($dsn, $config['username'], $config['password'], $config['options']);
         } catch (PDOException $e) {
-            ApplicationContext::getApplication()
-                              ->getContainer()
+            ApplicationContext::getContainer()
                               ->get(LoggerInterface::class)
                               ->error($e->getMessage());
         }

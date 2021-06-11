@@ -32,10 +32,9 @@ class ProviderConfig
     public static function load (): array
     {
         if (!static::$providerConfigs) {
-            $loader = ApplicationContext::getApplication()
-                                        ->getContainer()
+            $loader = ApplicationContext::getContainer()
                                         ->get(YamlLoader::class);
-            static::$providerConfigs = $loader->load(SERENDIPITY_JOB_PATH . '/config/providers.yaml');
+            static::$providerConfigs = $loader->load(BASE_PATH . '/config/providers.yaml');
         }
         return static::$providerConfigs;
     }

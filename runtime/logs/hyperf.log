@@ -1,1 +1,2 @@
 {"message":"Serendipity-Job Start Successfully#","context":{"trace_id":"9f47efd7503078c09dd785f8663a197b60ad176004bc2"},"level":100,"level_name":"DEBUG","channel":"serendipity","datetime":"2021-05-25T23:27:28.013441+08:00","extra":{}}
+{"message":"test#","context":{"trace_id":"9f47efd7503078c09dd785f8663a197b60c2ebb3dba86"},"level":400,"level_name":"ERROR","channel":"serendipity","datetime":"2021-06-11T12:50:59.898511+08:00","extra":{}}

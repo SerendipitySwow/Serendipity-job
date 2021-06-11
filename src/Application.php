@@ -3,8 +3,8 @@ declare( strict_types = 1 );
 
 namespace Serendipity\Job;
 
-use DI\Container;
 use Dotenv\Dotenv;
+use Hyperf\Di\Container;
 use Psr\Container\ContainerInterface;
 use Serendipity\Job\Config\Loader\YamlLoader;
 use Serendipity\Job\Console\SerendipityJobCommand;
@@ -43,13 +43,13 @@ final class  Application extends SymfonyApplication
     protected function initEnvironment (): void
     {
         // Non-thread-safe load
-        $this->dotenv = Dotenv::createUnsafeImmutable(SERENDIPITY_JOB_PATH);
+        $this->dotenv = Dotenv::createUnsafeImmutable(BASE_PATH);
         $this->dotenv->safeLoad();
     }
 
     protected function initSingleton (): void
     {
-        $fileLocator = $this->container->make(FileLocator::class, [ 'paths' => [ SERENDIPITY_JOB_PATH . '/config/' ] ]);
+        $fileLocator = $this->container->make(FileLocator::class, [ 'paths' => [ BASE_PATH . '/config/' ] ]);
         $this->container->set(FileLocatorInterface::class, $fileLocator);
         $this->container->make(YamlLoader::class);
     }

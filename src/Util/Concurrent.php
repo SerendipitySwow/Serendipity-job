@@ -65,8 +65,7 @@ class Concurrent
                 $callable();
             } catch (\Throwable $exception) {
                 if (ApplicationContext::hasContainer()) {
-                    $container = ApplicationContext::getApplication()
-                                                   ->getContainer();
+                    $container = ApplicationContext::getContainer();
                     if ($container->has(StdoutLoggerInterface::class)) {
                         $logger = $container->get(StdoutLoggerInterface::class);
                         $logger->error($exception->getMessage());

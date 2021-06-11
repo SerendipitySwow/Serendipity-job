@@ -12,9 +12,9 @@ class ConfigFactory
 
     public function __invoke (ContainerInterface $container): Config
     {
-        $configPath = SERENDIPITY_JOB_PATH . '/config/';
+        $configPath = BASE_PATH . '/config/';
         $config = $this->readConfig($configPath . 'config.php');
-        $autoloadConfig = $this->readPaths([ SERENDIPITY_JOB_PATH . '/config/autoload' ]);
+        $autoloadConfig = $this->readPaths([ BASE_PATH . '/config/autoload' ]);
         $merged = array_merge_recursive(ProviderConfig::load(), $config, ...$autoloadConfig);
         return new Config($merged);
     }

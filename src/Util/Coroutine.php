@@ -56,8 +56,7 @@ class Coroutine
                 serendipity_call($callable);
             } catch (Throwable $throwable) {
                 if (ApplicationContext::hasContainer()) {
-                    $container = ApplicationContext::getApplication()
-                                                   ->getContainer();
+                    $container = ApplicationContext::getContainer();
                     if ($container->has(StdoutLoggerInterface::class)) {
                         /* @var LoggerInterface $logger */
                         $logger = $container->get(StdoutLoggerInterface::class);

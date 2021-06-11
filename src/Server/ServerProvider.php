@@ -64,7 +64,7 @@ class ServerProvider extends AbstractProvider
                                     case '/':
                                     {
                                         $buffer = new Buffer();
-                                        $buffer->write(file_get_contents(SERENDIPITY_JOB_PATH . '/storage/task.php'));
+                                        $buffer->write(file_get_contents(BASE_PATH . '/storage/task.php'));
                                         $response = new Response();
                                         $response->setStatus(Status::OK);
                                         $response->setHeader('Server', 'Serendipity-Job');
@@ -75,6 +75,10 @@ class ServerProvider extends AbstractProvider
                                         $this->stdoutLogger->debug(sprintf('Http Client Fd[%s] Debug#',
                                             (string) $session->getFd()));
                                         break;
+                                    }
+                                    case '/nsq':
+                                    {
+
                                     }
                                     case '/dag':
                                     {
@@ -261,7 +265,7 @@ class ServerProvider extends AbstractProvider
                                     default:
                                     {
                                         $buffer = new Buffer();
-                                        $buffer->write(file_get_contents(SERENDIPITY_JOB_PATH . '/storage/404.php'));
+                                        $buffer->write(file_get_contents(BASE_PATH . '/storage/404.php'));
                                         $response = new Response();
                                         $response->setStatus(Status::NOT_FOUND);
                                         $response->setHeader('Server', 'Serendipity-Job');
