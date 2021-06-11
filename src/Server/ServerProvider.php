@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Serendipity\Job\Server;
 
 use Hyperf\Engine\Channel;
+use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\Contract\LoggerInterface;
 use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Serendipity\Job\Kernel\Dag\Dag;
@@ -13,6 +14,9 @@ use Serendipity\Job\Kernel\Swow\ServerFactory;
 use Serendipity\Job\Logger\LoggerFactory;
 use Serendipity\Job\Serializer\Person;
 use Serendipity\Job\Serializer\SymfonySerializer;
+use SerendipitySwow\Nsq\Message;
+use SerendipitySwow\Nsq\Nsq;
+use SerendipitySwow\Nsq\Result;
 use Swow\Coroutine;
 use Swow\Http\Buffer;
 use Swow\Http\Server;
@@ -76,9 +80,43 @@ class ServerProvider extends AbstractProvider
                                             (string) $session->getFd()));
                                         break;
                                     }
-                                    case '/nsq':
+                                    case '/nsq/publish':
                                     {
+                                        $config = $this->container()
+                                                       ->get(ConfigInterface::class)
+                                                       ->get('nsq.default');
+                                        /**
+                                         * @var Nsq $nsq
+                                         */
+                                        $nsq = make(Nsq::class, [ $this->container(), $config ]);
+                                        $string = (string) random_int(100000, 999999999);
+                                        $this->stdoutLogger->debug('Publish ' . $string . PHP_EOL);
+                                        ($nsq->publish('test', $string));
+                                        ($nsq ->publish('test',[
+                                            $string,
+                                            (string)random_int(10000,90000)
+                                        ],10));
+                                        $session->respond('Hello Nsq!');
+                                        break;
+                                    }
+                                    case '/nsq/subscribe':
+                                    {
+                                        $config = $this->container()
+                                                       ->get(ConfigInterface::class)
+                                                       ->get('nsq.default');
+                                        /**
+                                         * @var Nsq $nsq
+                                         */
+                                        $nsq = make(Nsq::class, [ $this->container(), $config ]);
 
+                                        Coroutine::run(function () use ($nsq) {
+                                            $nsq->subscribe('test', 'v2', function (Message $data) {
+                                                $this->stdoutLogger->error('Subscribe ' . $data->getBody() . PHP_EOL);
+                                                return Result::ACK;
+                                            });
+                                        });
+                                        $session->respond('Hello Nsq-subscribe!');
+                                        break;
                                     }
                                     case '/dag':
                                     {
