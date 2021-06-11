@@ -46,7 +46,7 @@
         "swow/nsq":"dev-main",
         "swow/socket":"dev-main",
         "ext-bcmath": "*",
-        "hyperf/di": "v2.2.0-beta1"
+        "hyperf/di": "2.2.x-dev"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",
