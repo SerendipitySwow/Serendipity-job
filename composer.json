@@ -46,7 +46,8 @@
         "ext-bcmath": "*",
         "hyperf/di": "2.2.x-dev",
         "serendipity-swow/nsq": "^0.2.0",
-        "serendipity-swow/sockets": "^0.2.0"
+        "serendipity-swow/sockets": "^0.2.0",
+        "catfan/medoo": "^2.1"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",

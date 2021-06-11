@@ -1,0 +1,2 @@
+通过STDOUT写入；
+通过php://stdout写入；
