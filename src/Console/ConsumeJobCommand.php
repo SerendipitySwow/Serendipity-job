@@ -93,7 +93,6 @@ final class ConsumeJobCommand extends Command
                             //TODO Task Handle
                             $lock->unlock($data->getBody());
                             $this->stdoutLogger->warning('Unsubscribe ' . $data->getBody() . PHP_EOL);
-
                             return Result::ACK;
                         }
                         $this->stdoutLogger->error('Unsubscribe ' . $data->getBody() . PHP_EOL);
