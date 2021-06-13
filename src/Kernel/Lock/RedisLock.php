@@ -85,7 +85,7 @@ LUA;
         if (isset($this->lockedNames[$key])) {
             $val = $this->lockedNames[$key];
 
-            return (bool)$this->execLuaScript($script, [$key, $val]);
+            return (bool) $this->execLuaScript($script, [$key, $val]);
         }
 
         return false;
