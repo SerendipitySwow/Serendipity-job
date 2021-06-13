@@ -14,7 +14,7 @@ use Swow\Coroutine;
 use Swow\Debug\Debugger;
 use function Serendipity\Job\Kernel\serendipity_env;
 
-class SerendipityJobCommand extends Command
+final class SerendipityJobCommand extends Command
 {
     protected static $defaultName = 'serendipity-job:start';
 
@@ -26,9 +26,6 @@ class SerendipityJobCommand extends Command
 
     public function handle(): int
     {
-        if (serendipity_env('DEBUG') === true) {
-            Debugger::runOnTTY('serendipity-job');
-        }
         $this->output->writeln(sprintf('<info>%s</info>', Logo::LOGO));
         $this->output->writeln([
             '<info>Serendipity Job</info>',
