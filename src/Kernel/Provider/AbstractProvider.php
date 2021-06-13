@@ -11,10 +11,21 @@ namespace Serendipity\Job\Kernel\Provider;
 use Hyperf\Di\Container;
 use JetBrains\PhpStorm\Pure;
 use Psr\Container\ContainerInterface;
+use Serendipity\Job\Config\ProviderConfig;
 use Serendipity\Job\Util\ApplicationContext;
 
 abstract class AbstractProvider implements ProviderContract
 {
+    protected ?string $module = null;
+
+    protected static array $providers = [];
+
+    public function __construct(string $module = null)
+    {
+        $this->module = $module;
+        $this->initApplication();
+    }
+
     #[Pure]
     public function container(): ContainerInterface | Container
     {
@@ -34,5 +45,10 @@ abstract class AbstractProvider implements ProviderContract
     public function shutdown(): void
     {
         echo __METHOD__;
+    }
+
+    protected function initApplication(): void
+    {
+        static::$providers = ProviderConfig::load();
     }
 }

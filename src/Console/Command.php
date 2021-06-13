@@ -148,6 +148,8 @@ abstract class Command extends SymfonyCommand
         return $callback();
     }
 
+    abstract protected function bootStrap(): void;
+
     /**
      * Handle the current command.
      */

@@ -12,10 +12,13 @@ use Dotenv\Dotenv;
 use Hyperf\Di\Container;
 use Psr\Container\ContainerInterface;
 use Serendipity\Job\Config\Loader\YamlLoader;
+use Serendipity\Job\Console\ConsumeJobCommand;
 use Serendipity\Job\Console\SerendipityJobCommand;
+use Swow\Debug\Debugger;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\FileLocatorInterface;
 use Symfony\Component\Console\Application as SymfonyApplication;
+use function Serendipity\Job\Kernel\serendipity_env;
 
 final class Application extends SymfonyApplication
 {
@@ -30,10 +33,12 @@ final class Application extends SymfonyApplication
     {
         $this->container = $container;
         parent::__construct('Serendipity Job Console Tool...');
+        $this->initialize();
+        $this->debug();
         $this->addCommands([
             new SerendipityJobCommand(),
+            new ConsumeJobCommand($container),
         ]);
-        $this->initialize();
     }
 
     public function initialize(): void
@@ -59,5 +64,12 @@ final class Application extends SymfonyApplication
     public function getContainer(): ContainerInterface | Container
     {
         return $this->container;
+    }
+
+    protected function debug(): void
+    {
+        if (serendipity_env('DEBUG')) {
+            Debugger::runOnTTY('serendipity-job');
+        }
     }
 }

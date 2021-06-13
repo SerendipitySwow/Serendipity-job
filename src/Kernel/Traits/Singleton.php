@@ -15,12 +15,12 @@ trait Singleton
      */
     private static ?self $instance = null;
 
-    public static function create(): static
+    public static function create(string $module = null): static
     {
         if (self::$instance instanceof self) {
             return self::$instance;
         }
 
-        return self::$instance = new self();
+        return self::$instance = new self($module);
     }
 }

@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Serendipity\Job\Server;
 
 use Hyperf\Engine\Channel;
+use Serendipity\Job\Console\ConsumeJobCommand;
 use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\Contract\LoggerInterface;
 use Serendipity\Job\Contract\StdoutLoggerInterface;
@@ -97,8 +98,8 @@ class ServerProvider extends AbstractProvider
                                         $nsq = make(Nsq::class, [$this->container(), $config]);
                                         $string = (string) random_int(100000, 999999999);
                                         $this->stdoutLogger->debug('Publish ' . $string . PHP_EOL);
-                                        ($nsq->publish('test', $string));
-                                        ($nsq->publish('test', [
+                                        ($nsq->publish(ConsumeJobCommand::TOPIC, $string));
+                                        ($nsq->publish(ConsumeJobCommand::TOPIC, [
                                             $string,
                                             (string) random_int(10000, 90000),
                                         ], 10));

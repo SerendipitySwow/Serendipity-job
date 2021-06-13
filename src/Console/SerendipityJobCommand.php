@@ -11,12 +11,12 @@ namespace Serendipity\Job\Console;
 use Serendipity\Job\Constant\Logo;
 use Serendipity\Job\Kernel\Provider\KernelProvider;
 use Swow\Coroutine;
-use Swow\Debug\Debugger;
-use function Serendipity\Job\Kernel\serendipity_env;
 
 final class SerendipityJobCommand extends Command
 {
     protected static $defaultName = 'serendipity-job:start';
+
+    protected const COMMADN_PROVIDER_NAME = 'Serendipity-Job';
 
     protected function configure(): void
     {
@@ -46,7 +46,7 @@ final class SerendipityJobCommand extends Command
 
     protected function bootStrap(): void
     {
-        KernelProvider::create()
+        KernelProvider::create(self::COMMADN_PROVIDER_NAME)
             ->bootApp();
     }
 }

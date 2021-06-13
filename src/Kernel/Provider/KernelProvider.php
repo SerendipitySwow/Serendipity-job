@@ -15,12 +15,12 @@ class KernelProvider extends AbstractProvider
 {
     use Singleton;
 
-    protected static array $providers = [];
-
     public function bootApp(): void
     {
-        static::$providers = ProviderConfig::load();
-        ProviderConfig::loadProviders(static::$providers[ProviderConfig::$bootApp], ProviderConfig::$bootApp);
+        ProviderConfig::loadProviders(
+            static::$providers[$this->module][ProviderConfig::$bootApp],
+            ProviderConfig::$bootApp
+        );
     }
 
     public function bootRequest(): void
@@ -29,6 +29,9 @@ class KernelProvider extends AbstractProvider
 
     public function shutdown(): void
     {
-        ProviderConfig::loadProviders(static::$providers[ProviderConfig::$bootShutdown], ProviderConfig::$bootShutdown);
+        ProviderConfig::loadProviders(
+            static::$providers[$this->module][ProviderConfig::$bootShutdown],
+            ProviderConfig::$bootShutdown
+        );
     }
 }

@@ -18,7 +18,7 @@ class ConfigFactory
         $configPath = BASE_PATH . '/config/';
         $config = $this->readConfig($configPath . 'config.php');
         $autoloadConfig = $this->readPaths([BASE_PATH . '/config/autoload']);
-        $merged = array_merge_recursive(ProviderConfig::load(), $config, ...$autoloadConfig);
+        $merged = array_merge_recursive(['providers' => ProviderConfig::load()], $config, ...$autoloadConfig);
 
         return new Config($merged);
     }
