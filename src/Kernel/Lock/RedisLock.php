@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Serendipity\Job\Kernel\Lock;
 
 use Exception;
+use Hyperf\Utils\Coroutine;
 use Redis;
 
 class RedisLock
@@ -57,7 +58,11 @@ class RedisLock
 
                 return true;
             }
-            sleep((float) $sleep / 10000);
+            if (Coroutine::inCoroutine()) {
+                sleep((int) $sleep / 1000);
+            } else {
+                usleep($sleep);
+            }
         }
 
         return $lock;

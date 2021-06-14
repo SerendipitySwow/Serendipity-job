@@ -15,6 +15,7 @@ use Serendipity\Job\Contract\LoggerInterface;
 use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Serendipity\Job\Kernel\Dag\Dag;
 use Serendipity\Job\Kernel\Dag\Vertex;
+use Serendipity\Job\Kernel\Lock\RedisLock;
 use Serendipity\Job\Kernel\Provider\AbstractProvider;
 use Serendipity\Job\Kernel\Swow\ServerFactory;
 use Serendipity\Job\Logger\LoggerFactory;
@@ -87,6 +88,23 @@ class ServerProvider extends AbstractProvider
                                         ));
                                         break;
                                     }
+                                    case '/lock':
+                                    {
+                                        $redis = new \Redis();
+                                        $redis->connect('127.0.0.1', 6379);
+                                        $lock = new RedisLock($redis);
+                                        if ($lock->lock('test')) {
+                                            $this->stdoutLogger->debug('test locked#');
+                                            sleep(random_int(1, 5));
+                                            $lock->unlock('test');
+                                            $this->stdoutLogger->debug('test unlocked#' . date('Y-m-d H:i:s'));
+                                            $session->respond('Hello Lock!');
+                                            break;
+                                        }
+                                        $this->stdoutLogger->error('test unlocked#');
+                                        $session->respond('Hello Lock failed!');
+                                        break;
+                                    }
                                     case '/nsq/publish':
                                     {
                                         $config = $this->container()
@@ -99,10 +117,11 @@ class ServerProvider extends AbstractProvider
                                         $string = (string) random_int(100000, 999999999);
                                         $this->stdoutLogger->debug('Publish ' . $string . PHP_EOL);
                                         ($nsq->publish(ConsumeJobCommand::TOPIC, $string));
-                                        ($nsq->publish(ConsumeJobCommand::TOPIC, [
-                                            $string,
+                                        ($nsq->publish(
+                                            ConsumeJobCommand::TOPIC,
                                             (string) random_int(10000, 90000),
-                                        ], 10));
+                                            10
+                                        ));
                                         $session->respond('Hello Nsq!');
                                         break;
                                     }

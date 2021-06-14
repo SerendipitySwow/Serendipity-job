@@ -88,11 +88,10 @@ final class ConsumeJobCommand extends Command
                     ]);
 
                     $nsq->subscribe(self::TOPIC, sprintf('Consumerd%s', $i), function (Message $data) use ($lock) {
-                        $this->stdoutLogger->info('Subscribe ' . $data->getBody() . PHP_EOL);
+                        $this->stdoutLogger->info('Subscribe ' . $data->getBody() . ' ' . date('Y-m-d H:i:s') . PHP_EOL);
                         if ($lock->lock($data->getBody())) {
                             //TODO Task Handle
                             $lock->unlock($data->getBody());
-                            $this->stdoutLogger->warning('Unsubscribe ' . $data->getBody() . PHP_EOL);
 
                             return Result::ACK;
                         }
