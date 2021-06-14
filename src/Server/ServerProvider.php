@@ -95,13 +95,12 @@ class ServerProvider extends AbstractProvider
                                         $lock = new RedisLock($redis);
                                         if ($lock->lock('test')) {
                                             $this->stdoutLogger->debug('test locked#');
-                                            sleep(random_int(1, 5));
                                             $lock->unlock('test');
                                             $this->stdoutLogger->debug('test unlocked#' . date('Y-m-d H:i:s'));
                                             $session->respond('Hello Lock!');
                                             break;
                                         }
-                                        $this->stdoutLogger->error('test unlocked#');
+                                        $this->stdoutLogger->error('test unlocked#error' . Coroutine::getCurrent()->getId());
                                         $session->respond('Hello Lock failed!');
                                         break;
                                     }

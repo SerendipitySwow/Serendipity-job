@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace Serendipity\Job\Kernel\Lock;
 
 use Exception;
-use Hyperf\Utils\Coroutine;
 use Redis;
 
 class RedisLock
@@ -40,12 +39,14 @@ class RedisLock
     /**
      * 上锁
      *
-     * @param string $name 锁名字
-     * @param int $expire 锁有效期
-     * @param int $retryTimes 重试次数
-     * @param float $sleep 重试休息微秒
+     * @param  string  $name  锁名字
+     * @param  int  $expire  锁有效期
+     * @param  int  $retryTimes  重试次数
+     * @param  int  $sleep  重试休息微秒
+     *
+     * @return bool
      */
-    public function lock(string $name, int $expire = 5, int $retryTimes = 10, float $sleep = 10000): bool
+    public function lock(string $name, int $expire = 5, int $retryTimes = 10, int $sleep = 10000): bool
     {
         $lock = false;
         $retryTimes = max($retryTimes, 1);
@@ -55,14 +56,9 @@ class RedisLock
             $lock = (bool) $this->getLock($key, $expire, $kVal); //上锁
             if ($lock) {
                 $this->lockedNames[$key] = $kVal;
-
-                return true;
+                break;
             }
-            if (Coroutine::inCoroutine()) {
-                sleep((int) $sleep / 1000);
-            } else {
-                usleep($sleep);
-            }
+            usleep($sleep);
         }
 
         return $lock;
