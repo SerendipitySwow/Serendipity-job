@@ -39,12 +39,10 @@ class RedisLock
     /**
      * 上锁
      *
-     * @param  string  $name  锁名字
-     * @param  int  $expire  锁有效期
-     * @param  int  $retryTimes  重试次数
-     * @param  int  $sleep  重试休息微秒
-     *
-     * @return bool
+     * @param string $name 锁名字
+     * @param int $expire 锁有效期
+     * @param int $retryTimes 重试次数
+     * @param int $sleep 重试休息微秒
      */
     public function lock(string $name, int $expire = 5, int $retryTimes = 10, int $sleep = 10000): bool
     {

@@ -40,4 +40,16 @@ interface JobInterface
      * @return JobMiddlewareInterface[]
      */
     public function middleware(): array;
+
+    /**
+     * Get job Token
+     *
+     * @return int|string
+     */
+    public function getIdentity(): int | string;
+
+    /**
+     * Get job action time
+     */
+    public function getTimeout(): int;
 }
