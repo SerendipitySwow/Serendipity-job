@@ -100,7 +100,8 @@ class ServerProvider extends AbstractProvider
                                             $session->respond('Hello Lock!');
                                             break;
                                         }
-                                        $this->stdoutLogger->error('test unlocked#error' . Coroutine::getCurrent()->getId());
+                                        $this->stdoutLogger->error('test unlocked#error' . Coroutine::getCurrent()
+                                            ->getId());
                                         $session->respond('Hello Lock failed!');
                                         break;
                                     }
@@ -115,9 +116,9 @@ class ServerProvider extends AbstractProvider
                                         $nsq = make(Nsq::class, [$this->container(), $config]);
                                         $string = (string) random_int(100000, 999999999);
                                         $this->stdoutLogger->debug('Publish ' . $string . PHP_EOL);
-                                        ($nsq->publish(ConsumeJobCommand::TOPIC_PREFIX, $string));
+                                        ($nsq->publish(ConsumeJobCommand::TOPIC_PREFIX . 'task', $string));
                                         ($nsq->publish(
-                                            ConsumeJobCommand::TOPIC_PREFIX.'task',
+                                            ConsumeJobCommand::TOPIC_PREFIX . 'task',
                                             (string) random_int(10000, 90000),
                                             10
                                         ));

@@ -1,11 +1,10 @@
 <?php
 /**
  * This file is part of Serendipity Job
- *
  * @license  https://github.com/Hyperf-Glory/Serendipity-job/blob/main/LICENSE
  */
 
-declare( strict_types = 1 );
+declare(strict_types=1);
 
 namespace Serendipity\Job\Console;
 
@@ -17,9 +16,7 @@ use Serendipity\Job\Kernel\Provider\KernelProvider;
 use Serendipity\Job\Nsq\Consumer\AbstractConsumer;
 use Serendipity\Job\Nsq\Consumer\DagConsumer;
 use Serendipity\Job\Nsq\Consumer\TaskConsumer;
-use Serendipity\Job\Serializer\SymfonySerializer;
 use Serendipity\Job\Util\ApplicationContext;
-use Serendipity\Job\Util\Waiter;
 use SerendipitySwow\Nsq\Message;
 use SerendipitySwow\Nsq\Nsq;
 use SerendipitySwow\Nsq\Result;
@@ -48,7 +45,7 @@ final class ConsumeJobCommand extends Command
 
     protected ?Nsq $subscriber = null;
 
-    protected function configure (): void
+    protected function configure(): void
     {
         $this
             ->setDescription('Consumes tasks')
@@ -82,24 +79,21 @@ final class ConsumeJobCommand extends Command
             );
     }
 
-    public function __construct (ContainerInterface $container)
+    public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
         parent::__construct();
     }
 
-    public function handle (): int
+    public function handle(): int
     {
         $this->bootStrap();
         $this->config = $this->container->get(ConfigInterface::class);
         $this->stdoutLogger = $this->container->get(StdoutLoggerInterface::class);
-        $this->serializer = $this->container
-            ->get(SymfonySerializer::class);
         $this->subscriber = make(Nsq::class, [
             $this->container,
-            $this->config->get('nsq.default')
+            $this->config->get('nsq.default'),
         ]);
-        $this->waiter = make(Waiter::class, [ 0 ]);
         $this->stdoutLogger->info('Consumer Task Successfully Processed#');
         $limit = $this->input->getOption('limit');
         $type = $this->input->getOption('type');
@@ -108,28 +102,31 @@ final class ConsumeJobCommand extends Command
             exit();
         }
         if ($limit !== null) {
-            $this->waiter = make(Waiter::class, [ 0 ]);
             for ($i = 0; $i < $limit; $i++) {
                 Coroutine::run(
                     function () use ($i, $type) {
-                        $consumer = match ( $type ) {
+                        $consumer = match ($type) {
                             'task' => $this->makeConsumer(TaskConsumer::class, self::TOPIC_PREFIX . $type, 'Consumerd'),
                             'dag' => $this->makeConsumer(DagConsumer::class, self::TOPIC_PREFIX . $type, 'Consumerd')
                         };
-                        $this->subscriber->subscribe(self::TOPIC_PREFIX . $type, 'Consumerd#' . $i,
-                            function (Message $message) use ($consumer) {
-                                return $this->waiter->wait(function () use ($message, $consumer) {
-                                    $result = null;
-                                    try {
-                                        $result = $consumer->consume($message);
-                                    } catch (Throwable $e) {
-                                        $result = Result::DROP;
-                                    }
-                                    return $result;
-                                });
+                        $this->subscriber->subscribe(
+                            self::TOPIC_PREFIX . $type,
+                            'Consumerd' . $i,
+                            function (Message $message) use ($consumer, $i) {
+                                try {
+                                    $result = $consumer->consume($message);
+                                } catch (Throwable $error) {
+                                    $this->stdoutLogger->error(sprintf(
+                                        'Consumer failed to consume %s,reason: %s#',
+                                        'Consumerd' . $i,
+                                        $error->getMessage()
+                                    ));
+                                    $result = Result::DROP;
+                                }
 
-                            });
-                        //TODO Event
+                                return $result;
+                            }
+                        );
                     }
                 );
             }
@@ -138,28 +135,22 @@ final class ConsumeJobCommand extends Command
         return Command::SUCCESS;
     }
 
-
-    /**
-     * @param  string  $class
-     * @param  string  $topic
-     * @param  string  $channel
-     *
-     * @return AbstractConsumer
-     */
-    protected function makeConsumer (string $class, string $topic, string $channel): AbstractConsumer
+    protected function makeConsumer(string $class, string $topic, string $channel): AbstractConsumer
     {
         /**
          * @var AbstractConsumer $consumer
          */
-        $consumer = ApplicationContext::getContainer()->get($class);
+        $consumer = ApplicationContext::getContainer()
+            ->get($class);
         $consumer->setTopic($topic);
         $consumer->setChannel($channel);
+
         return $consumer;
     }
 
-    protected function bootStrap (): void
+    protected function bootStrap(): void
     {
         KernelProvider::create(self::COMMADN_PROVIDER_NAME)
-                      ->bootApp();
+            ->bootApp();
     }
 }
