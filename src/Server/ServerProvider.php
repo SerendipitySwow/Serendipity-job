@@ -117,7 +117,7 @@ class ServerProvider extends AbstractProvider
                                         $this->stdoutLogger->debug('Publish ' . $string . PHP_EOL);
                                         ($nsq->publish(ConsumeJobCommand::TOPIC, $string));
                                         ($nsq->publish(
-                                            ConsumeJobCommand::TOPIC,
+                                            ConsumeJobCommand::TOPIC_PREFIX.'task',
                                             (string) random_int(10000, 90000),
                                             10
                                         ));

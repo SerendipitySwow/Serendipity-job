@@ -18,23 +18,27 @@ use Serendipity\Job\Nsq\Consumer\AbstractConsumer;
 use Serendipity\Job\Nsq\Consumer\DagConsumer;
 use Serendipity\Job\Nsq\Consumer\TaskConsumer;
 use Serendipity\Job\Serializer\SymfonySerializer;
+use Serendipity\Job\Util\ApplicationContext;
 use Serendipity\Job\Util\Waiter;
+use SerendipitySwow\Nsq\Message;
 use SerendipitySwow\Nsq\Nsq;
+use SerendipitySwow\Nsq\Result;
 use Swow\Coroutine;
 use Symfony\Component\Console\Input\InputOption;
+use Throwable;
 
 final class ConsumeJobCommand extends Command
 {
     public static $defaultName = 'scheduler:consume';
 
-    protected const COMMADN_PROVIDER_NAME = 'Consumer-Job-';
+    protected const COMMADN_PROVIDER_NAME = 'Consumer-Job';
 
     protected const TASK_TYPE = [
         'dag',
         'task',
     ];
 
-    public const TOPIC_PREFIX = 'serendipity-job';
+    public const TOPIC_PREFIX = 'serendipity-job-';
 
     protected ?ConfigInterface $config = null;
 
@@ -104,21 +108,28 @@ final class ConsumeJobCommand extends Command
             exit();
         }
         if ($limit !== null) {
-            $config = $this->config
-                ->get('nsq.default');
             $this->waiter = make(Waiter::class, [ 0 ]);
             for ($i = 0; $i < $limit; $i++) {
                 Coroutine::run(
-                    function () use ($config, $i, $type) {
+                    function () use ($i, $type) {
                         $consumer = match ( $type ) {
                             'task' => $this->makeConsumer(TaskConsumer::class, self::TOPIC_PREFIX . $type, 'Consumerd'),
                             'dag' => $this->makeConsumer(DagConsumer::class, self::TOPIC_PREFIX . $type, 'Consumerd')
                         };
-                        try {
+                        $this->subscriber->subscribe(self::TOPIC_PREFIX . $type, 'Consumerd#' . $i,
+                            function (Message $message) use ($consumer) {
+                                return $this->waiter->wait(function () use ($message, $consumer) {
+                                    $result = null;
+                                    try {
+                                        $result = $consumer->consume($message);
+                                    } catch (Throwable $e) {
+                                        $result = Result::DROP;
+                                    }
+                                    return $result;
+                                });
 
-                        } catch (Throwable $e) {
-
-                        }
+                            });
+                        //TODO Event
                     }
                 );
             }
@@ -140,7 +151,7 @@ final class ConsumeJobCommand extends Command
         /**
          * @var AbstractConsumer $consumer
          */
-        $consumer = make($class);
+        $consumer = ApplicationContext::getContainer()->get($class);
         $consumer->setTopic($topic);
         $consumer->setChannel($channel);
         return $consumer;
