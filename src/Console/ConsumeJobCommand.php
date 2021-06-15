@@ -1,7 +1,7 @@
 <?php
 /**
  * This file is part of Serendipity Job
- * @license  https://github.com/Hyperf-Glory/SerendipityJob/main/LICENSE
+ * @license  https://github.com/Hyperf-Glory/Serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
@@ -103,22 +103,22 @@ final class ConsumeJobCommand extends Command
             for ($i = 0; $i < $limit; $i++) {
                 Coroutine::run(
                     function () use ($config, $i, $type) {
-                    /**
-                     * @var Nsq $nsq
-                     */
-                    $nsq = make(Nsq::class, [$this->container, $config]);
-                    $redis = ( new Redis() );
-                    $redis->connect(
-                        $this->config->get('redis.default.host'),
-                        $this->config->get('redis.default.port')
-                    );
-                    /**
-                     * @var RedisLock $lock
-                     */
-                    $lock = make(RedisLock::class, [
-                        $redis,
-                    ]);
-                    switch ($type) {
+                        /**
+                         * @var Nsq $nsq
+                         */
+                        $nsq = make(Nsq::class, [$this->container, $config]);
+                        $redis = ( new Redis() );
+                        $redis->connect(
+                            $this->config->get('redis.default.host'),
+                            $this->config->get('redis.default.port')
+                        );
+                        /**
+                         * @var RedisLock $lock
+                         */
+                        $lock = make(RedisLock::class, [
+                            $redis,
+                        ]);
+                        switch ($type) {
                         case 'task':
                             $nsq->subscribe(
                                 self::TOPIC_PREFIX . $type,
@@ -159,7 +159,7 @@ final class ConsumeJobCommand extends Command
                         case 'dag':
                             //TODO
                     }
-                }
+                    }
                 );
             }
         }
