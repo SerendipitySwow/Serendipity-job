@@ -70,7 +70,7 @@ class ConcurrentMySQLPattern
         if (!isset($once)) {
             $once = true;
             Coroutine::create(function () {
-                ## TODO 协程监听
+                ## TODO 添加协程监听
                 /*
                 CoordinatorManager::until(Constants::WORKER_EXIT)->yield();
                 */
