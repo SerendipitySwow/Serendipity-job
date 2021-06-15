@@ -1,26 +1,25 @@
 <?php
 /**
  * This file is part of Serendipity Job
+ *
  * @license  https://github.com/Hyperf-Glory/Serendipity-job/blob/main/LICENSE
  */
 
-declare(strict_types=1);
+declare( strict_types = 1 );
 
 namespace Serendipity\Job\Console;
 
 use Psr\Container\ContainerInterface;
-use Redis;
 use Serendipity\Job\Contract\ConfigInterface;
-use Serendipity\Job\Contract\JobInterface;
 use Serendipity\Job\Contract\SerializerInterface;
 use Serendipity\Job\Contract\StdoutLoggerInterface;
-use Serendipity\Job\Kernel\Lock\RedisLock;
 use Serendipity\Job\Kernel\Provider\KernelProvider;
+use Serendipity\Job\Nsq\Consumer\AbstractConsumer;
+use Serendipity\Job\Nsq\Consumer\DagConsumer;
+use Serendipity\Job\Nsq\Consumer\TaskConsumer;
 use Serendipity\Job\Serializer\SymfonySerializer;
 use Serendipity\Job\Util\Waiter;
-use SerendipitySwow\Nsq\Message;
 use SerendipitySwow\Nsq\Nsq;
-use SerendipitySwow\Nsq\Result;
 use Swow\Coroutine;
 use Symfony\Component\Console\Input\InputOption;
 
@@ -43,7 +42,9 @@ final class ConsumeJobCommand extends Command
 
     protected ?SerializerInterface $serializer = null;
 
-    protected function configure(): void
+    protected ?Nsq $subscriber = null;
+
+    protected function configure (): void
     {
         $this
             ->setDescription('Consumes tasks')
@@ -77,20 +78,25 @@ final class ConsumeJobCommand extends Command
             );
     }
 
-    public function __construct(ContainerInterface $container)
+    public function __construct (ContainerInterface $container)
     {
         $this->container = $container;
-        parent::__construct();
-    }
-
-    public function handle(): int
-    {
         $this->bootStrap();
         $this->config = $this->container->get(ConfigInterface::class);
         $this->stdoutLogger = $this->container->get(StdoutLoggerInterface::class);
-        $this->stdoutLogger->info('Consumer Task Successfully Processed#');
         $this->serializer = $this->container
             ->get(SymfonySerializer::class);
+        $this->subscriber = make(Nsq::class, [
+            $container,
+            $this->config->get('nsq.default')
+        ]);
+        $this->waiter = make(Waiter::class, [ 0 ]);
+        parent::__construct();
+    }
+
+    public function handle (): int
+    {
+        $this->stdoutLogger->info('Consumer Task Successfully Processed#');
         $limit = $this->input->getOption('limit');
         $type = $this->input->getOption('type');
         if (!in_array($type, self::TASK_TYPE, true)) {
@@ -100,65 +106,19 @@ final class ConsumeJobCommand extends Command
         if ($limit !== null) {
             $config = $this->config
                 ->get('nsq.default');
+            $this->waiter = make(Waiter::class, [ 0 ]);
             for ($i = 0; $i < $limit; $i++) {
                 Coroutine::run(
                     function () use ($config, $i, $type) {
-                        /**
-                         * @var Nsq $nsq
-                         */
-                        $nsq = make(Nsq::class, [$this->container, $config]);
-                        $redis = ( new Redis() );
-                        $redis->connect(
-                            $this->config->get('redis.default.host'),
-                            $this->config->get('redis.default.port')
-                        );
-                        /**
-                         * @var RedisLock $lock
-                         */
-                        $lock = make(RedisLock::class, [
-                            $redis,
-                        ]);
-                        switch ($type) {
-                        case 'task':
-                            $nsq->subscribe(
-                                self::TOPIC_PREFIX . $type,
-                                sprintf('Consumerd%s', $i),
-                                function (Message $data) use ($lock) {
-                                    /**
-                                     * @var JobInterface $job
-                                     */
-                                    $job = $this->serializer->deserialize($data->getBody(), JobInterface::class);
-                                    if (!$job) {
-                                        $this->stdoutLogger->error('Invalid task#');
+                        $consumer = match ( $type ) {
+                            'task' => $this->makeConsumer(TaskConsumer::class, self::TOPIC_PREFIX . $type, 'Consumerd'),
+                            'dag' => $this->makeConsumer(DagConsumer::class, self::TOPIC_PREFIX . $type, 'Consumerd')
+                        };
+                        try {
 
-                                        return Result::DROP;
-                                    }
-                                    if ($lock->lock($job->getIdentity())) {
-                                        try {
-                                            $this->process($job);
-                                        } catch (\Throwable $e) {
-                                            $this->stdoutLogger->error(sprintf(
-                                                'Uncaptured exception[%s:%s] detected in %s::%d.',
-                                                get_class($e),
-                                                $e->getMessage(),
-                                                $e->getFile(),
-                                                $e->getLine()
-                                            ), [
-                                                'driver' => get_class($job),
-                                            ]);
-                                        }
-                                        $lock->unlock($job->getIdentity());
+                        } catch (Throwable $e) {
 
-                                        return Result::ACK;
-                                    }
-
-                                    return Result::DROP;
-                                }
-                            );
-                            break;
-                        case 'dag':
-                            //TODO
-                    }
+                        }
                     }
                 );
             }
@@ -167,22 +127,28 @@ final class ConsumeJobCommand extends Command
         return Command::SUCCESS;
     }
 
-    protected function process(JobInterface $job): void
+
+    /**
+     * @param  string  $class
+     * @param  string  $topic
+     * @param  string  $channel
+     *
+     * @return AbstractConsumer
+     */
+    protected function makeConsumer (string $class, string $topic, string $channel): AbstractConsumer
     {
-        //TODO execute job
         /**
-         * @var Waiter $wait
+         * @var AbstractConsumer $consumer
          */
-        $wait = make(Waiter::class);
-        try {
-            $wait->wait(static fn () => $job->handle(), $job->getTimeout());
-        } catch (\Exception $e) {
-        }
+        $consumer = make($class);
+        $consumer->setTopic($topic);
+        $consumer->setChannel($channel);
+        return $consumer;
     }
 
-    protected function bootStrap(): void
+    protected function bootStrap (): void
     {
         KernelProvider::create(self::COMMADN_PROVIDER_NAME)
-            ->bootApp();
+                      ->bootApp();
     }
 }
