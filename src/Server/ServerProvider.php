@@ -115,7 +115,7 @@ class ServerProvider extends AbstractProvider
                                         $nsq = make(Nsq::class, [$this->container(), $config]);
                                         $string = (string) random_int(100000, 999999999);
                                         $this->stdoutLogger->debug('Publish ' . $string . PHP_EOL);
-                                        ($nsq->publish(ConsumeJobCommand::TOPIC, $string));
+                                        ($nsq->publish(ConsumeJobCommand::TOPIC_PREFIX, $string));
                                         ($nsq->publish(
                                             ConsumeJobCommand::TOPIC_PREFIX.'task',
                                             (string) random_int(10000, 90000),

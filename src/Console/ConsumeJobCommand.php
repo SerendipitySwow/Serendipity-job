@@ -85,21 +85,21 @@ final class ConsumeJobCommand extends Command
     public function __construct (ContainerInterface $container)
     {
         $this->container = $container;
+        parent::__construct();
+    }
+
+    public function handle (): int
+    {
         $this->bootStrap();
         $this->config = $this->container->get(ConfigInterface::class);
         $this->stdoutLogger = $this->container->get(StdoutLoggerInterface::class);
         $this->serializer = $this->container
             ->get(SymfonySerializer::class);
         $this->subscriber = make(Nsq::class, [
-            $container,
+            $this->container,
             $this->config->get('nsq.default')
         ]);
         $this->waiter = make(Waiter::class, [ 0 ]);
-        parent::__construct();
-    }
-
-    public function handle (): int
-    {
         $this->stdoutLogger->info('Consumer Task Successfully Processed#');
         $limit = $this->input->getOption('limit');
         $type = $this->input->getOption('type');
