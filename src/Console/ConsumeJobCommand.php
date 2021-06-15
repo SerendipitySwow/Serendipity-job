@@ -28,9 +28,14 @@ final class ConsumeJobCommand extends Command
 {
     public static $defaultName = 'scheduler:consume';
 
-    protected const COMMADN_PROVIDER_NAME = 'Consumer-Job';
+    protected const COMMADN_PROVIDER_NAME = 'Consumer-Job-';
 
-    public const TOPIC = 'serendipity-job';
+    protected const TASK_TYPE = [
+        'dag',
+        'task',
+    ];
+
+    public const TOPIC_PREFIX = 'serendipity-job';
 
     protected ?ConfigInterface $config = null;
 
@@ -44,10 +49,18 @@ final class ConsumeJobCommand extends Command
             ->setDescription('Consumes tasks')
             ->setDefinition([
                 new InputOption(
+                    'type',
+                    't',
+                    InputOption::VALUE_REQUIRED,
+                    'Select the type of task to be performed (dag, task)',
+                    'task'
+                ),
+                new InputOption(
                     'limit',
                     'l',
                     InputOption::VALUE_REQUIRED,
-                    'Configure the number of coroutines to process tasks'
+                    'Configure the number of coroutines to process tasks',
+                    1
                 ),
             ])
             ->setHelp(
@@ -57,6 +70,8 @@ final class ConsumeJobCommand extends Command
                         <info>php %command.full_name%</info>
 
                     Use the --limit option configure the number of coroutines to process tasks:
+                        <info>php %command.full_name% --limit=10</info>
+                    Use the --type option Select the type of task to be performed (dag, task):
                         <info>php %command.full_name% --limit=10</info>
                     EOF
             );
@@ -73,16 +88,21 @@ final class ConsumeJobCommand extends Command
         $this->bootStrap();
         $this->config = $this->container->get(ConfigInterface::class);
         $this->stdoutLogger = $this->container->get(StdoutLoggerInterface::class);
-        $this->stdoutLogger->debug('Consumer Task Successfully Processed#');
+        $this->stdoutLogger->info('Consumer Task Successfully Processed#');
         $this->serializer = $this->container
             ->get(SymfonySerializer::class);
         $limit = $this->input->getOption('limit');
-
+        $type = $this->input->getOption('type');
+        if (!in_array($type, self::TASK_TYPE, true)) {
+            $this->stdoutLogger->error('Invalid task parameters.');
+            exit();
+        }
         if ($limit !== null) {
             $config = $this->config
                 ->get('nsq.default');
             for ($i = 0; $i < $limit; $i++) {
-                Coroutine::run(function () use ($config, $i) {
+                Coroutine::run(
+                    function () use ($config, $i, $type) {
                     /**
                      * @var Nsq $nsq
                      */
@@ -98,39 +118,49 @@ final class ConsumeJobCommand extends Command
                     $lock = make(RedisLock::class, [
                         $redis,
                     ]);
+                    switch ($type) {
+                        case 'task':
+                            $nsq->subscribe(
+                                self::TOPIC_PREFIX . $type,
+                                sprintf('Consumerd%s', $i),
+                                function (Message $data) use ($lock) {
+                                    /**
+                                     * @var JobInterface $job
+                                     */
+                                    $job = $this->serializer->deserialize($data->getBody(), JobInterface::class);
+                                    if (!$job) {
+                                        $this->stdoutLogger->error('Invalid task#');
 
-                    $nsq->subscribe(self::TOPIC, sprintf('Consumerd%s', $i), function (Message $data) use ($lock) {
-                        /**
-                         * @var JobInterface $job
-                         */
-                        $job = $this->serializer->deserialize($data->getBody(), JobInterface::class);
-                        if (!$job) {
-                            $this->stdoutLogger->error('Invalid task#');
+                                        return Result::DROP;
+                                    }
+                                    if ($lock->lock($job->getIdentity())) {
+                                        try {
+                                            $this->process($job);
+                                        } catch (\Throwable $e) {
+                                            $this->stdoutLogger->error(sprintf(
+                                                'Uncaptured exception[%s:%s] detected in %s::%d.',
+                                                get_class($e),
+                                                $e->getMessage(),
+                                                $e->getFile(),
+                                                $e->getLine()
+                                            ), [
+                                                'driver' => get_class($job),
+                                            ]);
+                                        }
+                                        $lock->unlock($job->getIdentity());
 
-                            return Result::DROP;
-                        }
-                        if ($lock->lock($job->getIdentity())) {
-                            try {
-                                $this->process($job);
-                            } catch (\Throwable $e) {
-                                $this->stdoutLogger->error(sprintf(
-                                    'Uncaptured exception[%s:%s] detected in %s::%d.',
-                                    get_class($e),
-                                    $e->getMessage(),
-                                    $e->getFile(),
-                                    $e->getLine()
-                                ), [
-                                    'driver' => get_class($job),
-                                ]);
-                            }
-                            $lock->unlock($job->getIdentity());
+                                        return Result::ACK;
+                                    }
 
-                            return Result::ACK;
-                        }
-
-                        return Result::DROP;
-                    });
-                });
+                                    return Result::DROP;
+                                }
+                            );
+                            break;
+                        case 'dag':
+                            //TODO
+                    }
+                }
+                );
             }
         }
 
@@ -145,9 +175,7 @@ final class ConsumeJobCommand extends Command
          */
         $wait = make(Waiter::class);
         try {
-            $wait->wait(static function () use ($job) {
-                $job->handle();
-            }, $job->getTimeout());
+            $wait->wait(static fn () => $job->handle(), $job->getTimeout());
         } catch (\Exception $e) {
         }
     }
