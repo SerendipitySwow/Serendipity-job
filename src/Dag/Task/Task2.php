@@ -31,13 +31,13 @@ class Task2 implements DagInterface
         return $this->next;
     }
 
-    public function getIdentity (): int|string
+    public function getIdentity(): int | string
     {
-       return 2;
+        return 2;
     }
 
-    public function getTimeout (): int
+    public function getTimeout(): int
     {
-       return 5;
+        return 5;
     }
 }

@@ -31,12 +31,12 @@ class Task1 implements DagInterface
         return true;
     }
 
-    public function getIdentity (): int|string
+    public function getIdentity(): int | string
     {
         return 1;
     }
 
-    public function getTimeout (): int
+    public function getTimeout(): int
     {
         return 5;
     }

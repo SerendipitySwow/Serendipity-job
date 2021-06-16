@@ -118,8 +118,6 @@ LUA;
      * @param $key
      * @param $expire
      * @param $value
-     *
-     * @return mixed
      */
     private function getLock($key, $expire, $value): mixed
     {

@@ -1,11 +1,10 @@
 <?php
 /**
  * This file is part of Serendipity Job
- *
  * @license  https://github.com/Hyperf-Glory/Serendipity-job/blob/main/LICENSE
  */
 
-declare( strict_types = 1 );
+declare(strict_types=1);
 
 namespace Serendipity\Job\Contract;
 
@@ -18,14 +17,14 @@ interface DagInterface
      *
      * @return int|string
      */
-    public function getIdentity (): int|string;
+    public function getIdentity(): int | string;
 
     /**
      * Get dag action time
      */
-    public function getTimeout (): int;
+    public function getTimeout(): int;
 
-    public function Run (ConcurrentMySQLPattern $pattern): mixed;
+    public function Run(ConcurrentMySQLPattern $pattern): mixed;
 
-    public function isNext (): bool;
+    public function isNext(): bool;
 }
