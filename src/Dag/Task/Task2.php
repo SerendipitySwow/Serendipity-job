@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Dag\Task;
 
-use Serendipity\Job\Dag\Interfaces\DagInterface;
+use Serendipity\Job\Contract\DagInterface;
 use Serendipity\Job\Kernel\Concurrent\ConcurrentMySQLPattern;
 
 class Task2 implements DagInterface
@@ -29,5 +29,15 @@ class Task2 implements DagInterface
     public function isNext(): bool
     {
         return $this->next;
+    }
+
+    public function getIdentity (): int|string
+    {
+       return 2;
+    }
+
+    public function getTimeout (): int
+    {
+       return 5;
     }
 }
