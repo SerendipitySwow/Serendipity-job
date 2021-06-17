@@ -25,4 +25,9 @@ Run into the beauty of PHP8 and Swow
 4.SwowServer
 ```
 
+## Please note
+```
+1.传递的任务Task必须实现JobInterface
+2.不能包含资源对象.
+```
 ## Come on!
