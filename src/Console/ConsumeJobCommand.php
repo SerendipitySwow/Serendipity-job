@@ -92,7 +92,7 @@ final class ConsumeJobCommand extends Command
         $this->stdoutLogger = $this->container->get(StdoutLoggerInterface::class);
         $this->subscriber = make(Nsq::class, [
             $this->container,
-            $this->config->get('nsq.default'),
+            $this->config->get(sprintf('nsq.%s', 'default')),
         ]);
         $this->stdoutLogger->info('Consumer Task Successfully Processed#');
         $limit = $this->input->getOption('limit');

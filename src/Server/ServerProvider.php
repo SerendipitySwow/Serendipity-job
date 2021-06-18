@@ -118,7 +118,7 @@ class ServerProvider extends AbstractProvider
                                     {
                                         $config = $this->container()
                                             ->get(ConfigInterface::class)
-                                            ->get('nsq.default');
+                                            ->get(sprintf('nsq.%s', 'default'));
                                         /**
                                          * @var Nsq $nsq
                                          */
@@ -138,7 +138,7 @@ class ServerProvider extends AbstractProvider
                                     {
                                         $config = $this->container()
                                             ->get(ConfigInterface::class)
-                                            ->get('nsq.default');
+                                            ->get(sprintf('nsq.%s', 'default'));
                                         /**
                                          * @var Nsq $nsq
                                          */
