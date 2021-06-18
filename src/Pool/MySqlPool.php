@@ -16,7 +16,7 @@ use Serendipity\Job\Util\ApplicationContext;
 use Swow\Coroutine;
 use function Swow\defer;
 
-class MySqlPool
+class MySQLPool
 {
     protected static bool $init = false;
 
