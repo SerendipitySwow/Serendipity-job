@@ -13,7 +13,6 @@ use Hyperf\Engine\Coroutine;
 use Serendipity\Job\Kernel\Dag\Exception\InvalidArgumentException;
 use Serendipity\Job\Util\Concurrent;
 use Throwable;
-use function Serendipity\Job\Kernel\serendipity_call;
 
 class Dag implements Runner
 {
@@ -79,7 +78,7 @@ class Dag implements Runner
             $visited[$element->key] = new Channel();
             $concurrent->create(function () use ($queue, $visited, $element, &$results) {
                 try {
-                    $results[$element->key] = serendipity_call($element->value, [$results]);
+                    $results[$element->key] = call($element->value, [$results]);
                 } catch (Throwable $e) {
                     $queue->push($e);
                     throw $e;

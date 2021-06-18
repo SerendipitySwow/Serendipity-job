@@ -6,20 +6,25 @@
 
 declare(strict_types=1);
 
-use function Serendipity\Job\Kernel\serendipity_env;
-
 return [
     'default' => [
-        'host' => serendipity_env('DB_HOST', 'localhost'),
-        'port' => serendipity_env('DB_PORT', 3306),
-        'database' => serendipity_env('DB_DATABASE', 'hyperf'),
-        'username' => serendipity_env('DB_USERNAME', 'root'),
-        'password' => serendipity_env('DB_PASSWORD', ''),
-        'charset' => serendipity_env('DB_CHARSET', 'utf8'),
-        'collation' => serendipity_env('DB_COLLATION', 'utf8_unicode_ci'),
-        'prefix' => serendipity_env('DB_PREFIX', ''),
-        'maxSpareConns' => 5,
-        'maxConns' => 10,
+        'driver' => env('DB_DRIVER', 'mysql'),
+        'host' => env('DB_HOST', 'localhost'),
+        'port' => env('DB_PORT', 3306),
+        'database' => env('DB_DATABASE', 'hyperf'),
+        'username' => env('DB_USERNAME', 'root'),
+        'password' => env('DB_PASSWORD', ''),
+        'charset' => env('DB_CHARSET', 'utf8'),
+        'collation' => env('DB_COLLATION', 'utf8_unicode_ci'),
+        'prefix' => env('DB_PREFIX', ''),
+        'pool' => [
+            'min_connections' => 1,
+            'max_connections' => 10,
+            'connect_timeout' => 10.0,
+            'wait_timeout' => 3.0,
+            'heartbeat' => -1,
+            'max_idle_time' => (float) env('DB_MAX_IDLE_TIME', 60),
+        ],
         'options' => [
             // 框架默认配置
             PDO::ATTR_CASE => PDO::CASE_NATURAL,

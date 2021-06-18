@@ -19,7 +19,6 @@ use Psr\Log\LoggerInterface;
 use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\Logger\Exception\InvalidConfigException;
 use Serendipity\Job\Util\Arr;
-use function Serendipity\Job\Kernel\serendipity_make;
 
 class LoggerFactory
 {
@@ -49,7 +48,7 @@ class LoggerFactory
         $handlers = $this->handlers($config);
         $processors = $this->processors($config);
 
-        return serendipity_make(Logger::class, [
+        return make(Logger::class, [
             'name' => $name,
             'handlers' => $handlers,
             'processors' => $processors,
@@ -103,7 +102,7 @@ class LoggerFactory
 
         foreach ($config['processors'] ?? [] as $value) {
             if (is_array($value) && isset($value['class'])) {
-                $value = serendipity_make($value['class'], $value['constructor'] ?? []);
+                $value = make($value['class'], $value['constructor'] ?? []);
             }
 
             $result[] = $value;
@@ -135,14 +134,14 @@ class LoggerFactory
     protected function handler($class, $constructor, $formatterConfig): HandlerInterface
     {
         /** @var HandlerInterface $handler */
-        $handler = serendipity_make($class, $constructor);
+        $handler = make($class, $constructor);
 
         if ($handler instanceof FormattableHandlerInterface) {
             $formatterClass = $formatterConfig['class'];
             $formatterConstructor = $formatterConfig['constructor'];
 
             /** @var FormatterInterface $formatter */
-            $formatter = serendipity_make($formatterClass, $formatterConstructor);
+            $formatter = make($formatterClass, $formatterConstructor);
 
             $handler->setFormatter($formatter);
         }

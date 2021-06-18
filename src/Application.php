@@ -18,7 +18,6 @@ use Swow\Debug\Debugger;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\FileLocatorInterface;
 use Symfony\Component\Console\Application as SymfonyApplication;
-use function Serendipity\Job\Kernel\serendipity_env;
 
 final class Application extends SymfonyApplication
 {
@@ -68,7 +67,7 @@ final class Application extends SymfonyApplication
 
     protected function debug(): void
     {
-        if (serendipity_env('DEBUG')) {
+        if (env('DEBUG')) {
             Debugger::runOnTTY('serendipity-job');
         }
     }

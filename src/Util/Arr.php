@@ -11,8 +11,6 @@ namespace Serendipity\Job\Util;
 use ArrayAccess;
 use InvalidArgumentException;
 use JetBrains\PhpStorm\Pure;
-use function Serendipity\Job\Kernel\serendipity_data_get;
-use function Serendipity\Job\Kernel\serendipity_value;
 
 /**
  * Most of the methods in this file come from illuminate/support,
@@ -141,7 +139,7 @@ class Arr
     {
         if (is_null($callback)) {
             if (empty($array)) {
-                return serendipity_value($default);
+                return value($default);
             }
             foreach ($array as $item) {
                 return $item;
@@ -153,7 +151,7 @@ class Arr
             }
         }
 
-        return serendipity_value($default);
+        return value($default);
     }
 
     /**
@@ -162,7 +160,7 @@ class Arr
     public static function last(array $array, callable $callback = null, mixed $default = null)
     {
         if (is_null($callback)) {
-            return empty($array) ? serendipity_value($default) : end($array);
+            return empty($array) ? value($default) : end($array);
         }
 
         return static::first(array_reverse($array, true), $callback, $default);
@@ -232,7 +230,7 @@ class Arr
     public static function get(ArrayAccess | array $array, int | string $key = null, mixed $default = null): mixed
     {
         if (!static::accessible($array)) {
-            return serendipity_value($default);
+            return value($default);
         }
         if (is_null($key)) {
             return $array;
@@ -241,13 +239,13 @@ class Arr
             return $array[$key];
         }
         if (!is_string($key) || !str_contains($key, '.')) {
-            return $array[$key] ?? serendipity_value($default);
+            return $array[$key] ?? value($default);
         }
         foreach (explode('.', $key) as $segment) {
             if (static::accessible($array) && static::exists($array, $segment)) {
                 $array = $array[$segment];
             } else {
-                return serendipity_value($default);
+                return value($default);
             }
         }
 
@@ -321,14 +319,14 @@ class Arr
         $results = [];
         [ $value, $key ] = static::explodePluckParameters($value, $key);
         foreach ($array as $item) {
-            $itemValue = serendipity_data_get($item, $value);
+            $itemValue = data_get($item, $value);
             // If the key is "null", we will just append the value to the array and keep
             // looping. Otherwise we will key the array using the value of the key we
             // received from the developer. Then we'll return the final array form.
             if (is_null($key)) {
                 $results[] = $itemValue;
             } else {
-                $itemKey = serendipity_data_get($item, $key);
+                $itemKey = data_get($item, $key);
                 if (is_object($itemKey) && method_exists($itemKey, '__toString')) {
                     $itemKey = (string) $itemKey;
                 }
