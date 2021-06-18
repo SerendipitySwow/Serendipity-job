@@ -22,7 +22,7 @@ class Waiter
 
     public function __construct(int $timeout = 10)
     {
-        $this->popTimeout = $timeout;
+        $this->popTimeout = $timeout * 1000;
     }
 
     /**

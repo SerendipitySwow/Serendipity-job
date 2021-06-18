@@ -165,39 +165,58 @@ class ServerProvider extends AbstractProvider
                                         $a = Vertex::make(function () {
                                             sleep(1);
                                             echo "A\n";
-                                        });
-                                        $b = Vertex::make(function () {
+
+                                            return 'A';
+                                        }, 2000);
+                                        $b = Vertex::make(function ($results) use ($a) {
                                             sleep(1);
                                             echo "B\n";
-                                        });
+                                            echo $results[$a->key] . PHP_EOL;
+
+                                            return 'B';
+                                        }, 2000);
                                         $c = Vertex::make(function () {
                                             sleep(1);
                                             echo "C\n";
-                                        });
+
+                                            return "C\n";
+                                        }, 2000);
                                         $d = Vertex::make(function () {
                                             sleep(1);
                                             echo "D\n";
-                                        });
+
+                                            return "D\n";
+                                        }, 2000);
                                         $e = Vertex::make(function () {
                                             sleep(1);
                                             echo "E\n";
-                                        });
+
+                                            return "E\n";
+                                        }, 2000);
                                         $f = Vertex::make(function () {
                                             sleep(1);
                                             echo "F\n";
-                                        });
+
+                                            return "F\n";
+                                        }, 2000);
                                         $g = Vertex::make(function () {
                                             sleep(1);
                                             echo "G\n";
-                                        });
+
+                                            return "G\n";
+                                        }, 2000);
                                         $h = Vertex::make(function () {
                                             sleep(1);
                                             echo "H\n";
-                                        });
+
+                                            return "H\n";
+                                        }, 2000);
                                         $i = Vertex::make(function () {
                                             sleep(1);
                                             echo "I\n";
-                                        });
+
+                                            return "I\n";
+                                        }, 2000);
                                         $dag->addVertex($a)
                                             ->addVertex($b)
                                             ->addVertex($c)
@@ -220,8 +239,7 @@ class ServerProvider extends AbstractProvider
                                             ->addEdge($e, $i)
                                             ->addEdge($f, $i)
                                             ->addEdge($g, $i);
-                                        $dag->run();
-
+                                       $arr = $dag->run();
                                         break;
                                     }
                                     ## serializable

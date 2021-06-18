@@ -29,5 +29,6 @@ Run into the beauty of PHP8 and Swow
 ```
 1.传递的任务Task必须实现JobInterface
 2.不能包含资源对象.
+3.Swow/channel push 和pop 都是毫秒.任务都可以支持毫秒.以后必须要注意.
 ```
 ## Come on!

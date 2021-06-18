@@ -12,6 +12,7 @@ use Hyperf\Engine\Channel;
 use Hyperf\Engine\Coroutine;
 use Serendipity\Job\Kernel\Dag\Exception\InvalidArgumentException;
 use Serendipity\Job\Util\Concurrent;
+use Serendipity\Job\Util\Waiter;
 use Throwable;
 
 class Dag implements Runner
@@ -22,6 +23,8 @@ class Dag implements Runner
     protected array $vertexes = [];
 
     protected int $concurrency = 10;
+
+    protected ?Waiter $waiter = null;
 
     /**
      * Add a vertex to the dag.
@@ -52,10 +55,11 @@ class Dag implements Runner
      * @param array $args while using the nested dag, $args contains results from the parent dag.
      *                    in other cases, args can be used to modify dag behavior at run time.
      *
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function run(array $args = []): array
     {
+        $this->waiter = make(Waiter::class);
         $queue = new Channel(1);
         Coroutine::create(function () use ($queue) {
             $this->buildInitialQueue($queue);
@@ -64,7 +68,7 @@ class Dag implements Runner
         $total = count($this->vertexes);
         $visited = [];
         $results = $args;
-        $concurrent = new Concurrent($this->concurrency);
+        # $concurrent = new Concurrent($this->concurrency);
 
         while (count($visited) < $total) {
             $element = $queue->pop();
@@ -76,7 +80,7 @@ class Dag implements Runner
             }
             // this channel will be closed after the completion of the corresponding task.
             $visited[$element->key] = new Channel();
-            $concurrent->create(function () use ($queue, $visited, $element, &$results) {
+            $this->waiter->wait(function () use ($queue, $visited, $element, &$results) {
                 try {
                     $results[$element->key] = call($element->value, [$results]);
                 } catch (Throwable $e) {
@@ -90,8 +94,28 @@ class Dag implements Runner
                 Coroutine::create(function () use ($element, $queue, $visited) {
                     $this->scheduleChildren($element, $queue, $visited);
                 });
+            }, $element->timeout);
+            /*
+            $concurrent->create(function () use ($queue, $visited, $element, &$results) {
+                try {
+                    $results[$element->key] = $this->waiter->wait(function () use ($element, $results) {
+                        return call($element->value, [$results]);
+                    }, $element->timeout);
+                } catch (Throwable $e) {
+                    $queue->push($e);
+                    throw $e;
+                }
+                $visited[$element->key]->close();
+                if (empty($element->children)) {
+                    return;
+                }
+                Coroutine::create(function () use ($element, $queue, $visited) {
+                    $this->scheduleChildren($element, $queue, $visited);
+                });
             });
+            */
         }
+
         // wait for all pending tasks to resolve
         foreach ($visited as $element) {
             $element->pop();

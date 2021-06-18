@@ -14,6 +14,8 @@ class Vertex
 {
     public ?string $key = '';
 
+    public ?int $timeout = 0;
+
     /**
      * @var callable
      */
@@ -29,7 +31,7 @@ class Vertex
      */
     public array $children = [];
 
-    public static function make(callable $job, string $key = null): self
+    public static function make(callable $job, int $timeout = 5, string $key = null, ): self
     {
         $closure = \Closure::fromCallable($job);
         if ($key === null) {
@@ -38,6 +40,7 @@ class Vertex
 
         $v = new self();
         $v->key = $key;
+        $v->timeout = $timeout;
         $v->value = $closure;
 
         return $v;
@@ -46,7 +49,8 @@ class Vertex
     #[Pure]
     public static function of(
         Runner $job,
-        string $key = null
+        int $timeout = 5,
+        string $key = null,
     ): self {
         if ($key === null) {
             $key = spl_object_hash($job);
@@ -55,6 +59,7 @@ class Vertex
         $v = new self();
         $v->key = $key;
         $v->value = [$job, 'run'];
+        $v->timeout = $timeout;
 
         return $v;
     }
