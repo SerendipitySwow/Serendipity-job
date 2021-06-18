@@ -5,41 +5,52 @@
  */
 
 declare(strict_types=1);
+/**
+ * This file is part of Hyperf.
+ *
+ * @see     https://www.hyperf.io
+ * @document https://hyperf.wiki
+ * @contact  group@hyperf.io
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
-namespace Serendipity\Job\Pool\Db;
+namespace Serendipity\Job\Db\Pool;
 
-use Hyperf\Contract\ConnectionInterface;
-use Hyperf\Pool\Pool as AbstractPool;
+use Hyperf\Pool\Pool as HyperfPool;
+use Hyperf\Utils\Arr;
 use Psr\Container\ContainerInterface;
 use Serendipity\Job\Contract\ConfigInterface;
-use Serendipity\Job\Util\Arr;
+use Serendipity\Job\Db\Frequency;
 
-class Pool extends AbstractPool
+abstract class Pool extends HyperfPool
 {
     protected string $name;
 
-    protected $config;
+    protected array $config;
 
     public function __construct(ContainerInterface $container, string $name)
     {
-        $this->name = $name;
         $config = $container->get(ConfigInterface::class);
-        $key = sprintf('databases.%s', $this->name);
+        $key = sprintf('db.%s', $name);
         if (!$config->has($key)) {
             throw new \InvalidArgumentException(sprintf('config[%s] is not exist!', $key));
         }
-        // Rewrite the `name` of the configuration item to ensure that the model query builder gets the right connection.
-        $config->set("{$key}.name", $name);
 
+        $this->name = $name;
         $this->config = $config->get($key);
         $options = Arr::get($this->config, 'pool', []);
-
         $this->frequency = make(Frequency::class, [$this]);
+
         parent::__construct($container, $options);
     }
 
-    protected function createConnection(): ConnectionInterface
+    public function getName(): string
     {
-        return new Connection($this->container, $this, $this->config);
+        return $this->name;
+    }
+
+    public function getConfig(): array
+    {
+        return $this->config;
     }
 }

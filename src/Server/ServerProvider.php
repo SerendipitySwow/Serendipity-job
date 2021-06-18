@@ -13,6 +13,7 @@ use Serendipity\Job\Console\ConsumeJobCommand;
 use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\Contract\LoggerInterface;
 use Serendipity\Job\Contract\StdoutLoggerInterface;
+use Serendipity\Job\Db\DB;
 use Serendipity\Job\Kernel\Dag\Dag;
 use Serendipity\Job\Kernel\Dag\Vertex;
 use Serendipity\Job\Kernel\Lock\RedisLock;
@@ -88,6 +89,13 @@ class ServerProvider extends AbstractProvider
                                         ));
                                         break;
                                     }
+                                    case '/db':
+                                    {
+                                        $db = $this->container()->get(DB::class);
+                                       $res = $db->query('select * from  `task`');
+                                        $session->respond(json_encode($res, JSON_THROW_ON_ERROR));
+                                        break;
+                                    }
                                     case '/lock':
                                     {
                                         $redis = new \Redis();
@@ -105,6 +113,7 @@ class ServerProvider extends AbstractProvider
                                         $session->respond('Hello Lock failed!');
                                         break;
                                     }
+
                                     case '/nsq/publish':
                                     {
                                         $config = $this->container()
@@ -239,7 +248,7 @@ class ServerProvider extends AbstractProvider
                                             ->addEdge($e, $i)
                                             ->addEdge($f, $i)
                                             ->addEdge($g, $i);
-                                       $arr = $dag->run();
+                                        $arr = $dag->run();
                                         break;
                                     }
                                     ## serializable

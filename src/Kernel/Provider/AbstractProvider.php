@@ -47,7 +47,7 @@ abstract class AbstractProvider implements ProviderContract
         echo __METHOD__;
     }
 
-    protected function initApplication(): void
+    private function initApplication(): void
     {
         static::$providers = ProviderConfig::load();
     }

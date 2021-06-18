@@ -29,6 +29,8 @@ class ConcurrentMySQLPattern
      */
     protected ?Channel $chan;
 
+    protected bool $transaction = false;
+
     protected LoggerInterface $logger;
 
     public function __construct(PDO $PDO, LoggerInterface $logger)
@@ -135,7 +137,9 @@ class ConcurrentMySQLPattern
         if (!$this->chan) {
             $this->loop();
         }
-
+        if ($this->getPDO()->inTransaction()) {
+            $this->logger->error('Maybe you\'ve forgotten to commit or rollback the MySQL transaction.');
+        }
         $this->chan->push(function () {
             $this->PDO = null;
         });
