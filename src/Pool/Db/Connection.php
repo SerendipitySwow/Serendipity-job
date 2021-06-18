@@ -80,6 +80,7 @@ class Connection extends BaseConnection
     public function close(): bool
     {
         $this->connection = null;
+        $this->transaction = false;
         unset($this->connection);
 
         return true;
@@ -103,5 +104,10 @@ class Connection extends BaseConnection
     public function isTransaction(): bool
     {
         return $this->transaction;
+    }
+
+    public function rollback($rollback): void
+    {
+        $this->setTransaction((bool) $rollback);
     }
 }
