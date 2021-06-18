@@ -19,6 +19,7 @@ namespace Serendipity\Job\Pool\Db;
 use Hyperf\Contract\ConnectionInterface;
 use Hyperf\Pool\Connection as BaseConnection;
 use Hyperf\Pool\Exception\ConnectionException;
+use PDO;
 use Psr\Container\ContainerInterface;
 use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Serendipity\Job\Pool\Db\Pool as DbPool;
@@ -30,7 +31,7 @@ class Connection extends BaseConnection
      */
     protected $pool;
 
-    protected ?ConnectionInterface $connection = null;
+    protected ?PDO $connection = null;
 
     protected array $config;
 
@@ -68,8 +69,8 @@ class Connection extends BaseConnection
     public function reconnect(): bool
     {
         $this->close();
-
-        $this->connection = '';
+        $connector = new MySqlConnector();
+        $this->connection = $connector->connect($this->config);
 
         $this->lastUseTime = microtime(true);
 
@@ -78,6 +79,7 @@ class Connection extends BaseConnection
 
     public function close(): bool
     {
+        $this->connection = null;
         unset($this->connection);
 
         return true;
