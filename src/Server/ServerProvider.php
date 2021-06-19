@@ -8,11 +8,13 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Server;
 
+use Carbon\Carbon;
 use Hyperf\Engine\Channel;
 use Serendipity\Job\Console\ConsumeJobCommand;
 use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\Contract\LoggerInterface;
 use Serendipity\Job\Contract\StdoutLoggerInterface;
+use Serendipity\Job\Dag\Task\Task1;
 use Serendipity\Job\Db\DB;
 use Serendipity\Job\Kernel\Dag\Dag;
 use Serendipity\Job\Kernel\Dag\Vertex;
@@ -91,9 +93,25 @@ class ServerProvider extends AbstractProvider
                                     }
                                     case '/db':
                                     {
-                                        $db = $this->container()->get(DB::class);
-                                       $res = $db->query('select * from  `task`');
-                                        $session->respond(json_encode($res, JSON_THROW_ON_ERROR));
+                                        $content = [
+                                            'class' => Task1::class,
+                                            'params' => [
+                                                'startDate' => Carbon::now()->subDays(10)->toDateString(),
+                                                'endDate' => Carbon::now()->toDateString(),
+                                            ],
+                                        ];
+                                        echo json_encode($content);
+//                                        $db = $this->container()->get(DB::class);
+//                                       $res = $db->query('select * from  `task`');
+                                        $tasks = DB::query(
+                                            'select `task_id` from vertex_edge where workflow_id = ?;',
+                                            [1]
+                                        );
+                                        $task = DB::query(
+                                            'select * from task where id in (?);',
+                                            [implode(',', array_column($tasks, 'task_id'))]
+                                        );
+                                        $session->respond(json_encode($task, JSON_THROW_ON_ERROR));
                                         break;
                                     }
                                     case '/lock':

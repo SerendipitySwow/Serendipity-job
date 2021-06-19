@@ -21,10 +21,8 @@ class Task3 implements DagInterface
     /**
      * {@inheritDoc}
      */
-    public function Run(ConcurrentMySQLPattern $pattern): mixed
+    public function Run(): mixed
     {
-        var_dump($pattern->getPDO()
-            ->commit());
     }
 
     public function isNext(): bool
@@ -40,5 +38,10 @@ class Task3 implements DagInterface
     public function getTimeout(): int
     {
         return 5;
+    }
+
+    public function runConcurrentMySQLPattern(ConcurrentMySQLPattern $pattern): mixed
+    {
+        // TODO: Implement runConcurrentMySQLPattern() method.
     }
 }

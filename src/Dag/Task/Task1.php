@@ -16,14 +16,11 @@ class Task1 implements DagInterface
     /**
      * {@inheritDoc}
      */
-    public function Run(ConcurrentMySQLPattern $pattern): int | bool
+    public function run(): int | bool
     {
         $start = random_int(1, 999);
         $end = random_int(999, 99999);
         $sqlquery = "INSERT INTO `edge` (`start_vertex`,`end_vertex`) VALUES ({$start},{$end})";
-
-        return $pattern->getPDO()
-            ->exec($sqlquery);
     }
 
     public function isNext(): bool
@@ -39,5 +36,10 @@ class Task1 implements DagInterface
     public function getTimeout(): int
     {
         return 5;
+    }
+
+    public function runConcurrentMySQLPattern(ConcurrentMySQLPattern $pattern): mixed
+    {
+        // TODO: Implement runConcurrentMySQLPattern() method.
     }
 }

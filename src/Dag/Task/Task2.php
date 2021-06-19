@@ -18,12 +18,9 @@ class Task2 implements DagInterface
     /**
      * {@inheritDoc}
      */
-    public function Run(ConcurrentMySQLPattern $pattern): int | bool
+    public function run(): int | bool
     {
         $sqlquery = 'DELETE FROM `edge` WHERE `edge_id` = 23';
-
-        return $pattern->getPDO()
-            ->exec($sqlquery);
     }
 
     public function isNext(): bool
@@ -39,5 +36,10 @@ class Task2 implements DagInterface
     public function getTimeout(): int
     {
         return 5;
+    }
+
+    public function runConcurrentMySQLPattern(ConcurrentMySQLPattern $pattern): mixed
+    {
+        // TODO: Implement runConcurrentMySQLPattern() method.
     }
 }

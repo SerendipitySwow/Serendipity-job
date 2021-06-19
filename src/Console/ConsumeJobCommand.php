@@ -54,7 +54,7 @@ final class ConsumeJobCommand extends Command
                     'type',
                     't',
                     InputOption::VALUE_REQUIRED,
-                    'Select the type of task to be performed (dag, task)',
+                    'Select the type of task to be performed (dag, task),',
                     'task'
                 ),
                 new InputOption(
@@ -73,7 +73,7 @@ final class ConsumeJobCommand extends Command
 
                     Use the --limit option configure the number of coroutines to process tasks:
                         <info>php %command.full_name% --limit=10</info>
-                    Use the --type option Select the type of task to be performed (dag, task):
+                    Use the --type option Select the type of task to be performed (dag, task),If you choose dag, limit is best configured to 1:
                         <info>php %command.full_name% --limit=10</info>
                     EOF
             );
