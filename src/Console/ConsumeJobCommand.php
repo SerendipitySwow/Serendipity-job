@@ -111,7 +111,7 @@ final class ConsumeJobCommand extends Command
                         };
                         $this->subscriber->subscribe(
                             self::TOPIC_PREFIX . $type,
-                            'Consumerd' . $i,
+                            ucfirst($type) . 'Consumerd' . $i,
                             function (Message $message) use ($consumer, $i) {
                                 try {
                                     $result = $consumer->consume($message);
