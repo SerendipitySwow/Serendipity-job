@@ -49,11 +49,10 @@ Coroutine::run(function () use ($wr, $packer, $serializer) {
                     $packet = $packer->unpack($data);
                     if (!$packet->getId()) {
                         echo '发生了错误';
-                        echo PHP_EOL;
                     } else {
                         echo 'success#';
-                        echo PHP_EOL;
                     }
+                    echo PHP_EOL;
                 }
             });
         }

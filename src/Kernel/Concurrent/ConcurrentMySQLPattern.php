@@ -9,11 +9,11 @@ declare(strict_types=1);
 namespace Serendipity\Job\Kernel\Concurrent;
 
 use Hyperf\Engine\Channel;
-use Hyperf\Utils\Coordinator\Constants;
-use Hyperf\Utils\Coordinator\CoordinatorManager;
 use PDO;
 use Psr\Log\LoggerInterface;
 use Serendipity\job\Kernel\Concurrent\Exception\MySQLRuntimeException;
+use Serendipity\Job\Util\Coordinator\Constants;
+use Serendipity\Job\Util\Coordinator\CoordinatorManager;
 use Serendipity\Job\Util\Coroutine;
 use Throwable;
 
@@ -72,10 +72,7 @@ class ConcurrentMySQLPattern
         if (!isset($once)) {
             $once = true;
             Coroutine::create(function () {
-                ## TODO 添加协程监听
-                /*
-                CoordinatorManager::until(Constants::WORKER_EXIT)->yield();
-                */
+                CoordinatorManager::until(Constants::COMMADN_EXIT)->yield();
                 if ($this->chan) {
                     $this->chan->close();
                 }
