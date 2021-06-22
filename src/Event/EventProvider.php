@@ -8,14 +8,26 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Event;
 
+use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\Contract\EventDispatcherInterface;
 use Serendipity\Job\Kernel\Provider\AbstractProvider;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class EventProvider extends AbstractProvider
 {
     public function bootApp(): void
     {
+        $dispatcher = new EventDispatcher();
         $this->container()
-            ->set(EventDispatcherInterface::class, new EventDispatcher());
+            ->set(EventDispatcherInterface::class, $dispatcher);
+        $config = $this->container()
+            ->get(ConfigInterface::class);
+        $subscribers = $config->get('subscribers');
+        foreach ($subscribers as $subscriber) {
+            $subscriber = new $subscriber();
+            if ($subscriber instanceof EventSubscriberInterface) {
+                $dispatcher->addSubscriber($subscriber);
+            }
+        }
     }
 }

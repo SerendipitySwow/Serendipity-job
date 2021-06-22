@@ -12,10 +12,12 @@ use Carbon\Carbon;
 use Hyperf\Engine\Channel;
 use Serendipity\Job\Console\ConsumeJobCommand;
 use Serendipity\Job\Contract\ConfigInterface;
+use Serendipity\Job\Contract\EventDispatcherInterface;
 use Serendipity\Job\Contract\LoggerInterface;
 use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Serendipity\Job\Dag\Task\Task1;
 use Serendipity\Job\Db\DB;
+use Serendipity\Job\Event\UpdateJobEvent;
 use Serendipity\Job\Kernel\Dag\Dag;
 use Serendipity\Job\Kernel\Dag\Vertex;
 use Serendipity\Job\Kernel\Lock\RedisLock;
@@ -112,6 +114,15 @@ class ServerProvider extends AbstractProvider
                                             [implode(',', array_column($tasks, 'task_id'))]
                                         );
                                         $session->respond(json_encode($task, JSON_THROW_ON_ERROR));
+                                        break;
+                                    }
+                                    case '/event':
+                                    {
+                                        //TODO 待测试event
+                                        $event = new UpdateJobEvent(new class() {
+                                            public int $taskId = 1;
+                                        });
+                                        $this->container()->get(EventDispatcherInterface::class)->dispatch($event, UpdateJobEvent::UPDATE_JOB);
                                         break;
                                     }
                                     case '/lock':

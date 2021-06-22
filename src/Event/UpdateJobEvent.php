@@ -8,8 +8,14 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Event;
 
-use Serendipity\Job\Contract\EventDispatcherInterface;
-
-class EventDispatcher extends \Symfony\Component\EventDispatcher\EventDispatcher implements EventDispatcherInterface
+class UpdateJobEvent
 {
+    public object $job;
+
+    public const UPDATE_JOB = 'update-job';
+
+    public function __construct(object $job)
+    {
+        $this->job = $job;
+    }
 }
