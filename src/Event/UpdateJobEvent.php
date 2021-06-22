@@ -10,12 +10,15 @@ namespace Serendipity\Job\Event;
 
 class UpdateJobEvent
 {
-    public object $job;
+    public int $id;
+
+    public int $status;
 
     public const UPDATE_JOB = 'update-job';
 
-    public function __construct(object $job)
+    public function __construct(int $id, int $status)
     {
-        $this->job = $job;
+        $this->id = $id;
+        $this->status = $status;
     }
 }

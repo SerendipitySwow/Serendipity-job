@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Serendipity\Job\Subscriber;
 
 use JetBrains\PhpStorm\ArrayShape;
+use Serendipity\Job\Db\DB;
 use Serendipity\Job\Event\UpdateJobEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -24,6 +25,6 @@ class UpdateJobSubscriber implements EventSubscriberInterface
 
     public function onUpdateJob(UpdateJobEvent $event): void
     {
-        dump($event);
+        DB::execute('update task status = ?  where id = ?;', [$this->status, $this->id]);
     }
 }
