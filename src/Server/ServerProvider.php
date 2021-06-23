@@ -119,7 +119,6 @@ class ServerProvider extends AbstractProvider
                                     }
                                     case '/event':
                                     {
-                                        //TODO 待测试event
                                         $event = new UpdateJobEvent(1, 2);
                                         $this->container()->get(EventDispatcherInterface::class)->dispatch($event, UpdateJobEvent::UPDATE_JOB);
                                         break;

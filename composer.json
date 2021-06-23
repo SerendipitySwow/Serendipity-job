@@ -45,12 +45,12 @@
         "multiplex/multiplex": "^0.3.1",
         "ext-bcmath": "*",
         "hyperf/di": "2.2.x-dev",
-        "serendipity-swow/nsq": "^0.2.0",
         "serendipity-swow/sockets": "^0.2.0",
         "nesbot/carbon": "^2.49",
         "hyperf/pool": "^2.1",
         "hyperf/redis": "^2.1",
-        "guzzlehttp/guzzle": "^7.3"
+        "guzzlehttp/guzzle": "^7.3",
+        "serendipity-swow/nsq": "^0.4.0"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",
