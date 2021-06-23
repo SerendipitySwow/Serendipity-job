@@ -17,6 +17,7 @@ use Serendipity\Job\Contract\LoggerInterface;
 use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Serendipity\Job\Dag\Task\Task1;
 use Serendipity\Job\Db\DB;
+use Serendipity\Job\Dingtalk\DingTalk;
 use Serendipity\Job\Event\UpdateJobEvent;
 use Serendipity\Job\Kernel\Dag\Dag;
 use Serendipity\Job\Kernel\Dag\Vertex;
@@ -121,6 +122,12 @@ class ServerProvider extends AbstractProvider
                                         //TODO 待测试event
                                         $event = new UpdateJobEvent(1, 2);
                                         $this->container()->get(EventDispatcherInterface::class)->dispatch($event, UpdateJobEvent::UPDATE_JOB);
+                                        break;
+                                    }
+                                    case '/ding':
+                                    {
+                                        make(DingTalk::class)->at(['13888888888'], true)
+                                            ->text('我就是我,@13888888888 是不一样的烟火');
                                         break;
                                     }
                                     case '/lock':
