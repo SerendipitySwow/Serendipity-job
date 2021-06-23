@@ -22,6 +22,7 @@ use Hyperf\Pool\Pool;
 use PDO;
 use PDOStatement;
 use Psr\Container\ContainerInterface;
+use Throwable;
 
 class PDOConnection extends AbstractConnection
 {
@@ -80,8 +81,8 @@ class PDOConnection extends AbstractConnection
         $password = $this->config['password'];
         $dsn = $this->buildDsn($this->config);
         try {
-            $pdo = new \PDO($dsn, $username, $password, $this->config['options']);
-        } catch (\Throwable $e) {
+            $pdo = new PDO($dsn, $username, $password, $this->config['options']);
+        } catch (Throwable $e) {
             throw new ConnectionException('Connection reconnect failed.:' . $e->getMessage());
         }
 

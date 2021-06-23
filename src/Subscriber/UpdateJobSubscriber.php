@@ -25,6 +25,6 @@ class UpdateJobSubscriber implements EventSubscriberInterface
 
     public function onUpdateJob(UpdateJobEvent $event): void
     {
-        DB::execute('update task status = ?  where id = ?;', [$this->status, $this->id]);
+        DB::execute(sprintf('update task set  status = %s where id = %s;', $event->status, $event->id));
     }
 }

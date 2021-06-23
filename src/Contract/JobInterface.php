@@ -55,6 +55,8 @@ interface JobInterface
 
     public function IncreaseCounter(int $attempt = 1): mixed;
 
+    public function getStep(): int;
+
     /**
      * Get the number of retries
      */
