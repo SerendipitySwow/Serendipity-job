@@ -160,6 +160,20 @@ final class ConsumeJobCommand extends Command
                                     case '/cancel':
                                         $params = $request->getQueryParams();
                                         $coroutine = Coroutine::get((int) $params['id']);
+                                        $buffer = new Buffer();
+                                        $response = new HttpServer\Response();
+                                        $response->setStatus(Status::OK);
+                                        $response->setHeader('Server', 'Serendipity-Job');
+                                        if (!$coroutine instanceof Coroutine) {
+                                            $buffer->write(json_encode([
+                                                'code' => 1,
+                                                'msg' => 'Unknown!',
+                                                'data' => [],
+                                            ], JSON_THROW_ON_ERROR));
+                                            $response->setBody($buffer);
+                                            $session->sendHttpResponse($response);
+                                            break;
+                                        }
                                         if ($coroutine === Coroutine::getCurrent()) {
                                             $session->respond(json_encode([
                                                 'code' => 1,
@@ -168,28 +182,32 @@ final class ConsumeJobCommand extends Command
                                             ], JSON_THROW_ON_ERROR));
                                             break;
                                         }
-                                        if ($coroutine?->getState() === $coroutine::STATE_LOCKED) {
-                                            $session->respond(json_encode([
+                                        if ($coroutine->getState() === $coroutine::STATE_LOCKED) {
+                                            $buffer->write(json_encode([
                                                 'code' => 1,
                                                 'msg' => 'coroutine block object locked	!',
                                                 'data' => [],
                                             ], JSON_THROW_ON_ERROR));
+                                            $response->setBody($buffer);
+                                            $session->sendHttpResponse($response);
                                             break;
                                         }
-                                        $coroutine?->kill();
-                                        if ($coroutine?->isAvailable()) {
-                                            $session->respond(json_encode([
+                                        $coroutine->kill();
+                                        if ($coroutine->isAvailable()) {
+                                            $buffer->write(json_encode([
                                                 'code' => 1,
                                                 'msg' => 'Not fully killed, try again later...',
                                                 'data' => [],
                                             ], JSON_THROW_ON_ERROR));
                                         } else {
-                                            $session->respond(json_encode([
+                                            $buffer->write(json_encode([
                                                 'code' => 0,
                                                 'msg' => 'Killed',
                                                 'data' => [],
                                             ], JSON_THROW_ON_ERROR));
                                         }
+                                        $response->setBody($buffer);
+                                        $session->sendHttpResponse($response);
                                         break;
                                     default:
                                     {
