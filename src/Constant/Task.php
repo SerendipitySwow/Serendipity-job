@@ -11,4 +11,12 @@ namespace Serendipity\Job\Constant;
 class Task
 {
     public const TASK_SUCCESS = 2;
+
+    public const TASK_ING = 1;
+
+    public const TASK_TODO = 0;
+
+    public const TASK_CANCEL = 3;
+
+    public const TASK_ERROR = 4;
 }
