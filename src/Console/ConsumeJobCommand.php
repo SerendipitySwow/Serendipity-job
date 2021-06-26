@@ -122,6 +122,7 @@ final class ConsumeJobCommand extends Command
         $limit = $this->input->getOption('limit');
         $type = $this->input->getOption('type');
         $port = (int) $this->input->getOption('port');
+        $host = $this->input->getOption('host');
         if (!in_array($type, self::TASK_TYPE, true)) {
             $this->stdoutLogger->error('Invalid task parameters.');
             exit();
@@ -134,7 +135,7 @@ final class ConsumeJobCommand extends Command
         }
 
         $server = new HttpServer();
-        $server->bind('0.0.0.0', $port)
+        $server->bind($host, $port)
             ->listen();
         while (true) {
             try {
