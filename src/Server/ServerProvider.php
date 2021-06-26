@@ -149,6 +149,7 @@ class ServerProvider extends AbstractProvider
 
                                     case '/nsq/publish':
                                     {
+                                        //TODO 2021-06-27 测试nsq 推送任务
                                         $config = $this->container()
                                             ->get(ConfigInterface::class)
                                             ->get(sprintf('nsq.%s', 'default'));

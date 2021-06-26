@@ -8,10 +8,13 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Console;
 
+use Carbon\Carbon;
 use Psr\Container\ContainerInterface;
+use Serendipity\Job\Constant\Task;
 use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\Contract\SerializerInterface;
 use Serendipity\Job\Contract\StdoutLoggerInterface;
+use Serendipity\Job\Db\DB;
 use Serendipity\Job\Kernel\Provider\KernelProvider;
 use Serendipity\Job\Nsq\Consumer\AbstractConsumer;
 use Serendipity\Job\Nsq\Consumer\DagConsumer;
@@ -125,7 +128,7 @@ final class ConsumeJobCommand extends Command
         $host = $this->input->getOption('host');
         if (!in_array($type, self::TASK_TYPE, true)) {
             $this->stdoutLogger->error('Invalid task parameters.');
-            exit();
+            exit(1);
         }
         if ($limit !== null) {
             for ($i = 0; $i < $limit; $i++) {
@@ -201,6 +204,18 @@ final class ConsumeJobCommand extends Command
                                                 'data' => [],
                                             ], JSON_THROW_ON_ERROR));
                                         } else {
+                                            DB::execute(sprintf(
+                                                'update task set status  = %s,memo = %s where id = %s and status = %s',
+                                                Task::TASK_CANCEL,
+                                                sprintf(
+                                                    '客户度IP:%s取消了任务,请求时间:%s.',
+                                                    $session->getPeerAddress(),
+                                                    Carbon::now()
+                                                        ->toDateTimeString()
+                                                ),
+                                                $params['id'],
+                                                Task::TASK_ING
+                                            ));
                                             $buffer->write(json_encode([
                                                 'code' => 0,
                                                 'msg' => 'Killed',
@@ -244,6 +259,9 @@ final class ConsumeJobCommand extends Command
     {
         Coroutine::run(
             function () use ($i, $type) {
+                /**
+                 * @var NSq $subscriber
+                 */
                 $subscriber = make(Nsq::class, [
                     $this->container,
                     $this->config->get(sprintf('nsq.%s', 'default')),

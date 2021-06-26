@@ -32,7 +32,7 @@ interface JobInterface
     /**
      * After failed, this function will be called.
      */
-    public function failed(int $id, array $payload): void;
+    public function failed(array $payload): void;
 
     /**
      * Get the middleware the job should pass through.
