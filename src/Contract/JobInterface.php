@@ -22,12 +22,12 @@ interface JobInterface
      *
      * @param $error
      */
-    public function canRetry(int $attempt, $error): bool;
+    public function canRetry(int $counter, $error): bool;
 
     /**
      * Get current job's next execution unix time after failed.
      */
-    public function retryAfter(int $attempt): int;
+    public function retryAfter(int $counter): int;
 
     /**
      * After failed, this function will be called.

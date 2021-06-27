@@ -10,6 +10,7 @@ namespace Serendipity\Job\Kernel\Lock;
 
 use Exception;
 use Redis;
+use Serendipity\Job\Redis\RedisProxy;
 
 class RedisLock
 {
@@ -22,12 +23,12 @@ class RedisLock
 
     private array $lockedNames = [];
 
-    private Redis $redis;
+    private Redis | RedisProxy $redis;
 
     /**
      * RedisLock constructor.
      */
-    public function __construct(Redis $redis)
+    public function __construct(Redis | RedisProxy $redis)
     {
         $this->redis = $redis;
     }

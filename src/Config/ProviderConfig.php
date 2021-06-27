@@ -8,8 +8,8 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Config;
 
+use Hyperf\Utils\ApplicationContext;
 use Serendipity\Job\Config\Loader\YamlLoader;
-use Serendipity\Job\Util\ApplicationContext;
 use function class_exists;
 use function is_string;
 use function method_exists;

@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Serendipity\Job\Util;
 
 use Hyperf\Engine\Channel;
+use Hyperf\Utils\ApplicationContext;
 use Serendipity\Job\Contract\StdoutLoggerInterface;
 
 /**

@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Dingtalk;
 
+use Hyperf\Utils\ApplicationContext;
 use JetBrains\PhpStorm\Pure;
 use Psr\Http\Message\ResponseInterface;
 use Serendipity\Job\Contract\StdoutLoggerInterface;
@@ -18,7 +19,6 @@ use Serendipity\Job\Dingtalk\Messages\Link;
 use Serendipity\Job\Dingtalk\Messages\Markdown;
 use Serendipity\Job\Dingtalk\Messages\Message;
 use Serendipity\Job\Dingtalk\Messages\Text;
-use Serendipity\Job\Util\ApplicationContext;
 use Throwable;
 use function Serendipity\Job\Kernel\serendipity_format_throwable;
 

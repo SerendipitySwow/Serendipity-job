@@ -8,8 +8,8 @@ declare(strict_types=1);
 
 use Hyperf\Di\Container;
 use Hyperf\Di\Definition\DefinitionSourceFactory;
+use Hyperf\Utils\ApplicationContext;
 use Psr\Container\ContainerInterface;
-use Serendipity\Job\Util\ApplicationContext;
 
 $container = new Container(( new DefinitionSourceFactory(true) )());
 if (!$container instanceof ContainerInterface) {

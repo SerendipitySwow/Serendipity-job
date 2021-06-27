@@ -8,7 +8,6 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Redis;
 
-use Hyperf\Contract\ConnectionInterface;
 use Hyperf\Pool\Connection as BaseConnection;
 use Hyperf\Pool\Exception\ConnectionException;
 use Hyperf\Pool\Pool;
@@ -18,7 +17,7 @@ use Serendipity\Job\Contract\StdoutLoggerInterface;
 /**
  * @method bool select(int $db)
  */
-class RedisConnection extends BaseConnection implements ConnectionInterface
+class RedisConnection extends BaseConnection
 {
     use ScanCaller;
 
@@ -50,7 +49,7 @@ class RedisConnection extends BaseConnection implements ConnectionInterface
     /**
      * Current redis database.
      */
-    protected ?int $database;
+    protected ?int $database = null;
 
     public function __construct(ContainerInterface $container, Pool $pool, array $config)
     {

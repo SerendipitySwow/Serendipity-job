@@ -9,10 +9,10 @@ declare(strict_types=1);
 namespace Serendipity\Job\Kernel\Provider;
 
 use Hyperf\Di\Container;
+use Hyperf\Utils\ApplicationContext;
 use JetBrains\PhpStorm\Pure;
 use Psr\Container\ContainerInterface;
 use Serendipity\Job\Config\ProviderConfig;
-use Serendipity\Job\Util\ApplicationContext;
 
 abstract class AbstractProvider implements ProviderContract
 {

@@ -17,8 +17,8 @@ declare(strict_types=1);
 namespace Serendipity\Job\Db;
 
 use Closure;
+use Hyperf\Utils\ApplicationContext;
 use Serendipity\Job\Db\Pool\PoolFactory;
-use Serendipity\Job\Util\ApplicationContext;
 use Serendipity\Job\Util\Context;
 use Throwable;
 

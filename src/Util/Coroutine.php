@@ -11,6 +11,7 @@ namespace Serendipity\Job\Util;
 use Hyperf\Engine\Coroutine as Co;
 use Hyperf\Engine\Exception\CoroutineDestroyedException;
 use Hyperf\Engine\Exception\RunningInNonCoroutineException;
+use Hyperf\Utils\ApplicationContext;
 use Psr\Log\LoggerInterface;
 use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Throwable;

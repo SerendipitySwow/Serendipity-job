@@ -12,8 +12,23 @@ use Serendipity\Job\Contract\JobInterface;
 
 class SimpleJob implements JobInterface
 {
-    public function __construct()
+    public int $identity;
+
+    public int $timeout;
+
+    public int $retryTimes;
+
+    public string $name;
+
+    public int $step;
+
+    public function __construct(int $identity, int $timeout, int $retryTimes, string $name, int $step)
     {
+        $this->identity = $identity;
+        $this->timeout = $timeout;
+        $this->retryTimes = $retryTimes;
+        $this->name = $name;
+        $this->step = $step;
     }
 
     public function handle(): void
@@ -21,12 +36,12 @@ class SimpleJob implements JobInterface
         throw new \Exception('测试钉钉,陈宇凡我儿子');
     }
 
-    public function canRetry(int $attempt, $error): bool
+    public function canRetry(int $counter, $error): bool
     {
-        return $attempt < 5;
+        return $counter < 5;
     }
 
-    public function retryAfter(int $attempt): int
+    public function retryAfter(int $counter): int
     {
         return 0;
     }
@@ -43,26 +58,26 @@ class SimpleJob implements JobInterface
 
     public function getIdentity(): int | string
     {
-        // TODO: Implement getIdentity() method.
+        return $this->identity;
     }
 
     public function getTimeout(): int
     {
-        // TODO: Implement getTimeout() method.
+        return $this->timeout;
     }
 
-    public function IncreaseCounter(int $attempt = 1): mixed
+    public function IncreaseCounter(int $attempt = 1): int
     {
-        // TODO: Implement IncreaseCounter() method.
+        return ++$this->retryTimes;
     }
 
     public function getStep(): int
     {
-        // TODO: Implement getStep() method.
+        return $this->step;
     }
 
     public function getCounter(): int
     {
-        // TODO: Implement getCounter() method.
+        return $this->retryTimes;
     }
 }

@@ -8,13 +8,13 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Dingtalk;
 
+use Hyperf\Utils\ApplicationContext;
 use Psr\Http\Message\ResponseInterface;
 use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\Dingtalk\Http\Client;
 use Serendipity\Job\Dingtalk\Messages\ActionCard;
 use Serendipity\Job\Dingtalk\Messages\FeedCard;
 use Serendipity\Job\Dingtalk\Messages\Message;
-use Serendipity\Job\Util\ApplicationContext;
 
 class DingTalk
 {

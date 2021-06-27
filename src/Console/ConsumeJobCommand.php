@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Serendipity\Job\Console;
 
 use Carbon\Carbon;
+use Hyperf\Utils\ApplicationContext;
 use Psr\Container\ContainerInterface;
 use Serendipity\Job\Constant\Task;
 use Serendipity\Job\Contract\ConfigInterface;
@@ -19,7 +20,6 @@ use Serendipity\Job\Kernel\Provider\KernelProvider;
 use Serendipity\Job\Nsq\Consumer\AbstractConsumer;
 use Serendipity\Job\Nsq\Consumer\DagConsumer;
 use Serendipity\Job\Nsq\Consumer\TaskConsumer;
-use Serendipity\Job\Util\ApplicationContext;
 use SerendipitySwow\Nsq\Message;
 use SerendipitySwow\Nsq\Nsq;
 use SerendipitySwow\Nsq\Result;
@@ -278,9 +278,11 @@ final class ConsumeJobCommand extends Command
                             $result = $consumer->consume($message);
                         } catch (Throwable $error) {
                             $this->stdoutLogger->error(sprintf(
-                                'Consumer failed to consume %s,reason: %s#',
+                                'Consumer failed to consume %s,reason: %s,file: %s,line: %s',
                                 'Consumerd' . $i,
-                                $error->getMessage()
+                                $error->getMessage(),
+                                $error->getFile(),
+                                $error->getLine()
                             ));
                             $result = Result::DROP;
                         }

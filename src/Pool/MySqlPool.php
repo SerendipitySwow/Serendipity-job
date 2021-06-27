@@ -8,11 +8,11 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Pool;
 
+use Hyperf\Utils\ApplicationContext;
 use PDO;
 use PDOException;
 use Serendipity\Job\Contract\LoggerInterface;
 use Serendipity\Job\Pool\Exception\MySqlPoolException;
-use Serendipity\Job\Util\ApplicationContext;
 use Swow\Coroutine;
 use function Swow\defer;
 

@@ -99,8 +99,11 @@ class ServerProvider extends AbstractProvider
                                         $content = [
                                             'class' => Task1::class,
                                             'params' => [
-                                                'startDate' => Carbon::now()->subDays(10)->toDateString(),
-                                                'endDate' => Carbon::now()->toDateString(),
+                                                'startDate' => Carbon::now()
+                                                    ->subDays(10)
+                                                    ->toDateString(),
+                                                'endDate' => Carbon::now()
+                                                    ->toDateString(),
                                             ],
                                         ];
                                         echo json_encode($content);
@@ -120,12 +123,15 @@ class ServerProvider extends AbstractProvider
                                     case '/event':
                                     {
                                         $event = new UpdateJobEvent(1, 2);
-                                        $this->container()->get(EventDispatcherInterface::class)->dispatch($event, UpdateJobEvent::UPDATE_JOB);
+                                        $this->container()
+                                            ->get(EventDispatcherInterface::class)
+                                            ->dispatch($event, UpdateJobEvent::UPDATE_JOB);
                                         break;
                                     }
                                     case '/ding':
                                     {
-                                        make(DingTalk::class)->at(['13888888888'], true)
+                                        make(DingTalk::class)
+                                            ->at(['13888888888'], true)
                                             ->text('我就是我,@13888888888 是不一样的烟火');
                                         break;
                                     }
@@ -157,14 +163,28 @@ class ServerProvider extends AbstractProvider
                                          * @var Nsq $nsq
                                          */
                                         $nsq = make(Nsq::class, [$this->container(), $config]);
-                                        $string = (string) random_int(100000, 999999999);
-                                        $this->stdoutLogger->debug('Publish ' . $string . PHP_EOL);
-                                        ($nsq->publish(ConsumeJobCommand::TOPIC_PREFIX . 'task', $string));
-                                        ($nsq->publish(
-                                            ConsumeJobCommand::TOPIC_PREFIX . 'task',
-                                            (string) random_int(10000, 90000),
-                                            10
-                                        ));
+                                        $serializer = $this->container()
+                                            ->get(SymfonySerializer::class);
+                                        $ret = DB::fetch('select * from task where id = 1 limit 1;');
+                                        $content = json_decode($ret['content'], true, 512, JSON_THROW_ON_ERROR);
+                                        $serializerObject = make($content['class'], [
+                                            'identity' => $ret['id'],
+                                            'timeout' => $ret['timeout'],
+                                            'step' => $ret['step'],
+                                            'name' => $ret['name'],
+                                            'retryTimes' => $ret['retry_times'],
+                                        ]);
+                                        $json = $serializer->serialize($serializerObject);
+                                        $json = json_encode(array_merge([
+                                            'body' => json_decode(
+                                                $json,
+                                                true,
+                                                512,
+                                                JSON_THROW_ON_ERROR
+                                            ),
+                                        ], ['class' => $serializerObject::class]), JSON_THROW_ON_ERROR);
+                                        $nsq->publish(ConsumeJobCommand::TOPIC_PREFIX . 'task', $json);
+
                                         $session->respond('Hello Nsq!');
                                         break;
                                     }

@@ -16,14 +16,17 @@ class RedisFactory
     /**
      * @var RedisProxy[]
      */
-    protected $proxies;
+    protected array $proxies;
 
     public function __construct(ConfigInterface $config)
     {
         $redisConfig = $config->get('redis');
 
         foreach ($redisConfig as $poolName => $item) {
-            $this->proxies[$poolName] = make(RedisProxy::class, ['pool' => $poolName]);
+            $this->proxies[$poolName] = make(
+                RedisProxy::class,
+                ['pool' => $poolName]
+            );
         }
     }
 
