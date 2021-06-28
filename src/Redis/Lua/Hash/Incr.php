@@ -24,7 +24,7 @@ class Incr extends Script
 LUA;
     }
 
-    protected function getKeyNums(): int
+    protected function getKeyNumber(array $arguments): int
     {
         return 1;
     }

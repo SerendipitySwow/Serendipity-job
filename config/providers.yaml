@@ -9,3 +9,4 @@ Consumer-Job:
   BootApp:
     - Serendipity\Job\Config\ConfigProvider
     - Serendipity\Job\Logger\LoggerProvider
+    - Serendipity\Job\Event\EventProvider

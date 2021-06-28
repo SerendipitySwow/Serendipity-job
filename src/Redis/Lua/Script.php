@@ -42,7 +42,6 @@ abstract class Script implements ScriptInterface
         if ($this->redis === null) {
             throw new RedisNotFoundException('Redis client is not found.');
         }
-
         if ($sha) {
             $result = $this->redis->evalSha($this->getSha(), $arguments, $this->getKeyNumber($arguments));
             if ($result !== false) {

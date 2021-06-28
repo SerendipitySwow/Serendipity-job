@@ -163,7 +163,7 @@ final class ConsumeJobCommand extends Command
                                     }
                                     case '/cancel':
                                         $params = $request->getQueryParams();
-                                        $coroutine = Coroutine::get((int) $params['id']);
+                                        $coroutine = Coroutine::get((int) $params['coroutine_id']);
                                         $buffer = new Buffer();
                                         $response = new HttpServer\Response();
                                         $response->setStatus(Status::OK);
@@ -205,7 +205,7 @@ final class ConsumeJobCommand extends Command
                                             ], JSON_THROW_ON_ERROR));
                                         } else {
                                             DB::execute(sprintf(
-                                                'update task set status  = %s,memo = %s where id = %s and status = %s',
+                                                "update task set status  = %s,memo = '%s' where coroutine_id = %s and status = %s and id = %s",
                                                 Task::TASK_CANCEL,
                                                 sprintf(
                                                     '客户度IP:%s取消了任务,请求时间:%s.',
@@ -213,8 +213,9 @@ final class ConsumeJobCommand extends Command
                                                     Carbon::now()
                                                         ->toDateTimeString()
                                                 ),
-                                                $params['id'],
-                                                Task::TASK_ING
+                                                $params['coroutine_id'],
+                                                Task::TASK_ING,
+                                                $params['id']
                                             ));
                                             $buffer->write(json_encode([
                                                 'code' => 0,
