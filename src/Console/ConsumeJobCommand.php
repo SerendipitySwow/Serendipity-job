@@ -196,6 +196,16 @@ final class ConsumeJobCommand extends Command
                                             $session->sendHttpResponse($response);
                                             break;
                                         }
+                                        if ($coroutine->getState() === $coroutine::STATE_WAITING) {
+                                            $buffer->write(json_encode([
+                                                'code' => 1,
+                                                'msg' => 'The coroutine is waiting for an IO event !',
+                                                'data' => [],
+                                            ], JSON_THROW_ON_ERROR));
+                                            $response->setBody($buffer);
+                                            $session->sendHttpResponse($response);
+                                            break;
+                                        }
                                         $coroutine->kill();
                                         if ($coroutine->isAvailable()) {
                                             $buffer->write(json_encode([
