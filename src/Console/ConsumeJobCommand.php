@@ -41,7 +41,7 @@ final class ConsumeJobCommand extends Command
 {
     public static $defaultName = 'scheduler:consume';
 
-    protected const COMMADN_PROVIDER_NAME = 'Consumer-Job';
+    protected const COMMAND_PROVIDER_NAME = 'Consumer-Job';
 
     protected const TASK_TYPE = [
         'dag',
@@ -320,7 +320,7 @@ final class ConsumeJobCommand extends Command
 
     protected function bootStrap(): void
     {
-        KernelProvider::create(self::COMMADN_PROVIDER_NAME)
+        KernelProvider::create(self::COMMAND_PROVIDER_NAME)
             ->bootApp();
     }
 }
