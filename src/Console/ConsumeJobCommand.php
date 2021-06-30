@@ -25,6 +25,7 @@ use SerendipitySwow\Nsq\Nsq;
 use SerendipitySwow\Nsq\Result;
 use Swow\Coroutine;
 use Swow\Coroutine\Exception as CoroutineException;
+use Swow\Coroutine\UnwindExit;
 use Swow\Http\Buffer;
 use Swow\Http\Exception as HttpException;
 use Swow\Http\Server as HttpServer;
@@ -196,17 +197,7 @@ final class ConsumeJobCommand extends Command
                                             $session->sendHttpResponse($response);
                                             break;
                                         }
-                                        if ($coroutine->getState() === $coroutine::STATE_WAITING) {
-                                            $buffer->write(json_encode([
-                                                'code' => 1,
-                                                'msg' => 'The coroutine is waiting for an IO event !',
-                                                'data' => [],
-                                            ], JSON_THROW_ON_ERROR));
-                                            $response->setBody($buffer);
-                                            $session->sendHttpResponse($response);
-                                            break;
-                                        }
-                                        $coroutine->kill();
+                                        $coroutine->throw(new UnwindExit('该任务被取消,请联系管理员!'));
                                         if ($coroutine->isAvailable()) {
                                             $buffer->write(json_encode([
                                                 'code' => 1,

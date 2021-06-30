@@ -16,7 +16,7 @@ final class SerendipityJobCommand extends Command
 {
     protected static $defaultName = 'serendipity-job:start';
 
-    protected const COMMADN_PROVIDER_NAME = 'Serendipity-Job';
+    protected const COMMAND_PROVIDER_NAME = 'Serendipity-Job';
 
     protected function configure(): void
     {
@@ -46,7 +46,7 @@ final class SerendipityJobCommand extends Command
 
     protected function bootStrap(): void
     {
-        KernelProvider::create(self::COMMADN_PROVIDER_NAME)
+        KernelProvider::create(self::COMMAND_PROVIDER_NAME)
             ->bootApp();
     }
 }
