@@ -14,7 +14,7 @@ Run into the beauty of PHP8 and Swow
 7.支持后台配置任务.
 8.支持定时任务.
 9.支持任务图表(成功,失败,重试,超时,终止.)
-10.支持任务取消
+10.支持任务取消(完成)
 ```
 
 ## TODO
@@ -32,6 +32,6 @@ Run into the beauty of PHP8 and Swow
 2.不能包含资源对象.
 3.Swow/channel push 和pop 都是毫秒.任务都可以支持毫秒.以后必须要注意.
 4.Di主要使用Hyperf/Di
-5.取消任务使用抛出异常
+5.取消任务使用kill
 ```
 ## Come on!

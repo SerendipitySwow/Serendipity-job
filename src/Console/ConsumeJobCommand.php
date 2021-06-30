@@ -25,7 +25,6 @@ use SerendipitySwow\Nsq\Nsq;
 use SerendipitySwow\Nsq\Result;
 use Swow\Coroutine;
 use Swow\Coroutine\Exception as CoroutineException;
-use Swow\Coroutine\UnwindExit;
 use Swow\Http\Buffer;
 use Swow\Http\Exception as HttpException;
 use Swow\Http\Server as HttpServer;
@@ -197,7 +196,7 @@ final class ConsumeJobCommand extends Command
                                             $session->sendHttpResponse($response);
                                             break;
                                         }
-                                        $coroutine->throw(new UnwindExit('该任务被取消,请联系管理员!'));
+                                        $coroutine->kill();
                                         if ($coroutine->isAvailable()) {
                                             $buffer->write(json_encode([
                                                 'code' => 1,
