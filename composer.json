@@ -37,7 +37,6 @@
         "swow/swow": "dev-develop",
         "nette/utils": "^3.2",
         "vlucas/phpdotenv": "^5.3",
-        "symfony/config": "^5.2",
         "ext-iconv": "*",
         "hyperf/engine-swow": "^1.1",
         "ext-pdo": "*",
@@ -50,8 +49,7 @@
         "hyperf/pool": "^2.1",
         "hyperf/redis": "^2.1",
         "guzzlehttp/guzzle": "^7.3",
-        "serendipity-swow/nsq": "^0.5.0",
-        "hyperf/crontab": "^2.1"
+        "serendipity-swow/nsq": "^0.5.0"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",
