@@ -14,7 +14,7 @@ return [
         'handler' => [
             'class' => Monolog\Handler\RotatingFileHandler::class,
             'constructor' => [
-                'filename' => BASE_PATH . '/runtimes/logs/hyperf.log',
+                'filename' => BASE_PATH . '/runtimes/logs/serendipity_job.log',
                 'maxFiles' => 5,
                 'level' => Monolog\Logger::DEBUG,
             ],
