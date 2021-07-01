@@ -17,15 +17,6 @@ Run into the beauty of PHP8 and Swow
 10.支持任务取消(完成)
 ```
 
-## TODO
-
-```
-1.MySQLPool
-2.RedisPool
-3.EventDispatcher
-4.SwowServer
-```
-
 ## Please note
 ```
 1.传递的任务Task必须实现JobInterface

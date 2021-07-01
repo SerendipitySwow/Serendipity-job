@@ -12,9 +12,10 @@ use Serendipity\Job\Kernel\Logger\AppendRequestIdProcessor;
 return [
     'default' => [
         'handler' => [
-            'class' => Monolog\Handler\StreamHandler::class,
+            'class' => Monolog\Handler\RotatingFileHandler::class,
             'constructor' => [
-                'stream' => BASE_PATH . '/runtimes/logs/hyperf.log',
+                'filename' => BASE_PATH . '/runtimes/logs/hyperf.log',
+                'maxFiles' => 5,
                 'level' => Monolog\Logger::DEBUG,
             ],
         ],
