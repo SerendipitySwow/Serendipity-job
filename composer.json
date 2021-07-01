@@ -50,7 +50,8 @@
         "hyperf/pool": "^2.1",
         "hyperf/redis": "^2.1",
         "guzzlehttp/guzzle": "^7.3",
-        "serendipity-swow/nsq": "^0.5.0"
+        "serendipity-swow/nsq": "^0.5.0",
+        "hyperf/crontab": "^2.1"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",
