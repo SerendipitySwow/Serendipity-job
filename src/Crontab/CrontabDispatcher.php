@@ -24,12 +24,15 @@ class CrontabDispatcher
 
     private StdoutLoggerInterface $logger;
 
+    private CoroutineStrategy $strategy;
+
     public function __construct(ContainerInterface $container)
     {
         parent::__construct($container);
         $this->config = $container->get(ConfigInterface::class);
         $this->scheduler = $container->get(Scheduler::class);
         $this->logger = $container->get(StdoutLoggerInterface::class);
+        $this->strategy = $container->get(CoroutineStrategy::class);
     }
 
     public function isEnable(): bool
@@ -45,6 +48,7 @@ class CrontabDispatcher
             while (!$crontabs->isEmpty()) {
                 $crontab = $crontabs->dequeue();
                 //TODO dispatch crontab
+                $this->strategy->dispatch($crontab);
             }
         }
     }
