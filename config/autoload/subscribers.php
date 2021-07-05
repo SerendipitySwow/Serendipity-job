@@ -6,8 +6,10 @@
 
 declare(strict_types=1);
 
+use Serendipity\Job\Subscriber\CrontabRegisterSubscriber;
 use Serendipity\Job\Subscriber\UpdateJobSubscriber;
 
 return [
     UpdateJobSubscriber::class,
+    CrontabRegisterSubscriber::class,
 ];

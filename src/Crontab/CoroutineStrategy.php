@@ -9,11 +9,16 @@ declare(strict_types=1);
 namespace Serendipity\Job\Crontab;
 
 use Carbon\Carbon;
-use Hyperf\Crontab\Crontab;
+use Psr\Container\ContainerInterface;
 use Serendipity\Job\Util\Coroutine;
 
-class CoroutineStrategy extends AbstractStrategy
+class CoroutineStrategy
 {
+    public function __construct(ContainerInterface $container)
+    {
+        $this->container = $container;
+    }
+
     public function dispatch(Crontab $crontab): void
     {
         Coroutine::create(function () use ($crontab) {

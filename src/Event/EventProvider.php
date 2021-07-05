@@ -24,7 +24,7 @@ class EventProvider extends AbstractProvider
             ->get(ConfigInterface::class);
         $subscribers = $config->get('subscribers');
         foreach ($subscribers as $subscriber) {
-            $subscriber = new $subscriber();
+            $subscriber = $this->container()->get($subscriber);
             if ($subscriber instanceof EventSubscriberInterface) {
                 $dispatcher->addSubscriber($subscriber);
             }

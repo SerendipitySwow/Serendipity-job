@@ -13,9 +13,12 @@ use Hyperf\Utils\ApplicationContext;
 use Psr\Container\ContainerInterface;
 use Serendipity\Job\Constant\Task;
 use Serendipity\Job\Contract\ConfigInterface;
+use Serendipity\Job\Contract\EventDispatcherInterface;
 use Serendipity\Job\Contract\SerializerInterface;
 use Serendipity\Job\Contract\StdoutLoggerInterface;
+use Serendipity\Job\Crontab\CrontabDispatcher;
 use Serendipity\Job\Db\DB;
+use Serendipity\Job\Event\CrontabEvent;
 use Serendipity\Job\Kernel\Provider\KernelProvider;
 use Serendipity\Job\Nsq\Consumer\AbstractConsumer;
 use Serendipity\Job\Nsq\Consumer\DagConsumer;
@@ -312,5 +315,16 @@ final class ConsumeJobCommand extends Command
     {
         KernelProvider::create(self::COMMAND_PROVIDER_NAME)
             ->bootApp();
+//        $this->dispatchCrontab();
+    }
+
+    protected function dispatchCrontab(): void
+    {
+        $this->container->get(EventDispatcherInterface::class)
+            ->dispatch(
+                new CrontabEvent(),
+                CrontabEvent::CRONTAB_REGISTER
+            );
+        $this->container->get(CrontabDispatcher::class)->handle();
     }
 }

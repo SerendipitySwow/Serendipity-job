@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Crontab;
 
+use Psr\Container\ContainerInterface;
 use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\Contract\StdoutLoggerInterface;
 
@@ -28,7 +29,6 @@ class CrontabDispatcher
 
     public function __construct(ContainerInterface $container)
     {
-        parent::__construct($container);
         $this->config = $container->get(ConfigInterface::class);
         $this->scheduler = $container->get(Scheduler::class);
         $this->logger = $container->get(StdoutLoggerInterface::class);
@@ -44,6 +44,7 @@ class CrontabDispatcher
     {
         while (true) {
             $this->sleep();
+            //TODO 待确认是否要一直循环
             $crontabs = $this->scheduler->schedule();
             while (!$crontabs->isEmpty()) {
                 $crontab = $crontabs->dequeue();
