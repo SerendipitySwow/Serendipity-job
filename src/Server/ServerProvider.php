@@ -456,8 +456,8 @@ class ServerProvider extends AbstractProvider
             }
         }
         /*
-        ## 当并发量比较大时,会阻塞该协程.
-        ## 监听协程退出
+        当并发量比较大时,会阻塞该协程.
+        监听协程退出
         $exited = new Channel();
         Signal::wait(Signal::INT);
 
