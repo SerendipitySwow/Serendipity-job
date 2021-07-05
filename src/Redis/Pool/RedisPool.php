@@ -18,15 +18,9 @@ use Serendipity\Job\Util\Arr;
 
 class RedisPool extends Pool
 {
-    /**
-     * @var string
-     */
-    protected $name;
+    protected string $name;
 
-    /**
-     * @var array
-     */
-    protected $config;
+    protected array $config;
 
     public function __construct(ContainerInterface $container, string $name)
     {
