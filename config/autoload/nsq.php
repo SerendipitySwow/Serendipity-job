@@ -1,7 +1,7 @@
 <?php
 /**
  * This file is part of Serendipity Job
- * @license  https://github.com/Hyperf-Glory/Serendipity-job/blob/main/LICENSE
+ * @license  https://github.com/serendipitySwow/Serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
@@ -10,7 +10,7 @@ return [
     'default' => [
         'host' => '127.0.0.1',
         'port' => 4150,
-        'connect_timeout' => 10,
+        'connect_timeout' => 10 * 1000,
         'wait_timeout' => 3,
         'max_msg_timeout' => 60,
         'heartbeat' => -1,

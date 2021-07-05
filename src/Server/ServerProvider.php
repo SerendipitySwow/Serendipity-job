@@ -1,7 +1,7 @@
 <?php
 /**
  * This file is part of Serendipity Job
- * @license  https://github.com/Hyperf-Glory/Serendipity-job/blob/main/LICENSE
+ * @license  https://github.com/serendipitySwow/Serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
@@ -447,40 +447,6 @@ class ServerProvider extends AbstractProvider
                         $session->close();
                     }
                 });
-                ## 当并发量比较大时,会阻塞该协程.
-//                ## 监听协程退出
-//                $exited = new Channel();
-//                Signal::wait(Signal::INT);
-//
-//                \Hyperf\Engine\Coroutine::create(fn () => $exited->close());
-//                \Hyperf\Engine\Coroutine::create(function () use ($exited) {
-//                    while (true) {
-//                        if ($exited->isClosing()) {
-//                            $tryAgain = false;
-//                            do {
-//                                $this->stdoutLogger->debug('Kill Start ============================');
-//                                foreach (Coroutine::getAll() as $coroutine) {
-//                                    if ($coroutine === Coroutine::getCurrent()) {
-//                                        continue;
-//                                    }
-//                                    if ($coroutine->getState() === $coroutine::STATE_LOCKED) {
-//                                        continue;
-//                                    }
-//                                    echo "Kill {$coroutine->getId()}..." . PHP_EOL;
-//                                    $coroutine->kill();
-//                                    if ($coroutine->isAvailable()) {
-//                                        echo 'Not fully killed, try again later...' . PHP_EOL;
-//                                        $tryAgain = true;
-//                                    } else {
-//                                        echo 'Killed' . PHP_EOL;
-//                                    }
-//                                }
-//                            } while ($tryAgain);
-//                            echo 'All coroutines has been killed' . PHP_EOL;
-//                            break;
-//                        }
-//                    }
-//                });
             } catch (SocketException | CoroutineException $exception) {
                 if (in_array($exception->getCode(), [EMFILE, ENFILE, ENOMEM], true)) {
                     sleep(1);
@@ -489,5 +455,41 @@ class ServerProvider extends AbstractProvider
                 }
             }
         }
+        /*
+        ## 当并发量比较大时,会阻塞该协程.
+        ## 监听协程退出
+        $exited = new Channel();
+        Signal::wait(Signal::INT);
+
+        \Hyperf\Engine\Coroutine::create(fn () => $exited->close());
+        \Hyperf\Engine\Coroutine::create(function () use ($exited) {
+            while (true) {
+                if ($exited->isClosing()) {
+                    $tryAgain = false;
+                    do {
+                        $this->stdoutLogger->debug('Kill Start ============================');
+                        foreach (Coroutine::getAll() as $coroutine) {
+                            if ($coroutine === Coroutine::getCurrent()) {
+                                continue;
+                            }
+                            if ($coroutine->getState() === $coroutine::STATE_LOCKED) {
+                                continue;
+                            }
+                            echo "Kill {$coroutine->getId()}..." . PHP_EOL;
+                            $coroutine->kill();
+                            if ($coroutine->isAvailable()) {
+                                echo 'Not fully killed, try again later...' . PHP_EOL;
+                                $tryAgain = true;
+                            } else {
+                                echo 'Killed' . PHP_EOL;
+                            }
+                        }
+                    } while ($tryAgain);
+                    echo 'All coroutines has been killed' . PHP_EOL;
+                    break;
+                }
+            }
+        });
+        */
     }
 }

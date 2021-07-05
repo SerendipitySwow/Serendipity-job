@@ -1,7 +1,7 @@
 <?php
 /**
  * This file is part of Serendipity Job
- * @license  https://github.com/Hyperf-Glory/Serendipity-job/blob/main/LICENSE
+ * @license  https://github.com/serendipitySwow/Serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
@@ -281,10 +281,7 @@ class Client implements ClientInterface, HasSerializerInterface
                         continue;
                     }
 
-                    $res = $client->write($data);
-                    if ($res) {
-                        $this->logger && $this->logger->warning('Send data failed. The reason is ' . error_get_last());
-                    }
+                    $client->write($data);
                 }
             } catch (StreamStateException | OpenStreamException $e) {
                 $this->logger && $this->logger->warning($e->getMessage());
