@@ -315,7 +315,7 @@ final class ConsumeJobCommand extends Command
     {
         KernelProvider::create(self::COMMAND_PROVIDER_NAME)
             ->bootApp();
-//        $this->dispatchCrontab();
+        $this->dispatchCrontab();
     }
 
     protected function dispatchCrontab(): void

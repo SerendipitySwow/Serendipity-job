@@ -10,7 +10,6 @@ namespace Serendipity\Job\Crontab;
 
 use Carbon\Carbon;
 use InvalidArgumentException;
-use JetBrains\PhpStorm\ArrayShape;
 
 class Parser
 {
@@ -40,11 +39,11 @@ class Parser
         }
         $startTime = $this->parseStartTime($startTime);
         $date = $this->parseDate($crontabString);
-        if (in_array((int) date('i', $startTime), $date['minutes'], true) &&
-            in_array((int) date('G', $startTime), $date['hours'], true) &&
-            in_array((int) date('j', $startTime), $date['day'], true) &&
-            in_array((int) date('w', $startTime), $date['week'], true) &&
-            in_array((int) date('n', $startTime), $date['month'], true)
+        if (in_array((int) date('i', $startTime), $date['minutes']) &&
+            in_array((int) date('G', $startTime), $date['hours']) &&
+            in_array((int) date('j', $startTime), $date['day']) &&
+            in_array((int) date('w', $startTime), $date['week']) &&
+            in_array((int) date('n', $startTime), $date['month'])
         ) {
             $result = [];
             foreach ($date['second'] as $second) {
@@ -60,12 +59,12 @@ class Parser
     public function isValid(string $crontabString): bool
     {
         return !(!preg_match(
-            '/^((\*(\/\d+)?)|[0-9\-\/]+)\s+((\*(\/\d+)?)|[0-9\-\/]+)\s+((\*(\/\d+)?)|[0-9\-\/]+)\s+((\*(\/\d+)?)|[0-9\-\/]+)\s+((\*(\/\d+)?)|[0-9\-\/]+)\s+((\*(\/\d+)?)|[0-9\-\/]+)$/',
+            '/^((\*(\/[0-9]+)?)|[0-9\-\,\/]+)\s+((\*(\/[0-9]+)?)|[0-9\-\,\/]+)\s+((\*(\/[0-9]+)?)|[0-9\-\,\/]+)\s+((\*(\/[0-9]+)?)|[0-9\-\,\/]+)\s+((\*(\/[0-9]+)?)|[0-9\-\,\/]+)\s+((\*(\/[0-9]+)?)|[0-9\-\,\/]+)$/i',
             trim($crontabString)
         ) && !preg_match(
-            '/^((\*(\/\d+)?)|[0-9\-\/]+)\s+((\*(\/\d+)?)|[0-9\-\/]+)\s+((\*(\/\d+)?)|[0-9\-\/]+)\s+((\*(\/\d+)?)|[0-9\-\/]+)\s+((\*(\/\d+)?)|[0-9\-\/]+)$/',
-            trim($crontabString)
-        ));
+                    '/^((\*(\/[0-9]+)?)|[0-9\-\,\/]+)\s+((\*(\/[0-9]+)?)|[0-9\-\,\/]+)\s+((\*(\/[0-9]+)?)|[0-9\-\,\/]+)\s+((\*(\/[0-9]+)?)|[0-9\-\,\/]+)\s+((\*(\/[0-9]+)?)|[0-9\-\,\/]+)$/i',
+                    trim($crontabString)
+                ));
     }
 
     /**
@@ -84,13 +83,12 @@ class Parser
         } elseif (str_contains($string, ',')) {
             $exploded = explode(',', $string);
             foreach ($exploded as $value) {
-                if (str_contains($value, '/') || str_contains($string, '-') !== false) {
-                    $result[] = $this->parseSegment($value, $min, $max, $start);
-                    $result = array_merge(...$result);
+                if (str_contains($value, '/') || str_contains($string, '-')) {
+                    $result = array_merge($result, $this->parseSegment($value, $min, $max, $start));
                     continue;
                 }
 
-                if (!$this->between((int) $value, ($min > $start ? $min : $start), $max)) {
+                if (!$this->between((int) $value, (int) ($min > $start ? $min : $start), (int) $max)) {
                     continue;
                 }
                 $result[] = (int) $value;
@@ -106,7 +104,7 @@ class Parser
             $start < $min && $start = $min;
             for ($i = $start; $i <= $max;) {
                 $result[] = $i;
-                $i .= $exploded[1];
+                $i += $exploded[1];
             }
         } elseif (str_contains($string, '-')) {
             $result = array_merge($result, $this->parseSegment($string . '/1', $min, $max, $start));
@@ -118,7 +116,7 @@ class Parser
     }
 
     /**
-     * Determine if the $value is between in $min and $max ?
+     * Determire if the $value is between in $min and $max ?
      */
     private function between(int $value, int $min, int $max): bool
     {
@@ -128,7 +126,7 @@ class Parser
     /**
      * @param null|Carbon|int $startTime
      */
-    private function parseStartTime(int | Carbon | null $startTime): int
+    private function parseStartTime($startTime): int
     {
         if ($startTime instanceof Carbon) {
             $startTime = $startTime->getTimestamp();
@@ -142,14 +140,10 @@ class Parser
         return (int) $startTime;
     }
 
-    #[ArrayShape([
-        'second' => 'array|int[]', 'minutes' => 'array', 'hours' => 'array', 'day' => 'array', 'month' => 'array',
-        'week' => 'array',
-    ])]
     private function parseDate(string $crontabString): array
     {
         $cron = preg_split('/[\\s]+/i', trim($crontabString));
-        if (count($cron) === 6) {
+        if (count($cron) == 6) {
             $date = [
                 'second' => $this->parseSegment($cron[0], 0, 59),
                 'minutes' => $this->parseSegment($cron[1], 0, 59),

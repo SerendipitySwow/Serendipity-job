@@ -10,8 +10,11 @@ namespace Serendipity\Job\Crontab;
 
 use Carbon\Carbon;
 use Closure;
+use Hyperf\Engine\Coroutine;
 use Psr\Container\ContainerInterface;
 use Serendipity\Job\Contract\LoggerInterface;
+use Serendipity\Job\Contract\StdoutLoggerInterface;
+use Throwable;
 
 class Executor
 {
@@ -41,7 +44,6 @@ class Executor
         $callback = null;
         switch ($crontab->getType()) {
             case 'callback':
-                //TODO 任务一直没执行
                 [$class, $method] = $crontab->getCallback();
                 $parameters = $crontab->getCallback()[2] ?? null;
                 if ($class && $method && class_exists($class) && method_exists($class, $method)) {
@@ -55,12 +57,13 @@ class Executor
                                 } else {
                                     $instance->{$method}();
                                 }
-                            } catch (\Throwable $throwable) {
+                            } catch (Throwable ) {
                                 $result = false;
                             } finally {
                                 $this->logResult($crontab, $result);
                             }
                         };
+
                         Coroutine::create($this->decorateRunnable($crontab, $runnable));
                     };
                 }
@@ -74,7 +77,7 @@ class Executor
                 };
                 break;
         }
-//        $callback && Timer::after($diff > 0 ? $diff * 1000 : 1, $callback);
+        $callback && sleep($diff > 0 ? $diff * 1000 : 0) === 0 && Closure::fromCallable($callback)();
     }
 
     protected function decorateRunnable(Crontab $crontab, Closure $runnable): Closure

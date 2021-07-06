@@ -44,11 +44,9 @@ class CrontabDispatcher
     {
         while (true) {
             $this->sleep();
-            //TODO 待确认是否要一直循环
             $crontabs = $this->scheduler->schedule();
             while (!$crontabs->isEmpty()) {
                 $crontab = $crontabs->dequeue();
-                //TODO dispatch crontab
                 $this->strategy->dispatch($crontab);
             }
         }
