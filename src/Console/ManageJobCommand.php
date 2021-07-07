@@ -247,7 +247,7 @@ final class ManageJobCommand extends Command
                                 break;
                             }
                         }
-                    } catch (Exception $exception) {
+                    } catch (Exception) {
                         // you can log error here
                     } finally {
                         $session->close();
@@ -302,8 +302,12 @@ final class ManageJobCommand extends Command
         );
     }
 
-    protected function makeConsumer(string $class, string $topic, string $channel): AbstractConsumer
-    {
+    protected function makeConsumer(
+        string $class,
+        string $topic,
+        string $channel,
+        string $redisPool = 'default'
+    ): AbstractConsumer {
         /**
          * @var AbstractConsumer $consumer
          */
@@ -311,6 +315,7 @@ final class ManageJobCommand extends Command
             ->get($class);
         $consumer->setTopic($topic);
         $consumer->setChannel($channel);
+        $consumer->setRedisPool($redisPool);
 
         return $consumer;
     }
@@ -319,7 +324,7 @@ final class ManageJobCommand extends Command
     {
         KernelProvider::create(self::COMMAND_PROVIDER_NAME)
             ->bootApp();
-        $this->dispatchCrontab();
+        Coroutine::run(fn () => $this->dispatchCrontab());
     }
 
     protected function dispatchCrontab(): void
@@ -329,6 +334,7 @@ final class ManageJobCommand extends Command
                 new CrontabEvent(),
                 CrontabEvent::CRONTAB_REGISTER
             );
-        $this->container->get(CrontabDispatcher::class)->handle();
+        $this->container->get(CrontabDispatcher::class)
+            ->handle();
     }
 }
