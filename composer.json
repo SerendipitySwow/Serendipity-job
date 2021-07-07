@@ -44,7 +44,7 @@
         "nesbot/carbon": "^2.49",
         "guzzlehttp/guzzle": "^7.3",
         "symfony/config": "^5.3",
-        "serendipity-swow/nsq": "^0.6.0",
+        "serendipity-swow/nsq": "^0.7.0",
         "serendipity-swow/sockets": "^0.6.0",
         "hyperf/di": "2.2.x-dev",
         "hyperf/engine-swow": "^1.1",

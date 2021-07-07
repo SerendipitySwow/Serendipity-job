@@ -42,9 +42,9 @@ use const Swow\Errno\ENOMEM;
 
 final class ManageJobCommand extends Command
 {
-    public static $defaultName = 'scheduler:consume';
+    public static $defaultName = 'manage-job:start';
 
-    protected const COMMAND_PROVIDER_NAME = 'Consumer-Job';
+    protected const COMMAND_PROVIDER_NAME = 'Manage-Job';
 
     protected const TASK_TYPE = [
         'dag',
@@ -64,7 +64,7 @@ final class ManageJobCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setDescription('Consumes tasks')
+            ->setDescription('Start Manage Job')
             ->setDefinition([
                 new InputOption(
                     'type',

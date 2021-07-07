@@ -5,7 +5,7 @@ Serendipity-Job:
     - Serendipity\Job\Logger\LoggerProvider
     ## 服务启动一定要在最后
     - Serendipity\Job\Server\ServerProvider
-Consumer-Job:
+Manage-Job:
   BootApp:
     - Serendipity\Job\Config\ConfigProvider
     - Serendipity\Job\Logger\LoggerProvider
