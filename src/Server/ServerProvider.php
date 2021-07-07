@@ -10,7 +10,7 @@ namespace Serendipity\Job\Server;
 
 use Carbon\Carbon;
 use Hyperf\Engine\Channel;
-use Serendipity\Job\Console\ConsumeJobCommand;
+use Serendipity\Job\Console\ManageJobCommand;
 use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\Contract\EventDispatcherInterface;
 use Serendipity\Job\Contract\LoggerInterface;
@@ -183,7 +183,7 @@ class ServerProvider extends AbstractProvider
                                                 JSON_THROW_ON_ERROR
                                             ),
                                         ], ['class' => $serializerObject::class]), JSON_THROW_ON_ERROR);
-                                        $nsq->publish(ConsumeJobCommand::TOPIC_PREFIX . 'task', $json);
+                                        $nsq->publish(ManageJobCommand::TOPIC_PREFIX . 'task', $json);
 
                                         $session->respond('Hello Nsq!');
                                         break;

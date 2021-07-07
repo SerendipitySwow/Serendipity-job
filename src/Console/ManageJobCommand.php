@@ -40,7 +40,7 @@ use const Swow\Errno\EMFILE;
 use const Swow\Errno\ENFILE;
 use const Swow\Errno\ENOMEM;
 
-final class ConsumeJobCommand extends Command
+final class ManageJobCommand extends Command
 {
     public static $defaultName = 'scheduler:consume';
 
@@ -139,7 +139,13 @@ final class ConsumeJobCommand extends Command
                 $this->stdoutLogger->info(ucfirst($type) . 'Consumerd#' . $i . ' start.');
             }
         }
+        $this->makeServer($host, $port);
 
+        return Command::SUCCESS;
+    }
+
+    protected function makeServer(string $host, int $port): void
+    {
         $server = new HttpServer();
         $server->bind($host, $port)
             ->listen();
@@ -255,8 +261,6 @@ final class ConsumeJobCommand extends Command
                 }
             }
         }
-
-        return Command::SUCCESS;
     }
 
     protected function subscribe(int $i, string $type): void
