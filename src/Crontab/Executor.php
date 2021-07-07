@@ -57,7 +57,7 @@ class Executor
                                 } else {
                                     $instance->{$method}();
                                 }
-                            } catch (Throwable ) {
+                            } catch (Throwable) {
                                 $result = false;
                             } finally {
                                 $this->logResult($crontab, $result);
