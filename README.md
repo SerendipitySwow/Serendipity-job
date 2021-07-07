@@ -15,6 +15,7 @@ Run into the beauty of PHP8 and Swow
 8.支持定时任务Crontab.(完成)
 9.支持任务图表(成功,失败,重试,超时,终止.)
 10.支持任务取消(完成)
+11.签名验证
 ```
 
 ## Please note
