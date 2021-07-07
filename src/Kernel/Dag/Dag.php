@@ -11,7 +11,6 @@ namespace Serendipity\Job\Kernel\Dag;
 use Hyperf\Engine\Channel;
 use Hyperf\Engine\Coroutine;
 use Serendipity\Job\Kernel\Dag\Exception\InvalidArgumentException;
-use Serendipity\Job\Util\Concurrent;
 use Serendipity\Job\Util\Waiter;
 use Throwable;
 
@@ -21,8 +20,6 @@ class Dag implements Runner
      * @var array<string,Vertex>
      */
     protected array $vertexes = [];
-
-    protected int $concurrency = 10;
 
     protected ?Waiter $waiter = null;
 
@@ -68,7 +65,6 @@ class Dag implements Runner
         $total = count($this->vertexes);
         $visited = [];
         $results = $args;
-        # $concurrent = new Concurrent($this->concurrency);
 
         while (count($visited) < $total) {
             $element = $queue->pop();
@@ -122,18 +118,6 @@ class Dag implements Runner
         }
 
         return $results;
-    }
-
-    public function getConcurrency(): int
-    {
-        return $this->concurrency;
-    }
-
-    public function setConcurrency(int $concurrency): self
-    {
-        $this->concurrency = $concurrency;
-
-        return $this;
     }
 
     private function scheduleChildren(Vertex $element, Channel $queue, array $visited): void
