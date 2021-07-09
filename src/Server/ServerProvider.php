@@ -9,7 +9,10 @@ declare(strict_types=1);
 namespace Serendipity\Job\Server;
 
 use Carbon\Carbon;
+use FastRoute\Dispatcher;
+use FastRoute\RouteCollector;
 use Hyperf\Engine\Channel;
+use Psr\Http\Message\RequestInterface;
 use Serendipity\Job\Console\ManageJobCommand;
 use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\Contract\EventDispatcherInterface;
@@ -26,6 +29,7 @@ use Serendipity\Job\Kernel\Provider\AbstractProvider;
 use Serendipity\Job\Kernel\Swow\ServerFactory;
 use Serendipity\Job\Logger\LoggerFactory;
 use Serendipity\Job\Serializer\SymfonySerializer;
+use Serendipity\Job\Util\Context;
 use SerendipitySwow\Nsq\Message;
 use SerendipitySwow\Nsq\Nsq;
 use SerendipitySwow\Nsq\Result;
@@ -38,6 +42,7 @@ use Swow\Http\Status;
 use Swow\Signal;
 use Swow\Socket\Exception;
 use Swow\Socket\Exception as SocketException;
+use function FastRoute\simpleDispatcher;
 use const Swow\Errno\EMFILE;
 use const Swow\Errno\ENFILE;
 use const Swow\Errno\ENOMEM;
@@ -383,38 +388,6 @@ class ServerProvider extends AbstractProvider
                                         $session->respond($request->getBodyAsString());
                                         break;
                                     }
-                                    ## websokcet
-                                    /*
-                                    case '/chat':
-                                    {
-                                        if ($upgrade = $request->getUpgrade()) {
-                                            if ($upgrade === $request::UPGRADE_WEBSOCKET) {
-                                                $session->upgradeToWebSocket($request);
-                                                $request = null;
-                                                while (true) {
-                                                    $frame = $session->recvWebSocketFrame();
-                                                    $opcode = $frame->getOpcode();
-                                                    switch ($opcode) {
-                                                        case WebSocketOpcode::PING:
-                                                            $session->sendString(WebSocketFrame::PONG);
-                                                            break;
-                                                        case WebSocketOpcode::PONG:
-                                                            break;
-                                                        case WebSocketOpcode::CLOSE:
-                                                            break 2;
-                                                        default:
-                                                            $frame->getPayloadData()->rewind()->write("You said: {$frame->getPayloadData()}");
-                                                            $session->sendWebSocketFrame($frame);
-                                                    }
-                                                }
-                                                break;
-                                            }
-                                            throw new HttpException(HttpStatus::BAD_REQUEST, 'Unsupported Upgrade Type');
-                                        }
-                                        $session->respond(file_get_contents(__DIR__ . '/chat.html'));
-                                        break;
-                                    }
-                                    */
                                     default:
                                     {
                                         $buffer = new Buffer();
@@ -491,5 +464,84 @@ class ServerProvider extends AbstractProvider
             }
         });
         */
+    }
+
+    protected function makeFastRoute(): Dispatcher
+    {
+        return simpleDispatcher(static function (RouteCollector $router) {
+            $router->get('/', static function (): Response {
+                $response = new Response();
+                $buffer = new Buffer();
+                $buffer->write(file_get_contents(BASE_PATH . '/storage/task.php'));
+                $response->setStatus(Status::OK);
+                $response->setHeader('Server', 'Serendipity-Job');
+                $response->setBody($buffer);
+                ## clear buffer
+                $buffer->clear();
+
+                return $response;
+            });
+            $router->post('/nsq/publish', function (): Response {
+                $response = new Response();
+                $buffer = new Buffer();
+                /**
+                 * @var Server\Request $request
+                 */
+                $request = Context::get(RequestInterface::class);
+                $config = $this->container()
+                    ->get(ConfigInterface::class)
+                    ->get(sprintf('nsq.%s', 'default'));
+                /**
+                 * @var Nsq $nsq
+                 */
+                $nsq = make(Nsq::class, [$this->container(), $config]);
+                $serializer = $this->container()
+                    ->get(SymfonySerializer::class);
+                //TODO xx 接受参数
+                $ret = DB::fetch('select * from task where id = ? limit 1;', ['xx']);
+                $content = json_decode($ret['content'], true, 512, JSON_THROW_ON_ERROR);
+                $serializerObject = make($content['class'], [
+                    'identity' => $ret['id'],
+                    'timeout' => $ret['timeout'],
+                    'step' => $ret['step'],
+                    'name' => $ret['name'],
+                    'retryTimes' => $ret['retry_times'],
+                ]);
+                $json = $serializer->serialize($serializerObject);
+                $json = json_encode(array_merge([
+                    'body' => json_decode(
+                        $json,
+                        true,
+                        512,
+                        JSON_THROW_ON_ERROR
+                    ),
+                ], ['class' => $serializerObject::class]), JSON_THROW_ON_ERROR);
+                $bool = $nsq->publish(ManageJobCommand::TOPIC_PREFIX . 'task', $json);
+                if ($bool) {
+                    $buffer->write(json_encode([
+                        'code' => 0,
+                        'msg' => 'Ok!',
+                        'data' => [],
+                    ], JSON_THROW_ON_ERROR));
+                } else {
+                    $buffer->write(json_encode([
+                        'code' => 1,
+                        'msg' => '推送nsq失败!',
+                        'data' => [],
+                    ], JSON_THROW_ON_ERROR));
+                }
+                $response->setStatus(Status::OK);
+                $response->setHeader('Server', 'Serendipity-Job');
+                $response->setBody($buffer);
+                ## clear buffer
+                $buffer->clear();
+
+                return $response;
+            });
+        });
+    }
+
+    protected function dispatcher(): void
+    {
     }
 }

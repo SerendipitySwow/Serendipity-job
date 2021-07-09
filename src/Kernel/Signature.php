@@ -10,6 +10,7 @@ namespace Serendipity\Job\Kernel;
 
 use Hyperf\Utils\Str;
 use Serendipity\Job\Contract\ConfigInterface;
+
 //TODO api签名验证
 class Signature
 {
