@@ -1,10 +1,11 @@
 <?php
 /**
  * This file is part of Serendipity Job
+ *
  * @license  https://github.com/serendipitySwow/Serendipity-job/blob/main/LICENSE
  */
 
-declare(strict_types=1);
+declare( strict_types = 1 );
 
 namespace Serendipity\Job\Server;
 
@@ -12,6 +13,7 @@ use Carbon\Carbon;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use Hyperf\Engine\Channel;
+use JetBrains\PhpStorm\Pure;
 use Psr\Http\Message\RequestInterface;
 use Serendipity\Job\Console\ManageJobCommand;
 use Serendipity\Job\Contract\ConfigInterface;
@@ -37,7 +39,8 @@ use Swow\Coroutine;
 use Swow\Coroutine\Exception as CoroutineException;
 use Swow\Http\Buffer;
 use Swow\Http\Server;
-use Swow\Http\Server\Response;
+use Swow\Http\Server\Request as SwowRequest;
+use Swow\Http\Server\Response as SwowResponse;
 use Swow\Http\Status;
 use Swow\Signal;
 use Swow\Socket\Exception;
@@ -53,19 +56,21 @@ class ServerProvider extends AbstractProvider
 
     protected LoggerInterface $logger;
 
-    public function bootApp(): void
+    protected Dispatcher $fastRouteDispatcher;
+
+    public function bootApp (): void
     {
         /**
          * @var Server $server
          */
         $server = $this->container()
-            ->make(ServerFactory::class)
-            ->start();
+                       ->make(ServerFactory::class)
+                       ->start();
         $this->stdoutLogger = $this->container()
-            ->get(StdoutLoggerInterface::class);
+                                   ->get(StdoutLoggerInterface::class);
         $this->logger = $this->container()
-            ->get(LoggerFactory::class)
-            ->get();
+                             ->get(LoggerFactory::class)
+                             ->get();
         $this->stdoutLogger->debug('Serendipity-Job Start Successfully#');
 
         while (true) {
@@ -86,7 +91,7 @@ class ServerProvider extends AbstractProvider
                                     {
                                         $buffer = new Buffer();
                                         $buffer->write(file_get_contents(BASE_PATH . '/storage/task.php'));
-                                        $response = new Response();
+                                        $response = new SwowResponse();
                                         $response->setStatus(Status::OK);
                                         $response->setHeader('Server', 'Serendipity-Job');
                                         $response->setBody($buffer);
@@ -105,10 +110,10 @@ class ServerProvider extends AbstractProvider
                                             'class' => Task1::class,
                                             'params' => [
                                                 'startDate' => Carbon::now()
-                                                    ->subDays(10)
-                                                    ->toDateString(),
+                                                                     ->subDays(10)
+                                                                     ->toDateString(),
                                                 'endDate' => Carbon::now()
-                                                    ->toDateString(),
+                                                                   ->toDateString(),
                                             ],
                                         ];
                                         echo json_encode($content);
@@ -116,11 +121,11 @@ class ServerProvider extends AbstractProvider
 //                                       $res = $db->query('select * from  `task`');
                                         $tasks = DB::query(
                                             'select `task_id` from vertex_edge where workflow_id = ?;',
-                                            [1]
+                                            [ 1 ]
                                         );
                                         $task = DB::query(
                                             'select * from task where id in (?);',
-                                            [implode(',', array_column($tasks, 'task_id'))]
+                                            [ implode(',', array_column($tasks, 'task_id')) ]
                                         );
                                         $session->respond(json_encode($task, JSON_THROW_ON_ERROR));
                                         break;
@@ -129,14 +134,14 @@ class ServerProvider extends AbstractProvider
                                     {
                                         $event = new UpdateJobEvent(1, 2);
                                         $this->container()
-                                            ->get(EventDispatcherInterface::class)
-                                            ->dispatch($event, UpdateJobEvent::UPDATE_JOB);
+                                             ->get(EventDispatcherInterface::class)
+                                             ->dispatch($event, UpdateJobEvent::UPDATE_JOB);
                                         break;
                                     }
                                     case '/ding':
                                     {
                                         make(DingTalk::class)
-                                            ->at(['13888888888'], true)
+                                            ->at([ '13888888888' ], true)
                                             ->text('我就是我,@13888888888 是不一样的烟火');
                                         break;
                                     }
@@ -153,7 +158,7 @@ class ServerProvider extends AbstractProvider
                                             break;
                                         }
                                         $this->stdoutLogger->error('test unlocked#error' . Coroutine::getCurrent()
-                                            ->getId());
+                                                                                                    ->getId());
                                         $session->respond('Hello Lock failed!');
                                         break;
                                     }
@@ -162,14 +167,14 @@ class ServerProvider extends AbstractProvider
                                     {
                                         //TODO 2021-06-27 测试nsq 推送任务
                                         $config = $this->container()
-                                            ->get(ConfigInterface::class)
-                                            ->get(sprintf('nsq.%s', 'default'));
+                                                       ->get(ConfigInterface::class)
+                                                       ->get(sprintf('nsq.%s', 'default'));
                                         /**
                                          * @var Nsq $nsq
                                          */
-                                        $nsq = make(Nsq::class, [$this->container(), $config]);
+                                        $nsq = make(Nsq::class, [ $this->container(), $config ]);
                                         $serializer = $this->container()
-                                            ->get(SymfonySerializer::class);
+                                                           ->get(SymfonySerializer::class);
                                         $ret = DB::fetch('select * from task where id = 1 limit 1;');
                                         $content = json_decode($ret['content'], true, 512, JSON_THROW_ON_ERROR);
                                         $serializerObject = make($content['class'], [
@@ -187,7 +192,7 @@ class ServerProvider extends AbstractProvider
                                                 512,
                                                 JSON_THROW_ON_ERROR
                                             ),
-                                        ], ['class' => $serializerObject::class]), JSON_THROW_ON_ERROR);
+                                        ], [ 'class' => $serializerObject::class ]), JSON_THROW_ON_ERROR);
                                         $nsq->publish(ManageJobCommand::TOPIC_PREFIX . 'task', $json);
 
                                         $session->respond('Hello Nsq!');
@@ -196,12 +201,12 @@ class ServerProvider extends AbstractProvider
                                     case '/nsq/subscribe':
                                     {
                                         $config = $this->container()
-                                            ->get(ConfigInterface::class)
-                                            ->get(sprintf('nsq.%s', 'default'));
+                                                       ->get(ConfigInterface::class)
+                                                       ->get(sprintf('nsq.%s', 'default'));
                                         /**
                                          * @var Nsq $nsq
                                          */
-                                        $nsq = make(Nsq::class, [$this->container(), $config]);
+                                        $nsq = make(Nsq::class, [ $this->container(), $config ]);
 
                                         Coroutine::run(function () use ($nsq) {
                                             $nsq->subscribe('test', 'v2', function (Message $data) {
@@ -323,44 +328,44 @@ class ServerProvider extends AbstractProvider
                                             private $createdAt;
 
                                             // Getters
-                                            public function getName()
+                                            public function getName ()
                                             {
                                                 return $this->name;
                                             }
 
-                                            public function getAge()
+                                            public function getAge ()
                                             {
                                                 return $this->age;
                                             }
 
-                                            public function getCreatedAt()
+                                            public function getCreatedAt ()
                                             {
                                                 return $this->createdAt;
                                             }
 
                                             // Issers
-                                            public function isSportsperson()
+                                            public function isSportsperson ()
                                             {
                                                 return $this->sportsperson;
                                             }
 
                                             // Setters
-                                            public function setName($name)
+                                            public function setName ($name)
                                             {
                                                 $this->name = $name;
                                             }
 
-                                            public function setAge($age)
+                                            public function setAge ($age)
                                             {
                                                 $this->age = $age;
                                             }
 
-                                            public function setSportsperson($sportsperson)
+                                            public function setSportsperson ($sportsperson)
                                             {
                                                 $this->sportsperson = $sportsperson;
                                             }
 
-                                            public function setCreatedAt($createdAt)
+                                            public function setCreatedAt ($createdAt)
                                             {
                                                 $this->createdAt = $createdAt;
                                             }
@@ -369,7 +374,7 @@ class ServerProvider extends AbstractProvider
                                         $person->setAge(99);
                                         $person->setSportsperson(false);
                                         $serializer = $this->container()
-                                            ->get(SymfonySerializer::class);
+                                                           ->get(SymfonySerializer::class);
                                         $json = $serializer->serialize($person);
                                         $this->stdoutLogger->debug(sprintf(
                                             'Class Serializer returned[%s]#',
@@ -392,7 +397,7 @@ class ServerProvider extends AbstractProvider
                                     {
                                         $buffer = new Buffer();
                                         $buffer->write(file_get_contents(BASE_PATH . '/storage/404.php'));
-                                        $response = new Response();
+                                        $response = new SwowResponse();
                                         $response->setStatus(Status::NOT_FOUND);
                                         $response->setHeader('Server', 'Serendipity-Job');
                                         $response->setBody($buffer);
@@ -421,7 +426,7 @@ class ServerProvider extends AbstractProvider
                     }
                 });
             } catch (SocketException | CoroutineException $exception) {
-                if (in_array($exception->getCode(), [EMFILE, ENFILE, ENOMEM], true)) {
+                if (in_array($exception->getCode(), [ EMFILE, ENFILE, ENOMEM ], true)) {
                     sleep(1);
                 } else {
                     break;
@@ -466,11 +471,11 @@ class ServerProvider extends AbstractProvider
         */
     }
 
-    protected function makeFastRoute(): Dispatcher
+    protected function makeFastRoute (): void
     {
-        return simpleDispatcher(static function (RouteCollector $router) {
-            $router->get('/', static function (): Response {
-                $response = new Response();
+        $this->fastRouteDispatcher = simpleDispatcher(static function (RouteCollector $router) {
+            $router->get('/', static function (): SwowResponse {
+                $response = new SwowResponse();
                 $buffer = new Buffer();
                 $buffer->write(file_get_contents(BASE_PATH . '/storage/task.php'));
                 $response->setStatus(Status::OK);
@@ -481,24 +486,24 @@ class ServerProvider extends AbstractProvider
 
                 return $response;
             });
-            $router->post('/nsq/publish', function (): Response {
-                $response = new Response();
+            $router->post('/nsq/publish', function (): SwowResponse {
+                $response = new SwowResponse();
                 $buffer = new Buffer();
                 /**
-                 * @var Server\Request $request
+                 * @var Request $request
                  */
                 $request = Context::get(RequestInterface::class);
                 $config = $this->container()
-                    ->get(ConfigInterface::class)
-                    ->get(sprintf('nsq.%s', 'default'));
+                               ->get(ConfigInterface::class)
+                               ->get(sprintf('nsq.%s', 'default'));
                 /**
                  * @var Nsq $nsq
                  */
-                $nsq = make(Nsq::class, [$this->container(), $config]);
+                $nsq = make(Nsq::class, [ $this->container(), $config ]);
                 $serializer = $this->container()
-                    ->get(SymfonySerializer::class);
+                                   ->get(SymfonySerializer::class);
                 //TODO xx 接受参数
-                $ret = DB::fetch('select * from task where id = ? limit 1;', ['xx']);
+                $ret = DB::fetch('select * from task where id = ? limit 1;', [ 'xx' ]);
                 $content = json_decode($ret['content'], true, 512, JSON_THROW_ON_ERROR);
                 $serializerObject = make($content['class'], [
                     'identity' => $ret['id'],
@@ -515,7 +520,7 @@ class ServerProvider extends AbstractProvider
                         512,
                         JSON_THROW_ON_ERROR
                     ),
-                ], ['class' => $serializerObject::class]), JSON_THROW_ON_ERROR);
+                ], [ 'class' => $serializerObject::class ]), JSON_THROW_ON_ERROR);
                 $bool = $nsq->publish(ManageJobCommand::TOPIC_PREFIX . 'task', $json);
                 if ($bool) {
                     $buffer->write(json_encode([
@@ -541,7 +546,29 @@ class ServerProvider extends AbstractProvider
         });
     }
 
-    protected function dispatcher(): void
+    protected function dispatcher (SwowRequest $request): void
     {
+        $uri = $request->getPath();
+        $method = $request->getMethod();
+        if (false !== $pos = strpos($uri, '?')) {
+            $uri = substr($uri, 0, $pos);
+        }
+        $uri = rawurldecode($uri);
+        $routeInfo = $this->fastRouteDispatcher->dispatch($method, $uri);
+        //TODO
+        switch ($routeInfo[0]) {
+            case Dispatcher::NOT_FOUND:
+                // ... 404 Not Found 没找到对应的方法
+                break;
+            case Dispatcher::METHOD_NOT_ALLOWED:
+                $allowedMethods = $routeInfo[1];
+                // ... 405 Method Not Allowed  方法不允许
+                break;
+            case Dispatcher::FOUND: // 找到对应的方法
+                $handler = $routeInfo[1]; // 获得处理函数
+                $vars = $routeInfo[2]; // 获取请求参数
+                // ... call $handler with $vars // 调用处理函数
+                break;
+        }
     }
 }
