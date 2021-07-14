@@ -71,10 +71,10 @@ class ServerProvider extends AbstractProvider
             ->get(LoggerFactory::class)
             ->get();
         $this->stdoutLogger->debug('Serendipity-Job Start Successfully#');
+        $this->makeFastRoute();
 
         while (true) {
             try {
-                $coroutine = Coroutine::getCurrent();
                 $session = $server->acceptSession();
                 Coroutine::run(function () use ($session) {
                     try {
@@ -85,331 +85,333 @@ class ServerProvider extends AbstractProvider
                             $request = null;
                             try {
                                 $request = $session->recvHttpRequest();
-                                switch ($request->getPath()) {
-                                    case '/':
-                                    {
-                                        $buffer = new Buffer();
-                                        $buffer->write(file_get_contents(BASE_PATH . '/storage/task.php'));
-                                        $response = new SwowResponse();
-                                        $response->setStatus(Status::OK);
-                                        $response->setHeader('Server', 'Serendipity-Job');
-                                        $response->setBody($buffer);
-                                        $session->sendHttpResponse($response);
-                                        ## clear buffer
-                                        $buffer->clear();
-                                        $this->stdoutLogger->debug(sprintf(
-                                            'Http Client Fd[%s] Debug#',
-                                            (string) $session->getFd()
-                                        ));
-                                        break;
-                                    }
-                                    case '/db':
-                                    {
-                                        $content = [
-                                            'class' => Task1::class,
-                                            'params' => [
-                                                'startDate' => Carbon::now()
-                                                    ->subDays(10)
-                                                    ->toDateString(),
-                                                'endDate' => Carbon::now()
-                                                    ->toDateString(),
-                                            ],
-                                        ];
-                                        echo json_encode($content);
-//                                        $db = $this->container()->get(DB::class);
-//                                       $res = $db->query('select * from  `task`');
-                                        $tasks = DB::query(
-                                            'select `task_id` from vertex_edge where workflow_id = ?;',
-                                            [1]
-                                        );
-                                        $task = DB::query(
-                                            'select * from task where id in (?);',
-                                            [implode(',', array_column($tasks, 'task_id'))]
-                                        );
-                                        $session->respond(json_encode($task, JSON_THROW_ON_ERROR));
-                                        break;
-                                    }
-                                    case '/event':
-                                    {
-                                        $event = new UpdateJobEvent(1, 2);
-                                        $this->container()
-                                            ->get(EventDispatcherInterface::class)
-                                            ->dispatch($event, UpdateJobEvent::UPDATE_JOB);
-                                        break;
-                                    }
-                                    case '/ding':
-                                    {
-                                        make(DingTalk::class)
-                                            ->at(['13888888888'], true)
-                                            ->text('我就是我,@13888888888 是不一样的烟火');
-                                        break;
-                                    }
-                                    case '/lock':
-                                    {
-                                        $redis = new \Redis();
-                                        $redis->connect('127.0.0.1', 6379);
-                                        $lock = new RedisLock($redis);
-                                        if ($lock->lock('test')) {
-                                            $this->stdoutLogger->debug('test locked#');
-                                            $lock->unlock('test');
-                                            $this->stdoutLogger->debug('test unlocked#' . date('Y-m-d H:i:s'));
-                                            $session->respond('Hello Lock!');
-                                            break;
-                                        }
-                                        $this->stdoutLogger->error('test unlocked#error' . Coroutine::getCurrent()
-                                            ->getId());
-                                        $session->respond('Hello Lock failed!');
-                                        break;
-                                    }
-
-                                    case '/nsq/publish':
-                                    {
-                                        //TODO 2021-06-27 测试nsq 推送任务
-                                        $config = $this->container()
-                                            ->get(ConfigInterface::class)
-                                            ->get(sprintf('nsq.%s', 'default'));
-                                        /**
-                                         * @var Nsq $nsq
-                                         */
-                                        $nsq = make(Nsq::class, [$this->container(), $config]);
-                                        $serializer = $this->container()
-                                            ->get(SymfonySerializer::class);
-                                        $ret = DB::fetch('select * from task where id = 1 limit 1;');
-                                        $content = json_decode($ret['content'], true, 512, JSON_THROW_ON_ERROR);
-                                        $serializerObject = make($content['class'], [
-                                            'identity' => $ret['id'],
-                                            'timeout' => $ret['timeout'],
-                                            'step' => $ret['step'],
-                                            'name' => $ret['name'],
-                                            'retryTimes' => $ret['retry_times'],
-                                        ]);
-                                        $json = $serializer->serialize($serializerObject);
-                                        $json = json_encode(array_merge([
-                                            'body' => json_decode(
-                                                $json,
-                                                true,
-                                                512,
-                                                JSON_THROW_ON_ERROR
-                                            ),
-                                        ], ['class' => $serializerObject::class]), JSON_THROW_ON_ERROR);
-                                        $nsq->publish(ManageJobCommand::TOPIC_PREFIX . 'task', $json);
-
-                                        $session->respond('Hello Nsq!');
-                                        break;
-                                    }
-                                    case '/nsq/subscribe':
-                                    {
-                                        $config = $this->container()
-                                            ->get(ConfigInterface::class)
-                                            ->get(sprintf('nsq.%s', 'default'));
-                                        /**
-                                         * @var Nsq $nsq
-                                         */
-                                        $nsq = make(Nsq::class, [$this->container(), $config]);
-
-                                        Coroutine::run(function () use ($nsq) {
-                                            $nsq->subscribe('test', 'v2', function (Message $data) {
-                                                $this->stdoutLogger->error('Subscribe ' . $data->getBody() . PHP_EOL);
-
-                                                return Result::ACK;
-                                            });
-                                        });
-                                        $session->respond('Hello Nsq-subscribe!');
-                                        break;
-                                    }
-                                    case '/dag':
-                                    {
-                                        // return response
-                                        \Serendipity\Job\Util\Coroutine::create(function () use ($session) {
-                                            $session->respond('Hello Swow');
-                                        });
-                                        ## Dag
-                                        $dag = new Dag();
-                                        ## 除了使用闭包外还可以实现 Serendipity\Job\Kernel\Dag\Runner接口来定义.并通过 Vertex::of 将其转化为一个顶点。
-                                        /**
-                                         * class MyJob implements \Hyperf\Dag\Runner {
-                                         * public function run($results = []) {
-                                         * return 'hello';
-                                         * }
-                                         * }
-                                         * \Hyperf\Dag\Vertex::of(new MyJob(), "greeting");
-                                         */
-                                        $a = Vertex::make(function () {
-                                            sleep(1);
-                                            echo "A\n";
-
-                                            return 'A';
-                                        }, 2000);
-                                        $b = Vertex::make(function ($results) use ($a) {
-                                            sleep(1);
-                                            echo "B\n";
-                                            echo $results[$a->key] . PHP_EOL;
-
-                                            return 'B';
-                                        }, 2000);
-                                        $c = Vertex::make(function () {
-                                            sleep(1);
-                                            echo "C\n";
-
-                                            return "C\n";
-                                        }, 2000);
-                                        $d = Vertex::make(function () {
-                                            sleep(1);
-                                            echo "D\n";
-
-                                            return "D\n";
-                                        }, 2000);
-                                        $e = Vertex::make(function () {
-                                            sleep(1);
-                                            echo "E\n";
-
-                                            return "E\n";
-                                        }, 2000);
-                                        $f = Vertex::make(function () {
-                                            sleep(1);
-                                            echo "F\n";
-
-                                            return "F\n";
-                                        }, 2000);
-                                        $g = Vertex::make(function () {
-                                            sleep(1);
-                                            echo "G\n";
-
-                                            return "G\n";
-                                        }, 2000);
-                                        $h = Vertex::make(function () {
-                                            sleep(1);
-                                            echo "H\n";
-
-                                            return "H\n";
-                                        }, 2000);
-                                        $i = Vertex::make(function () {
-                                            sleep(1);
-                                            echo "I\n";
-
-                                            return "I\n";
-                                        }, 2000);
-                                        $dag->addVertex($a)
-                                            ->addVertex($b)
-                                            ->addVertex($c)
-                                            ->addVertex($d)
-                                            ->addVertex($e)
-                                            ->addVertex($f)
-                                            ->addVertex($g)
-                                            ->addVertex($h)
-                                            ->addVertex($i)
-                                            ->addEdge($a, $b)
-                                            ->addEdge($a, $c)
-                                            ->addEdge($a, $d)
-                                            ->addEdge($b, $h)
-                                            ->addEdge($b, $e)
-                                            ->addEdge($b, $f)
-                                            ->addEdge($c, $f)
-                                            ->addEdge($c, $g)
-                                            ->addEdge($d, $g)
-                                            ->addEdge($h, $i)
-                                            ->addEdge($e, $i)
-                                            ->addEdge($f, $i)
-                                            ->addEdge($g, $i);
-                                        $arr = $dag->run();
-                                        break;
-                                    }
-                                    ## serializable
-                                    case '/serializable':
-                                    {
-                                        $person = new class() {
-                                            private $age;
-
-                                            private $name;
-
-                                            private $sportsperson;
-
-                                            private $createdAt;
-
-                                            // Getters
-                                            public function getName()
-                                            {
-                                                return $this->name;
-                                            }
-
-                                            public function getAge()
-                                            {
-                                                return $this->age;
-                                            }
-
-                                            public function getCreatedAt()
-                                            {
-                                                return $this->createdAt;
-                                            }
-
-                                            // Issers
-                                            public function isSportsperson()
-                                            {
-                                                return $this->sportsperson;
-                                            }
-
-                                            // Setters
-                                            public function setName($name)
-                                            {
-                                                $this->name = $name;
-                                            }
-
-                                            public function setAge($age)
-                                            {
-                                                $this->age = $age;
-                                            }
-
-                                            public function setSportsperson($sportsperson)
-                                            {
-                                                $this->sportsperson = $sportsperson;
-                                            }
-
-                                            public function setCreatedAt($createdAt)
-                                            {
-                                                $this->createdAt = $createdAt;
-                                            }
-                                        };
-                                        $person->setName('foo');
-                                        $person->setAge(99);
-                                        $person->setSportsperson(false);
-                                        $serializer = $this->container()
-                                            ->get(SymfonySerializer::class);
-                                        $json = $serializer->serialize($person);
-                                        $this->stdoutLogger->debug(sprintf(
-                                            'Class Serializer returned[%s]#',
-                                            $json
-                                        ));
-                                        $object = $serializer->deserialize($json, $person::class);
-                                        $this->stdoutLogger->debug(sprintf(
-                                            'Class Deserializer returned[%s]#',
-                                            get_class($object)
-                                        ));
-                                        $session->respond($json);
-                                        break;
-                                    }
-                                    case '/echo':
-                                    {
-                                        $session->respond($request->getBodyAsString());
-                                        break;
-                                    }
-                                    default:
-                                    {
-                                        $buffer = new Buffer();
-                                        $buffer->write(file_get_contents(BASE_PATH . '/storage/404.php'));
-                                        $response = new SwowResponse();
-                                        $response->setStatus(Status::NOT_FOUND);
-                                        $response->setHeader('Server', 'Serendipity-Job');
-                                        $response->setBody($buffer);
-                                        $session->sendHttpResponse($response);
-                                        ## clear buffer
-                                        $buffer->clear();
-                                        $this->stdoutLogger->debug(sprintf(
-                                            'Http Client Fd[%s] NotFound#',
-                                            (string) $session->getFd()
-                                        ));
-                                        break;
-                                    }
-                                }
+                                $response = $this->dispatcher($request, $session);
+                                $session->sendHttpResponse($response);
+//                                switch ($request->getPath()) {
+//                                    case '/':
+//                                    {
+//                                        $buffer = new Buffer();
+//                                        $buffer->write(file_get_contents(BASE_PATH . '/storage/task.php'));
+//                                        $response = new SwowResponse();
+//                                        $response->setStatus(Status::OK);
+//                                        $response->setHeader('Server', 'Serendipity-Job');
+//                                        $response->setBody($buffer);
+//                                        $session->sendHttpResponse($response);
+//                                        ## clear buffer
+//                                        $buffer->clear();
+//                                        $this->stdoutLogger->debug(sprintf(
+//                                            'Http Client Fd[%s] Debug#',
+//                                            (string) $session->getFd()
+//                                        ));
+//                                        break;
+//                                    }
+//                                    case '/db':
+//                                    {
+//                                        $content = [
+//                                            'class' => Task1::class,
+//                                            'params' => [
+//                                                'startDate' => Carbon::now()
+//                                                    ->subDays(10)
+//                                                    ->toDateString(),
+//                                                'endDate' => Carbon::now()
+//                                                    ->toDateString(),
+//                                            ],
+//                                        ];
+//                                        echo json_encode($content);
+////                                        $db = $this->container()->get(DB::class);
+////                                       $res = $db->query('select * from  `task`');
+//                                        $tasks = DB::query(
+//                                            'select `task_id` from vertex_edge where workflow_id = ?;',
+//                                            [1]
+//                                        );
+//                                        $task = DB::query(
+//                                            'select * from task where id in (?);',
+//                                            [implode(',', array_column($tasks, 'task_id'))]
+//                                        );
+//                                        $session->respond(json_encode($task, JSON_THROW_ON_ERROR));
+//                                        break;
+//                                    }
+//                                    case '/event':
+//                                    {
+//                                        $event = new UpdateJobEvent(1, 2);
+//                                        $this->container()
+//                                            ->get(EventDispatcherInterface::class)
+//                                            ->dispatch($event, UpdateJobEvent::UPDATE_JOB);
+//                                        break;
+//                                    }
+//                                    case '/ding':
+//                                    {
+//                                        make(DingTalk::class)
+//                                            ->at(['13888888888'], true)
+//                                            ->text('我就是我,@13888888888 是不一样的烟火');
+//                                        break;
+//                                    }
+//                                    case '/lock':
+//                                    {
+//                                        $redis = new \Redis();
+//                                        $redis->connect('127.0.0.1', 6379);
+//                                        $lock = new RedisLock($redis);
+//                                        if ($lock->lock('test')) {
+//                                            $this->stdoutLogger->debug('test locked#');
+//                                            $lock->unlock('test');
+//                                            $this->stdoutLogger->debug('test unlocked#' . date('Y-m-d H:i:s'));
+//                                            $session->respond('Hello Lock!');
+//                                            break;
+//                                        }
+//                                        $this->stdoutLogger->error('test unlocked#error' . Coroutine::getCurrent()
+//                                            ->getId());
+//                                        $session->respond('Hello Lock failed!');
+//                                        break;
+//                                    }
+//
+//                                    case '/nsq/publish':
+//                                    {
+//                                        //TODO 2021-06-27 测试nsq 推送任务
+//                                        $config = $this->container()
+//                                            ->get(ConfigInterface::class)
+//                                            ->get(sprintf('nsq.%s', 'default'));
+//                                        /**
+//                                         * @var Nsq $nsq
+//                                         */
+//                                        $nsq = make(Nsq::class, [$this->container(), $config]);
+//                                        $serializer = $this->container()
+//                                            ->get(SymfonySerializer::class);
+//                                        $ret = DB::fetch('select * from task where id = 1 limit 1;');
+//                                        $content = json_decode($ret['content'], true, 512, JSON_THROW_ON_ERROR);
+//                                        $serializerObject = make($content['class'], [
+//                                            'identity' => $ret['id'],
+//                                            'timeout' => $ret['timeout'],
+//                                            'step' => $ret['step'],
+//                                            'name' => $ret['name'],
+//                                            'retryTimes' => $ret['retry_times'],
+//                                        ]);
+//                                        $json = $serializer->serialize($serializerObject);
+//                                        $json = json_encode(array_merge([
+//                                            'body' => json_decode(
+//                                                $json,
+//                                                true,
+//                                                512,
+//                                                JSON_THROW_ON_ERROR
+//                                            ),
+//                                        ], ['class' => $serializerObject::class]), JSON_THROW_ON_ERROR);
+//                                        $nsq->publish(ManageJobCommand::TOPIC_PREFIX . 'task', $json);
+//
+//                                        $session->respond('Hello Nsq!');
+//                                        break;
+//                                    }
+//                                    case '/nsq/subscribe':
+//                                    {
+//                                        $config = $this->container()
+//                                            ->get(ConfigInterface::class)
+//                                            ->get(sprintf('nsq.%s', 'default'));
+//                                        /**
+//                                         * @var Nsq $nsq
+//                                         */
+//                                        $nsq = make(Nsq::class, [$this->container(), $config]);
+//
+//                                        Coroutine::run(function () use ($nsq) {
+//                                            $nsq->subscribe('test', 'v2', function (Message $data) {
+//                                                $this->stdoutLogger->error('Subscribe ' . $data->getBody() . PHP_EOL);
+//
+//                                                return Result::ACK;
+//                                            });
+//                                        });
+//                                        $session->respond('Hello Nsq-subscribe!');
+//                                        break;
+//                                    }
+//                                    case '/dag':
+//                                    {
+//                                        // return response
+//                                        \Serendipity\Job\Util\Coroutine::create(function () use ($session) {
+//                                            $session->respond('Hello Swow');
+//                                        });
+//                                        ## Dag
+//                                        $dag = new Dag();
+//                                        ## 除了使用闭包外还可以实现 Serendipity\Job\Kernel\Dag\Runner接口来定义.并通过 Vertex::of 将其转化为一个顶点。
+//                                        /**
+//                                         * class MyJob implements \Hyperf\Dag\Runner {
+//                                         * public function run($results = []) {
+//                                         * return 'hello';
+//                                         * }
+//                                         * }
+//                                         * \Hyperf\Dag\Vertex::of(new MyJob(), "greeting");
+//                                         */
+//                                        $a = Vertex::make(function () {
+//                                            sleep(1);
+//                                            echo "A\n";
+//
+//                                            return 'A';
+//                                        }, 2000);
+//                                        $b = Vertex::make(function ($results) use ($a) {
+//                                            sleep(1);
+//                                            echo "B\n";
+//                                            echo $results[$a->key] . PHP_EOL;
+//
+//                                            return 'B';
+//                                        }, 2000);
+//                                        $c = Vertex::make(function () {
+//                                            sleep(1);
+//                                            echo "C\n";
+//
+//                                            return "C\n";
+//                                        }, 2000);
+//                                        $d = Vertex::make(function () {
+//                                            sleep(1);
+//                                            echo "D\n";
+//
+//                                            return "D\n";
+//                                        }, 2000);
+//                                        $e = Vertex::make(function () {
+//                                            sleep(1);
+//                                            echo "E\n";
+//
+//                                            return "E\n";
+//                                        }, 2000);
+//                                        $f = Vertex::make(function () {
+//                                            sleep(1);
+//                                            echo "F\n";
+//
+//                                            return "F\n";
+//                                        }, 2000);
+//                                        $g = Vertex::make(function () {
+//                                            sleep(1);
+//                                            echo "G\n";
+//
+//                                            return "G\n";
+//                                        }, 2000);
+//                                        $h = Vertex::make(function () {
+//                                            sleep(1);
+//                                            echo "H\n";
+//
+//                                            return "H\n";
+//                                        }, 2000);
+//                                        $i = Vertex::make(function () {
+//                                            sleep(1);
+//                                            echo "I\n";
+//
+//                                            return "I\n";
+//                                        }, 2000);
+//                                        $dag->addVertex($a)
+//                                            ->addVertex($b)
+//                                            ->addVertex($c)
+//                                            ->addVertex($d)
+//                                            ->addVertex($e)
+//                                            ->addVertex($f)
+//                                            ->addVertex($g)
+//                                            ->addVertex($h)
+//                                            ->addVertex($i)
+//                                            ->addEdge($a, $b)
+//                                            ->addEdge($a, $c)
+//                                            ->addEdge($a, $d)
+//                                            ->addEdge($b, $h)
+//                                            ->addEdge($b, $e)
+//                                            ->addEdge($b, $f)
+//                                            ->addEdge($c, $f)
+//                                            ->addEdge($c, $g)
+//                                            ->addEdge($d, $g)
+//                                            ->addEdge($h, $i)
+//                                            ->addEdge($e, $i)
+//                                            ->addEdge($f, $i)
+//                                            ->addEdge($g, $i);
+//                                        $arr = $dag->run();
+//                                        break;
+//                                    }
+//                                    ## serializable
+//                                    case '/serializable':
+//                                    {
+//                                        $person = new class() {
+//                                            private $age;
+//
+//                                            private $name;
+//
+//                                            private $sportsperson;
+//
+//                                            private $createdAt;
+//
+//                                            // Getters
+//                                            public function getName()
+//                                            {
+//                                                return $this->name;
+//                                            }
+//
+//                                            public function getAge()
+//                                            {
+//                                                return $this->age;
+//                                            }
+//
+//                                            public function getCreatedAt()
+//                                            {
+//                                                return $this->createdAt;
+//                                            }
+//
+//                                            // Issers
+//                                            public function isSportsperson()
+//                                            {
+//                                                return $this->sportsperson;
+//                                            }
+//
+//                                            // Setters
+//                                            public function setName($name)
+//                                            {
+//                                                $this->name = $name;
+//                                            }
+//
+//                                            public function setAge($age)
+//                                            {
+//                                                $this->age = $age;
+//                                            }
+//
+//                                            public function setSportsperson($sportsperson)
+//                                            {
+//                                                $this->sportsperson = $sportsperson;
+//                                            }
+//
+//                                            public function setCreatedAt($createdAt)
+//                                            {
+//                                                $this->createdAt = $createdAt;
+//                                            }
+//                                        };
+//                                        $person->setName('foo');
+//                                        $person->setAge(99);
+//                                        $person->setSportsperson(false);
+//                                        $serializer = $this->container()
+//                                            ->get(SymfonySerializer::class);
+//                                        $json = $serializer->serialize($person);
+//                                        $this->stdoutLogger->debug(sprintf(
+//                                            'Class Serializer returned[%s]#',
+//                                            $json
+//                                        ));
+//                                        $object = $serializer->deserialize($json, $person::class);
+//                                        $this->stdoutLogger->debug(sprintf(
+//                                            'Class Deserializer returned[%s]#',
+//                                            get_class($object)
+//                                        ));
+//                                        $session->respond($json);
+//                                        break;
+//                                    }
+//                                    case '/echo':
+//                                    {
+//                                        $session->respond($request->getBodyAsString());
+//                                        break;
+//                                    }
+//                                    default:
+//                                    {
+//                                        $buffer = new Buffer();
+//                                        $buffer->write(file_get_contents(BASE_PATH . '/storage/404.php'));
+//                                        $response = new SwowResponse();
+//                                        $response->setStatus(Status::NOT_FOUND);
+//                                        $response->setHeader('Server', 'Serendipity-Job');
+//                                        $response->setBody($buffer);
+//                                        $session->sendHttpResponse($response);
+//                                        ## clear buffer
+//                                        $buffer->clear();
+//                                        $this->stdoutLogger->debug(sprintf(
+//                                            'Http Client Fd[%s] NotFound#',
+//                                            (string) $session->getFd()
+//                                        ));
+//                                        break;
+//                                    }
+//                                }
                             } catch (HttpException $exception) {
                                 $session->error($exception->getCode(), $exception->getMessage());
                             }
@@ -472,16 +474,18 @@ class ServerProvider extends AbstractProvider
 
     protected function makeFastRoute(): void
     {
-        $this->fastRouteDispatcher = simpleDispatcher(static function (RouteCollector $router) {
+        $this->fastRouteDispatcher = simpleDispatcher(function (RouteCollector $router) {
             $router->get('/', static function (): SwowResponse {
+                /**
+                 * @var Request $request
+                 */
+                $request = Context::get(RequestInterface::class);
                 $response = new SwowResponse();
                 $buffer = new Buffer();
                 $buffer->write(file_get_contents(BASE_PATH . '/storage/task.php'));
                 $response->setStatus(Status::OK);
                 $response->setHeader('Server', 'Serendipity-Job');
                 $response->setBody($buffer);
-                ## clear buffer
-                $buffer->clear();
 
                 return $response;
             });
@@ -489,9 +493,11 @@ class ServerProvider extends AbstractProvider
                 $response = new SwowResponse();
                 $buffer = new Buffer();
                 /**
-                 * @var Request $request
+                 * @var SwowRequest $request
                  */
                 $request = Context::get(RequestInterface::class);
+                $params = json_decode($request->getBody()
+                    ->getContents(), true, 512, JSON_THROW_ON_ERROR);
                 $config = $this->container()
                     ->get(ConfigInterface::class)
                     ->get(sprintf('nsq.%s', 'default'));
@@ -501,8 +507,7 @@ class ServerProvider extends AbstractProvider
                 $nsq = make(Nsq::class, [$this->container(), $config]);
                 $serializer = $this->container()
                     ->get(SymfonySerializer::class);
-                //TODO xx 接受参数
-                $ret = DB::fetch('select * from task where id = ? limit 1;', ['xx']);
+                $ret = DB::fetch('select * from task where id = ? limit 1;', [$params['task_id']]);
                 $content = json_decode($ret['content'], true, 512, JSON_THROW_ON_ERROR);
                 $serializerObject = make($content['class'], [
                     'identity' => $ret['id'],
@@ -537,8 +542,6 @@ class ServerProvider extends AbstractProvider
                 $response->setStatus(Status::OK);
                 $response->setHeader('Server', 'Serendipity-Job');
                 $response->setBody($buffer);
-                ## clear buffer
-                $buffer->clear();
 
                 return $response;
             });
@@ -549,6 +552,9 @@ class ServerProvider extends AbstractProvider
     {
         $channel = new Channel();
         Coroutine::run(function () use ($request, $channel) {
+            \Swow\defer(function () {
+                Context::destroy(RequestInterface::class);
+            });
             Context::set(RequestInterface::class, $request);
             $uri = $request->getPath();
             $method = $request->getMethod();
@@ -566,15 +572,13 @@ class ServerProvider extends AbstractProvider
                     $response->setStatus(Status::NOT_FOUND);
                     $response->setHeader('Server', 'Serendipity-Job');
                     $response->setBody($buffer);
-                    ## clear buffer
-                    $buffer->clear();
                     break;
                 case Dispatcher::METHOD_NOT_ALLOWED:
                     $allowedMethods = $routeInfo[1];
                     // ... 405 Method Not Allowed  方法不允许
                     break;
                 case Dispatcher::FOUND: // 找到对应的方法
-                    [ $handler, $vars ] = $routeInfo;
+                    [ $uri,$handler, $vars ] = $routeInfo;
                     // ... call $handler with $vars // 调用处理函数
                     $response = call($handler, $vars);
                     break;
