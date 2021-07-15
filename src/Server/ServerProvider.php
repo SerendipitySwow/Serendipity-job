@@ -84,7 +84,7 @@ class ServerProvider extends AbstractProvider
                                 break;
                             }
                         }
-                    } catch (Exception $exception) {
+                    } catch (Exception) {
                         // you can log error here
                     } finally {
                         ## close session
@@ -169,6 +169,16 @@ class ServerProvider extends AbstractProvider
                 $serializer = $this->container()
                     ->get(SymfonySerializer::class);
                 $ret = DB::fetch('select * from task where id = ? limit 1;', [$params['task_id']]);
+                if (!$ret) {
+                    $buffer->write(json_encode([
+                        'code' => 1,
+                        'msg' => sprintf('Unknown Task [%s]#', $params['task_id']),
+                        'data' => [],
+                    ], JSON_THROW_ON_ERROR));
+                    $response->setBody($buffer);
+
+                    return $response;
+                }
                 $content = json_decode($ret['content'], true, 512, JSON_THROW_ON_ERROR);
                 $serializerObject = make($content['class'], [
                     'identity' => $ret['id'],
@@ -201,6 +211,27 @@ class ServerProvider extends AbstractProvider
                 $response->setBody($buffer);
 
                 return $response;
+            });
+            /*
+             * 创建应用
+             */
+            $router->post('/application/create', function () {
+            });
+            /*
+             * 创建任务
+             * dag or task
+             */
+            $router->post('/task/create', function () {
+            });
+            /*
+             * 查看任务详情
+             */
+            $router->post('/task/detail', function () {
+            });
+            /*
+             * 取消任务
+             */
+            $router->post('/task/cancel', function () {
             });
         });
     }
@@ -236,7 +267,7 @@ class ServerProvider extends AbstractProvider
                     $response->error(Status::NOT_ALLOWED, 'Method Not Allowed');
                     break;
                 case Dispatcher::FOUND: // 找到对应的方法
-                    [ $uri, $handler, $vars ] = $routeInfo;
+                    [ , $handler, $vars ] = $routeInfo;
                     $response = call($handler, $vars);
                     break;
             }
