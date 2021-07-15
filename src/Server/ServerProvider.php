@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace Serendipity\Job\Server;
 
 use FastRoute\Dispatcher;
-use FastRoute\RouteCollector;
 use Hyperf\Engine\Channel;
 use Psr\Http\Message\RequestInterface;
 use Serendipity\Job\Console\ManageJobCommand;
@@ -18,8 +17,10 @@ use Serendipity\Job\Contract\LoggerInterface;
 use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Serendipity\Job\Db\DB;
 use Serendipity\Job\Kernel\Provider\AbstractProvider;
+use Serendipity\Job\Kernel\Router\RouteCollector;
 use Serendipity\Job\Kernel\Swow\ServerFactory;
 use Serendipity\Job\Logger\LoggerFactory;
+use Serendipity\Job\Middleware\AuthMiddleware;
 use Serendipity\Job\Serializer\SymfonySerializer;
 use Serendipity\Job\Util\Context;
 use SerendipitySwow\Nsq\Nsq;
@@ -62,7 +63,6 @@ class ServerProvider extends AbstractProvider
             ->get();
         $this->stdoutLogger->debug('Serendipity-Job Start Successfully#');
         $this->makeFastRoute();
-
         while (true) {
             try {
                 $session = $server->acceptSession();
@@ -150,90 +150,94 @@ class ServerProvider extends AbstractProvider
 
                 return $response;
             });
-            $router->post('/nsq/publish', function (): SwowResponse {
-                $response = new SwowResponse();
-                $buffer = new Buffer();
-                /**
-                 * @var SwowRequest $request
-                 */
-                $request = Context::get(RequestInterface::class);
-                $params = json_decode($request->getBody()
-                    ->getContents(), true, 512, JSON_THROW_ON_ERROR);
-                $config = $this->container()
-                    ->get(ConfigInterface::class)
-                    ->get(sprintf('nsq.%s', 'default'));
-                /**
-                 * @var Nsq $nsq
-                 */
-                $nsq = make(Nsq::class, [$this->container(), $config]);
-                $serializer = $this->container()
-                    ->get(SymfonySerializer::class);
-                $ret = DB::fetch('select * from task where id = ? limit 1;', [$params['task_id']]);
-                if (!$ret) {
-                    $buffer->write(json_encode([
+            /*
+                * 创建应用
+                */
+            $router->post('/application/create', function () {
+            });
+            $router->addMiddleware(AuthMiddleware::class, function (RouteCollector $router) {
+                $router->post('/nsq/publish', function (): SwowResponse {
+                    $response = new SwowResponse();
+                    $buffer = new Buffer();
+                    /**
+                     * @var SwowRequest $request
+                     */
+                    $request = Context::get(RequestInterface::class);
+                    $params = json_decode($request->getBody()
+                        ->getContents(), true, 512, JSON_THROW_ON_ERROR);
+                    $config = $this->container()
+                        ->get(ConfigInterface::class)
+                        ->get(sprintf('nsq.%s', 'default'));
+                    /**
+                     * @var Nsq $nsq
+                     */
+                    $nsq = make(Nsq::class, [$this->container(), $config]);
+                    $serializer = $this->container()
+                        ->get(SymfonySerializer::class);
+                    $ret = DB::fetch('select * from task where id = ? limit 1;', [$params['task_id']]);
+                    if (!$ret) {
+                        $buffer->write(json_encode([
+                            'code' => 1,
+                            'msg' => sprintf('Unknown Task [%s]#', $params['task_id']),
+                            'data' => [],
+                        ], JSON_THROW_ON_ERROR));
+                        $response->setBody($buffer);
+
+                        return $response;
+                    }
+                    $content = json_decode($ret['content'], true, 512, JSON_THROW_ON_ERROR);
+                    $serializerObject = make($content['class'], [
+                        'identity' => $ret['id'],
+                        'timeout' => $ret['timeout'],
+                        'step' => $ret['step'],
+                        'name' => $ret['name'],
+                        'retryTimes' => $ret['retry_times'],
+                    ]);
+                    $json = $serializer->serialize($serializerObject);
+                    $json = json_encode(array_merge([
+                        'body' => json_decode(
+                            $json,
+                            true,
+                            512,
+                            JSON_THROW_ON_ERROR
+                        ),
+                    ], ['class' => $serializerObject::class]), JSON_THROW_ON_ERROR);
+                    $bool = $nsq->publish(ManageJobCommand::TOPIC_PREFIX . 'task', $json);
+                    $bool ? $buffer->write(json_encode([
+                        'code' => 0,
+                        'msg' => 'Ok!',
+                        'data' => [],
+                    ], JSON_THROW_ON_ERROR)) : $buffer->write(json_encode([
                         'code' => 1,
-                        'msg' => sprintf('Unknown Task [%s]#', $params['task_id']),
+                        'msg' => '推送nsq失败!',
                         'data' => [],
                     ], JSON_THROW_ON_ERROR));
+                    $response->setStatus(Status::OK);
+                    $response->setHeader('Server', 'Serendipity-Job');
                     $response->setBody($buffer);
 
                     return $response;
-                }
-                $content = json_decode($ret['content'], true, 512, JSON_THROW_ON_ERROR);
-                $serializerObject = make($content['class'], [
-                    'identity' => $ret['id'],
-                    'timeout' => $ret['timeout'],
-                    'step' => $ret['step'],
-                    'name' => $ret['name'],
-                    'retryTimes' => $ret['retry_times'],
-                ]);
-                $json = $serializer->serialize($serializerObject);
-                $json = json_encode(array_merge([
-                    'body' => json_decode(
-                        $json,
-                        true,
-                        512,
-                        JSON_THROW_ON_ERROR
-                    ),
-                ], ['class' => $serializerObject::class]), JSON_THROW_ON_ERROR);
-                $bool = $nsq->publish(ManageJobCommand::TOPIC_PREFIX . 'task', $json);
-                $bool ? $buffer->write(json_encode([
-                    'code' => 0,
-                    'msg' => 'Ok!',
-                    'data' => [],
-                ], JSON_THROW_ON_ERROR)) : $buffer->write(json_encode([
-                    'code' => 1,
-                    'msg' => '推送nsq失败!',
-                    'data' => [],
-                ], JSON_THROW_ON_ERROR));
-                $response->setStatus(Status::OK);
-                $response->setHeader('Server', 'Serendipity-Job');
-                $response->setBody($buffer);
-
-                return $response;
+                });
+                /*
+                 * 创建任务
+                 * dag or task
+                 */
+                $router->post('/task/create', function () {
+                });
+                /*
+                 * 查看任务详情
+                 */
+                $router->post('/task/detail', function () {
+                });
+                /*
+                 * 取消任务
+                 */
+                $router->post('/task/cancel', function () {
+                });
             });
-            /*
-             * 创建应用
-             */
-            $router->post('/application/create', function () {
-            });
-            /*
-             * 创建任务
-             * dag or task
-             */
-            $router->post('/task/create', function () {
-            });
-            /*
-             * 查看任务详情
-             */
-            $router->post('/task/detail', function () {
-            });
-            /*
-             * 取消任务
-             */
-            $router->post('/task/cancel', function () {
-            });
-        });
+        }, [
+            'routeCollector' => RouteCollector::class,
+        ]);
     }
 
     protected function dispatcher(SwowRequest $request, Session $session): SwowResponse
@@ -268,7 +272,20 @@ class ServerProvider extends AbstractProvider
                     break;
                 case Dispatcher::FOUND: // 找到对应的方法
                     [ , $handler, $vars ] = $routeInfo;
-                    $response = call($handler, $vars);
+                    if (is_array($handler) && $handler['middlewares']) {
+                        //middleware
+                        /**
+                         * @var AuthMiddleware $middleware
+                         */
+                        $middleware = $this->container()
+                            ->get($handler['middlewares'][0]);
+                        $check = $middleware->process(Context::get(RequestInterface::class));
+                        if (!$check) {
+                            $response = new SwowResponse();
+                            $response->error(Status::UNAUTHORIZED, 'UNAUTHORIZED');
+                        }
+                    }
+                    $response = call($handler[0], $vars);
                     break;
             }
             $channel->push($response);
