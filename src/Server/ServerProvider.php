@@ -8,8 +8,10 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Server;
 
+use Carbon\Carbon;
 use FastRoute\Dispatcher;
 use Hyperf\Engine\Channel;
+use Hyperf\Utils\Str;
 use Psr\Http\Message\RequestInterface;
 use Serendipity\Job\Console\ManageJobCommand;
 use Serendipity\Job\Contract\ConfigInterface;
@@ -22,6 +24,7 @@ use Serendipity\Job\Kernel\Swow\ServerFactory;
 use Serendipity\Job\Logger\LoggerFactory;
 use Serendipity\Job\Middleware\AuthMiddleware;
 use Serendipity\Job\Serializer\SymfonySerializer;
+use Serendipity\Job\Util\Arr;
 use Serendipity\Job\Util\Context;
 use SerendipitySwow\Nsq\Nsq;
 use Swow\Coroutine;
@@ -154,6 +157,26 @@ class ServerProvider extends AbstractProvider
                 * 创建应用
                 */
             $router->post('/application/create', function () {
+                /**
+                 * @var SwowRequest $request
+                 */
+                $appKey = Str::random();
+                $secretKey = Str::random(32);
+                $request = Context::get(RequestInterface::class);
+                $params = json_decode($request->getBody()
+                    ->getContents(), true, 512, JSON_THROW_ON_ERROR);
+                $data = [
+                    'status' => 1,
+                    'app_key' => $appKey,
+                    'app_name' => Arr::get($params, 'appName'),
+                    'secret_key' => $secretKey,
+                    'step' => (int) Arr::get($params, 'step', 0),
+                    'retry_total' => (int) Arr::get($params, 'retryTotal', 5),
+                    'link_url' => Arr::get($params, 'linkUrl'),
+                    'remark' => Arr::get($params, 'remark'),
+                    'created_at' => Carbon::now()->toDateTimeString(),
+                ];
+                $sql = sprintf('INSERT INTO %s VALUES (%s)', 'application', '');
             });
             $router->addMiddleware(AuthMiddleware::class, function (RouteCollector $router) {
                 $router->post('/nsq/publish', function (): SwowResponse {
@@ -283,6 +306,7 @@ class ServerProvider extends AbstractProvider
                         if (!$check) {
                             $response = new SwowResponse();
                             $response->error(Status::UNAUTHORIZED, 'UNAUTHORIZED');
+                            break;
                         }
                     }
                     $response = call($handler[0], $vars);
