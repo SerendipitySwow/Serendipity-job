@@ -17,9 +17,11 @@ use Serendipity\Job\Console\ManageJobCommand;
 use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\Contract\LoggerInterface;
 use Serendipity\Job\Contract\StdoutLoggerInterface;
+use Serendipity\Job\Db\Command;
 use Serendipity\Job\Db\DB;
 use Serendipity\Job\Kernel\Provider\AbstractProvider;
 use Serendipity\Job\Kernel\Router\RouteCollector;
+use Serendipity\Job\Kernel\Signature;
 use Serendipity\Job\Kernel\Swow\ServerFactory;
 use Serendipity\Job\Logger\LoggerFactory;
 use Serendipity\Job\Middleware\AuthMiddleware;
@@ -38,7 +40,9 @@ use Swow\Http\Status;
 use Swow\Signal;
 use Swow\Socket\Exception;
 use Swow\Socket\Exception as SocketException;
+use Throwable;
 use function FastRoute\simpleDispatcher;
+use function Serendipity\Job\Kernel\serendipity_format_throwable;
 use const Swow\Errno\EMFILE;
 use const Swow\Errno\ENFILE;
 use const Swow\Errno\ENOMEM;
@@ -154,8 +158,8 @@ class ServerProvider extends AbstractProvider
                 return $response;
             });
             /*
-                * 创建应用
-                */
+             * 创建应用
+             */
             $router->post('/application/create', function () {
                 /**
                  * @var SwowRequest $request
@@ -174,9 +178,63 @@ class ServerProvider extends AbstractProvider
                     'retry_total' => (int) Arr::get($params, 'retryTotal', 5),
                     'link_url' => Arr::get($params, 'linkUrl'),
                     'remark' => Arr::get($params, 'remark'),
-                    'created_at' => Carbon::now()->toDateTimeString(),
+                    'created_at' => Carbon::now()
+                        ->toDateTimeString(),
                 ];
-                $sql = sprintf('INSERT INTO %s VALUES (%s)', 'application', '');
+                /**
+                 * @var Command $command
+                 */
+                $command = make(Command::class);
+                $command->insert('application', $data);
+                $id = DB::run(function (\PDO $PDO) use ($command): int {
+                    $statement = $PDO->prepare($command->getSql());
+
+                    $this->bindValues($statement, $command->getParams());
+
+                    $statement->execute();
+
+                    return (int) $PDO->lastInsertId();
+                });
+
+                /**
+                 * @var Signature $signature
+                 */
+                $signature = make(Signature::class, [
+                    'options' => [
+                        'signatureSecret' => $secretKey,
+                        'signatureApiKey' => $appKey,
+                    ],
+                ]);
+                $timestamps = (string) time();
+                $nonce = $signature->generateNonce();
+                $payload = md5(Arr::get($params, 'appName'));
+                $clientSignature = $signature->generateSignature(
+                    $timestamps,
+                    $nonce,
+                    $payload,
+                    $secretKey
+                );
+                $response = new SwowResponse();
+                $buffer = new Buffer();
+                $id ? $buffer->write(json_encode([
+                    'code' => 0,
+                    'msg' => 'Ok!',
+                    'data' => [
+                        'nonce' => $nonce, 'timestamps' => $timestamps,
+                        'signature' => $clientSignature,
+                        'appKey' => $appKey,
+                        'payload' => $payload,
+                    ],
+                ], JSON_THROW_ON_ERROR)) : $buffer->write(json_encode([
+                    'code' => 1,
+                    'msg' => '创建应用失败!',
+                    'data' => [],
+                ], JSON_THROW_ON_ERROR));
+                $response->setStatus(Status::OK);
+                $response->setHeader('Server', 'Serendipity-Job');
+                $response->setBody($buffer);
+
+                return $response;
             });
             $router->addMiddleware(AuthMiddleware::class, function (RouteCollector $router) {
                 $router->post('/nsq/publish', function (): SwowResponse {
@@ -302,10 +360,17 @@ class ServerProvider extends AbstractProvider
                          */
                         $middleware = $this->container()
                             ->get($handler['middlewares'][0]);
-                        $check = $middleware->process(Context::get(RequestInterface::class));
-                        if (!$check) {
+                        try {
+                            $check = $middleware->process(Context::get(RequestInterface::class));
+                            if (!$check) {
+                                $response = new SwowResponse();
+                                $response->error(Status::UNAUTHORIZED, 'UNAUTHORIZED');
+                                break;
+                            }
+                        } catch (Throwable $exception) {
+                            $this->logger->error(serendipity_format_throwable($exception));
                             $response = new SwowResponse();
-                            $response->error(Status::UNAUTHORIZED, 'UNAUTHORIZED');
+                            $response->error(Status::INTERNAL_SERVER_ERROR);
                             break;
                         }
                     }

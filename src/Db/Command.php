@@ -16,7 +16,17 @@ class Command
 
     private array $params = [];
 
-    public function insert(string $table, array $columns): string
+    public function getParams(): array
+    {
+        return $this->params;
+    }
+
+    public function getSql(): string
+    {
+        return $this->sql;
+    }
+
+    public function insert(string $table, array $columns): Command
     {
         $fields = array_map(function ($value) {
             return $this->quoteColumn($value);
@@ -33,13 +43,13 @@ class Command
             $this->params[':' . strtoupper($k)] = $v;
         }
 
-        return $this->prepare();
+        return $this;
     }
 
     /**
      * @param array $params to be bound in condition,could be set to empty array
      */
-    public function update(string $table, array $columns, string $condition, array $params = []): ?string
+    public function update(string $table, array $columns, string $condition, array $params = []): Command
     {
         $sets = array_map(function ($value) {
             return $this->quoteColumn($value) . ' = :' . strtoupper($value);
@@ -55,6 +65,8 @@ class Command
         foreach ($columns as $k => $v) {
             $this->params[':' . strtoupper($k)] = $v;
         }
+
+        return $this;
     }
 
     /**
@@ -64,7 +76,7 @@ class Command
      *
      * @throws DbException
      */
-    public function delete(string $table, string $condition, array $params = []): string
+    public function delete(string $table, string $condition, array $params = []): Command
     {
         $this->sql = 'DELETE FROM ' . $this->quoteTable($table);
         if (is_string($condition)) {
@@ -73,6 +85,8 @@ class Command
             throw new DbException('condition must be a string');
         }
         $this->params = $params;
+
+        return $this;
     }
 
     public function quoteColumn($name): ?string

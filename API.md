@@ -1,12 +1,12 @@
 # 系统环境
 
-需要PHP7.4+、MySQL和 Redis。
+需要PHP8+、MySQL,Redis,Nsq。
 
 # 接口鉴权
 
 ## 接口地址
 
-`url`：http://www.api.com
+`url`：http://host:port
 
 ## 头部信息
 
@@ -15,22 +15,19 @@
 | 参数名     | 类型     | 是否必填 | 默认值 | 说明      |
 |---------|--------|------|-----|---------|
 | app_key | string | 是    | -   | APP KEY |
-| nonce_str | string | 是    | -   | 随机字符串 |
-| timestamp | string | 是    | -   | 当前时间：2021-03-04 11:42:36 |
+| nonce | string | 是    | -   | 随机字符串 |
+| timestamps | string | 是    | -   | 当前时间：2021-03-04 11:42:36 |
 | signature | string | 是    | -   | 签名信息 |
-| version | string | 是    | 1.0   | 版本号（固定值） |
+| payload | string | 是    |   | payload） |
 
-## 签名算法
-
-提交内容和头部信息按A-Z进行排序，组成签名字符串+分配的密码,然后使用MD5加密获取签名字符串。
 
 # 接口说明
 
-> 系统将使用POST方法将数据{data:xxxx}提交到接口地址,接口返回success字符串表示执行成功,其它内容GoodJob会执行重试操作！在提交数据的同时系统会使用下面接口鉴权的方法提交头部信息，以便于接入端校验请求是否来源于GoodJob。。
+> 系统将使用POST方法将数据{data:xxxx}提交到接口地址,接口返回success字符串表示执行成功,在提交数据的同时系统会使用下面接口鉴权的方法提交头部信息，以便于接入端校验请求是否来源于平台。
 
 ## 创建应用
 
-`uri`:/application
+`uri`:/application/create
 
 ### 接口参数
 
@@ -46,14 +43,17 @@
 
 ### 返回结果
 
-```
+```json
 {
-    "code": 200,
+    "code": 0,
+    "msg": "Ok!",
     "data": {
-        "appKey": "5347838620634821",
-        "secretKey": "vph1291T6Q6ZK262p2z611922tKBpUj6"
-    },
-    "message": ""
+        "nonce": "S5D7zmW5HNnSiqf0",
+        "timestamps": "1626418779",
+        "signature": "NTBhNmIyYTRkZjFkODM4MDIyYTYzMzllMDIwN2QyN2MyYjNiYzg3YjM0ODc1YWNiZWZlOGQxZGU0MmE4NzgxMg==",
+        "appKey": "wWt1aSZj2KXMO7fE",
+        "payload": "f3c5fa5b2b4045bcb1132ddece49c0f4"
+    }
 }
 ```
 

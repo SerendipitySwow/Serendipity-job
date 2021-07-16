@@ -11,7 +11,6 @@ namespace Serendipity\Job\Kernel;
 use Hyperf\Utils\Str;
 use Serendipity\Job\Contract\ConfigInterface;
 
-//TODO api签名验证
 class Signature
 {
     /**
@@ -24,9 +23,9 @@ class Signature
      */
     private string $signatureType = 'sha256';
 
-    public function __construct(ConfigInterface $config)
+    public function __construct(ConfigInterface $config, array $options = [])
     {
-        $this->signature = $config->get('signature');
+        $this->signature = array_merge($config->get('signature'), $options);
     }
 
     /**
@@ -63,14 +62,14 @@ class Signature
      * @param string $timestamp //时间戳
      * @param string $nonce //16位随机字符串
      * @param string $payload // 请求荷载
-     * @param string $signatureApiKey //服务端api key
+     * @param string $signatureAppKey //服务端app key
      * @param string $clientSignature //客户端生成的 签名
      */
     public function verifySignature(
         string $timestamp,
         string $nonce,
         string $payload,
-        string $signatureApiKey,
+        string $signatureAppKey,
         string $clientSignature
     ): bool {
         $arguments = func_get_args();
@@ -79,11 +78,11 @@ class Signature
                 return false;
             }
         }
-        if (time() - $timestamp > $this->getSignatureApiTime($signatureApiKey)) {
+        if (time() - $timestamp > $this->getSignatureApiTime($signatureAppKey)) {
             return false;
         }
-        $apiSecret = $this->getSignatureApiSecret($signatureApiKey);
-        if (empty($apiSecret) || !$this->verifiedTimestamp($timestamp, $signatureApiKey)) {
+        $apiSecret = $this->getSignatureApiSecret($signatureAppKey);
+        if (empty($apiSecret) || !$this->verifiedTimestamp($timestamp, $signatureAppKey)) {
             return false;
         }
         $arg = [
@@ -100,52 +99,41 @@ class Signature
     /**
      * @Notes: 根据api 获取api secret
      */
-    public function getSignatureApiSecret(string $signatureApiKey): string
+    public function getSignatureApiSecret(string $signatureAppKey): string
     {
-        $apiInfo = $this->getSignatureApiInfo($signatureApiKey);
-        if (empty($apiInfo)) {
+        if (!$this->checkSignatureApiInfo($signatureAppKey)) {
             return '';
         }
 
-        return current($apiInfo)['signatureSecret'];
+        return $this->signature['signatureSecret'];
     }
 
     /**
      * @Notes: 获取验证时间戳
      */
-    public function getSignatureApiTime(string $signatureApiKey): string
+    public function getSignatureApiTime(string $signatureAppKey): int | string
     {
-        $apiInfo = $this->getSignatureApiInfo($signatureApiKey);
-        if (empty($apiInfo)) {
+        if (!$this->checkSignatureApiInfo($signatureAppKey)) {
             return '';
         }
 
-        return current($apiInfo)['timestampValidity'];
+        return $this->signature['timestampValidity'];
     }
 
-    /**
-     * @Notes: 根据apikey 获取api信息
-     */
-    protected function getSignatureApiInfo(string $signatureApiKey = ''): array
+    protected function checkSignatureApiInfo(string $signatureAppKey = ''): bool
     {
-        $apiInfo = array_filter($this->signature, static fn ($item) => $item['signatureApiKey'] === $signatureApiKey);
-        if (empty($apiInfo)) {
-            return [];
-        }
-
-        return array_values($apiInfo);
+        return $this->signature['signatureAppKey'] === $signatureAppKey;
     }
 
     /**
      * @Notes: 验证时间戳有效性
      */
-    protected function verifiedTimestamp(string $timestamp = '', string $signatureApiKey = ''): bool
+    protected function verifiedTimestamp(string $timestamp = '', string $signatureAppKey = ''): bool
     {
-        $apiInfo = $this->getSignatureApiInfo($signatureApiKey);
-        if (empty($apiInfo)) {
+        if (!$this->checkSignatureApiInfo($signatureAppKey)) {
             return false;
         }
-        $timestampValidity = (int) $apiInfo[0]['timestampValidity'];
+        $timestampValidity = (int) $this->signature['timestampValidity'];
 
         return !(time() - (int) $timestamp > $timestampValidity);
     }
