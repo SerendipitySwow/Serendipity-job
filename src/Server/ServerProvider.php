@@ -268,7 +268,8 @@ class ServerProvider extends AbstractProvider
                  * 创建任务
                  * dag or task
                  */
-                $router->post('/task/create', function () {
+                $router->post('/task/create', static function () {
+                    //TODO
                 });
                 /*
                  * 查看任务详情
