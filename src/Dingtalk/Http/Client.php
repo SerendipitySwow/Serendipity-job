@@ -8,8 +8,10 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Dingtalk\Http;
 
+use Exception;
 use GuzzleHttp\Exception\GuzzleException;
 use InvalidArgumentException;
+use JsonException;
 use Psr\Http\Message\ResponseInterface;
 use Serendipity\Job\Dingtalk\ClientInterface;
 
@@ -42,7 +44,7 @@ class Client implements ClientInterface
 
     /**
      * @throws GuzzleException
-     * @throws \JsonException
+     * @throws JsonException
      */
     public function send(array $params = []): ResponseInterface
     {
@@ -66,7 +68,8 @@ class Client implements ClientInterface
                 $sign = hash_hmac('sha256', $timestamp . "\n" . $secret, $secret, true);
                 $query['timestamp'] = $timestamp;
                 $query['sign'] = base64_encode($sign);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
+                //do something
             }
         }
 

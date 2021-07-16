@@ -8,19 +8,30 @@ declare(strict_types=1);
 
 use Swow\Coroutine;
 
-$coroutine = Coroutine::run(function () {
+$a = 1;
+$coroutine = Coroutine::run(function () use ($a) {
     try {
         \Swow\defer(function () {
-            echo Coroutine::getCurrent()
-                ->getId() . '已退出.' . PHP_EOL;
+//            echo Coroutine::getCurrent()
+//                ->getId() . '已退出.' . PHP_EOL;
         });
-        echo 'defer---------------------' . PHP_EOL;
 
-        var_dump(file_get_contents('http://www.baidu.com'));
+        (file_get_contents('http://www.baidu.com'));
     } catch (Throwable $e) {
     }
 });
-Coroutine::run(static function () use ($coroutine) {
-    var_dump($coroutine->getState());
-    var_dump($coroutine->throw(new Exception('111')));
-});
+$data = [
+    'state' => $coroutine?->getStateName(),
+    'trace_list' => json_encode($coroutine?->getTrace(), JSON_THROW_ON_ERROR),
+    'executed_file_name' => $coroutine?->getExecutedFilename(),
+    'executed_function_name' => $coroutine?->getExecutedFunctionName(),
+    'executed_function_line' => $coroutine?->getExecutedLineno(),
+    'vars' => $coroutine?->getDefinedVars(),
+    'round' => $coroutine?->getRound(),
+    'elapsed' => $coroutine?->getElapsed(),
+];
+echo json_encode([
+    'code' => 0,
+    'msg' => 'ok!',
+    'data' => $data,
+], JSON_THROW_ON_ERROR);

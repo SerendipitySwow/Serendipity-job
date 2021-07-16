@@ -161,11 +161,31 @@ final class ManageJobCommand extends Command
                                 switch ($request->getPath()) {
                                     case '/':
                                     {
+                                        break;
+                                    }
+                                    case '/detail':
+                                    {
+                                        $params = $request->getQueryParams();
+                                        $coroutine = Coroutine::get((int) $params['coroutine_id']);
+                                        $data = [
+                                            'state' => $coroutine?->getStateName(),
+                                            'trace_list' => json_encode($coroutine?->getTrace(), JSON_THROW_ON_ERROR),
+                                            'executed_file_name' => $coroutine?->getExecutedFilename(),
+                                            'executed_function_name' => $coroutine?->getExecutedFunctionName(),
+                                            'executed_function_line' => $coroutine?->getExecutedLineno(),
+                                            'vars' => $coroutine?->getDefinedVars(),
+                                            'round' => $coroutine?->getRound(),
+                                            'elapsed' => $coroutine?->getElapsed(),
+                                        ];
                                         $buffer = new Buffer();
-                                        $buffer->write(file_get_contents(BASE_PATH . '/storage/task.php'));
                                         $response = new HttpServer\Response();
                                         $response->setStatus(Status::OK);
                                         $response->setHeader('Server', 'Serendipity-Job');
+                                        $buffer->write(json_encode([
+                                            'code' => 0,
+                                            'msg' => 'ok!',
+                                            'data' => $data,
+                                        ], JSON_THROW_ON_ERROR));
                                         $response->setBody($buffer);
                                         $session->sendHttpResponse($response);
                                         break;

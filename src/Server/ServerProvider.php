@@ -10,8 +10,10 @@ namespace Serendipity\Job\Server;
 
 use Carbon\Carbon;
 use FastRoute\Dispatcher;
+use GuzzleHttp\Client;
 use Hyperf\Engine\Channel;
 use Hyperf\Utils\Str;
+use PDO;
 use Psr\Http\Message\RequestInterface;
 use Serendipity\Job\Console\ManageJobCommand;
 use Serendipity\Job\Contract\ConfigInterface;
@@ -37,7 +39,6 @@ use Swow\Http\Server\Request as SwowRequest;
 use Swow\Http\Server\Response as SwowResponse;
 use Swow\Http\Server\Session;
 use Swow\Http\Status;
-use Swow\Signal;
 use Swow\Socket\Exception;
 use Swow\Socket\Exception as SocketException;
 use Throwable;
@@ -106,42 +107,6 @@ class ServerProvider extends AbstractProvider
                 }
             }
         }
-        /*
-        当并发量比较大时,会阻塞该协程.
-        监听协程退出
-        $exited = new Channel();
-        Signal::wait(Signal::INT);
-
-        \Hyperf\Engine\Coroutine::create(fn () => $exited->close());
-        \Hyperf\Engine\Coroutine::create(function () use ($exited) {
-            while (true) {
-                if ($exited->isClosing()) {
-                    $tryAgain = false;
-                    do {
-                        $this->stdoutLogger->debug('Kill Start ============================');
-                        foreach (Coroutine::getAll() as $coroutine) {
-                            if ($coroutine === Coroutine::getCurrent()) {
-                                continue;
-                            }
-                            if ($coroutine->getState() === $coroutine::STATE_LOCKED) {
-                                continue;
-                            }
-                            echo "Kill {$coroutine->getId()}..." . PHP_EOL;
-                            $coroutine->kill();
-                            if ($coroutine->isAvailable()) {
-                                echo 'Not fully killed, try again later...' . PHP_EOL;
-                                $tryAgain = true;
-                            } else {
-                                echo 'Killed' . PHP_EOL;
-                            }
-                        }
-                    } while ($tryAgain);
-                    echo 'All coroutines has been killed' . PHP_EOL;
-                    break;
-                }
-            }
-        });
-        */
     }
 
     protected function makeFastRoute(): void
@@ -186,7 +151,7 @@ class ServerProvider extends AbstractProvider
                  */
                 $command = make(Command::class);
                 $command->insert('application', $data);
-                $id = DB::run(function (\PDO $PDO) use ($command): int {
+                $id = DB::run(function (PDO $PDO) use ($command): int {
                     $statement = $PDO->prepare($command->getSql());
 
                     $this->bindValues($statement, $command->getParams());
@@ -308,12 +273,63 @@ class ServerProvider extends AbstractProvider
                 /*
                  * 查看任务详情
                  */
-                $router->post('/task/detail', function () {
+                $router->get('/task/detail', function () {
+                    /**
+                     * @var SwowRequest $request
+                     */
+                    $request = Context::get(RequestInterface::class);
+                    $swowResponse = new SwowResponse();
+                    $buffer = new Buffer();
+                    $params = json_decode($request->getBody()
+                        ->getContents(), true, 512, JSON_THROW_ON_ERROR);
+                    $client = new Client();
+                    $config = $this->container()
+                        ->get(ConfigInterface::class)
+                        ->get('task_server');
+                    $response = $client->get(
+                        sprintf('%s:%s/%s', $config['host'], $config['port'], 'detail'),
+                        [
+                            'query' => ['coroutine_id' => $params['coroutine_id']],
+                        ]
+                    );
+
+                    $buffer->write($response->getBody()
+                        ->getContents());
+                    $swowResponse->setStatus(Status::OK);
+                    $swowResponse->setHeader('Server', 'Serendipity-Job');
+                    $swowResponse->setBody($buffer);
+
+                    return $swowResponse;
                 });
                 /*
                  * 取消任务
                  */
                 $router->post('/task/cancel', function () {
+                    /**
+                     * @var SwowRequest $request
+                     */
+                    $request = Context::get(RequestInterface::class);
+                    $swowResponse = new SwowResponse();
+                    $buffer = new Buffer();
+                    $params = $request->getQueryParams();
+                    $client = new Client();
+                    $config = $this->container()
+                        ->get(ConfigInterface::class)
+                        ->get('task_server');
+                    $response = $client->get(
+                        sprintf('%s:%s/%s', $config['host'], $config['port'], 'cancel'),
+                        [
+                            'query' => ['coroutine_id' => $params['coroutine_id']],
+                        ]
+                    );
+
+                    $buffer->write($response->getBody()
+                        ->getContents());
+                    $swowResponse->setStatus(Status::OK);
+                    $swowResponse->setHeader('Server', 'Serendipity-Job');
+                    $swowResponse->setBody($buffer);
+
+                    return $swowResponse;
                 });
             });
         }, [
