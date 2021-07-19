@@ -168,14 +168,14 @@ final class ManageJobCommand extends Command
                                         $params = $request->getQueryParams();
                                         $coroutine = Coroutine::get((int) $params['coroutine_id']);
                                         $data = [
-                                            'state' => $coroutine?->getStateName(),
-                                            'trace_list' => json_encode($coroutine?->getTrace(), JSON_THROW_ON_ERROR),
-                                            'executed_file_name' => $coroutine?->getExecutedFilename(),
-                                            'executed_function_name' => $coroutine?->getExecutedFunctionName(),
-                                            'executed_function_line' => $coroutine?->getExecutedLineno(),
-                                            'vars' => $coroutine?->getDefinedVars(),
-                                            'round' => $coroutine?->getRound(),
-                                            'elapsed' => $coroutine?->getElapsed(),
+                                            'state' => $coroutine?->getStateName(), //当前协程
+                                            'trace_list' => json_encode($coroutine?->getTrace(), JSON_THROW_ON_ERROR), //协程函数调用栈
+                                            'executed_file_name' => $coroutine?->getExecutedFilename(), //获取执行文件名
+                                            'executed_function_name' => $coroutine?->getExecutedFunctionName(), //获取执行的函数名称
+                                            'executed_function_line' => $coroutine?->getExecutedLineno(), //获得执行的文件行数
+                                            'vars' => $coroutine?->getDefinedVars(), //获取定义的变量
+                                            'round' => $coroutine?->getRound(), //获取协程切换次数
+                                            'elapsed' => $coroutine?->getElapsed(), //获取协程运行的时间以便于分析统计或找出僵尸协程
                                         ];
                                         $buffer = new Buffer();
                                         $response = new HttpServer\Response();
