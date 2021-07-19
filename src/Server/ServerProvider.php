@@ -197,6 +197,7 @@ class ServerProvider extends AbstractProvider
                 ], JSON_THROW_ON_ERROR));
                 $response->setStatus(Status::OK);
                 $response->setHeader('Server', 'Serendipity-Job');
+                $response->setHeader('content-type', 'application/json; charset=utf-8');
                 $response->setBody($buffer);
 
                 return $response;
@@ -260,6 +261,7 @@ class ServerProvider extends AbstractProvider
                     ], JSON_THROW_ON_ERROR));
                     $response->setStatus(Status::OK);
                     $response->setHeader('Server', 'Serendipity-Job');
+                    $response->setHeader('content-type', 'application/json; charset=utf-8');
                     $response->setBody($buffer);
 
                     return $response;
@@ -269,7 +271,78 @@ class ServerProvider extends AbstractProvider
                  * dag or task
                  */
                 $router->post('/task/create', static function () {
-                    //TODO
+                    $response = new SwowResponse();
+                    $buffer = new Buffer();
+                    /**
+                     * @var SwowRequest $request
+                     */
+                    $request = Context::get(RequestInterface::class);
+                    $params = json_decode($request->getBody()
+                        ->getContents(), true, 512, JSON_THROW_ON_ERROR);
+                    $appKey = $request->getHeaderLine('app_key');
+                    $application = $request->getHeader('application');
+                    $taskNo = Arr::get($params, 'taskNo');
+                    $content = Arr::get($params, 'content');
+
+                    $runtime = Arr::get($params, 'runtime');
+                    $runtime = $runtime ? Carbon::parse($runtime)
+                        ->toDateTimeString() : Carbon::now()
+                        ->toDateTimeString();
+                    if (DB::fetch(sprintf(
+                        "select count(*) from task where app_key = '%s' and task_no = '%s'",
+                        $appKey,
+                        $taskNo
+                    ))) {
+                        $json = json_encode([
+                            'code' => 1,
+                            'msg' => '请勿重复提交!',
+                            'data' => [],
+                        ], JSON_THROW_ON_ERROR);
+                    } else {
+                        $appKey = Arr::get($application, 'app_key');
+                        $running = Carbon::parse($runtime)
+                            ->lte(Carbon::now()
+                            ->toDateTimeString()) ? 1 : 0;
+                        $data = [
+                            'app_key' => $appKey,
+                            'task_no' => $taskNo,
+                            'status' => $running,
+                            'step' => Arr::get($application, 'step'),
+                            'runtime' => $runtime,
+                            'content' => $content,
+                            // $content  =  { "class": "\\Job\\SimpleJob\\","_params":{"startDate":"xx","endDate":"xxx"}},
+                            'created_at' => Carbon::now()
+                                ->toDateTimeString(),
+                        ];
+                        /**
+                         * @var Command $command
+                         */
+                        $command = make(Command::class);
+                        $command->insert('task', $data);
+                        $id = DB::run(function (PDO $PDO) use ($command): int {
+                            $statement = $PDO->prepare($command->getSql());
+
+                            $this->bindValues($statement, $command->getParams());
+
+                            $statement->execute();
+
+                            return (int) $PDO->lastInsertId();
+                        });
+                        $delay = strtotime($runtime) - time();
+                        //TODO 投递任务
+                        $json = json_encode([
+                            'code' => 0,
+                            'msg' => 'ok!',
+                            'data' => ['taskId' => $id],
+                        ], JSON_THROW_ON_ERROR);
+                    }
+                    $buffer->write($json);
+                    $response->setStatus(Status::OK);
+                    $response->setHeader('Server', 'Serendipity-Job');
+                    $response->setHeader('content-type', 'application/json; charset=utf-8');
+                    $response->setBody($buffer);
+
+                    return $response;
                 });
                 /*
                  * 查看任务详情
@@ -298,6 +371,7 @@ class ServerProvider extends AbstractProvider
                         ->getContents());
                     $swowResponse->setStatus(Status::OK);
                     $swowResponse->setHeader('Server', 'Serendipity-Job');
+                    $response->setHeader('content-type', 'application/json; charset=utf-8');
                     $swowResponse->setBody($buffer);
 
                     return $swowResponse;
@@ -328,6 +402,7 @@ class ServerProvider extends AbstractProvider
                         ->getContents());
                     $swowResponse->setStatus(Status::OK);
                     $swowResponse->setHeader('Server', 'Serendipity-Job');
+                    $response->setHeader('content-type', 'application/json; charset=utf-8');
                     $swowResponse->setBody($buffer);
 
                     return $swowResponse;
