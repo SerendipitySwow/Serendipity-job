@@ -270,7 +270,7 @@ class ServerProvider extends AbstractProvider
                  * 创建任务
                  * dag or task
                  */
-                $router->post('/task/create', static function () {
+                $router->post('/task/create', function () {
                     $response = new SwowResponse();
                     $buffer = new Buffer();
                     /**
@@ -283,6 +283,8 @@ class ServerProvider extends AbstractProvider
                     $application = $request->getHeader('application');
                     $taskNo = Arr::get($params, 'taskNo');
                     $content = Arr::get($params, 'content');
+                    $timeout = Arr::get($params, 'timeout');
+                    $name = Arr::get($params, 'name');
 
                     $runtime = Arr::get($params, 'runtime');
                     $runtime = $runtime ? Carbon::parse($runtime)
@@ -310,9 +312,11 @@ class ServerProvider extends AbstractProvider
                             'step' => Arr::get($application, 'step'),
                             'runtime' => $runtime,
                             'content' => $content,
+                            'timeout' => $timeout,
                             // $content  =  { "class": "\\Job\\SimpleJob\\","_params":{"startDate":"xx","endDate":"xxx"}},
                             'created_at' => Carbon::now()
                                 ->toDateTimeString(),
+                            'name' => $name,
                         ];
                         /**
                          * @var Command $command
@@ -329,11 +333,42 @@ class ServerProvider extends AbstractProvider
                             return (int) $PDO->lastInsertId();
                         });
                         $delay = strtotime($runtime) - time();
-                        //TODO 投递任务
-                        $json = json_encode([
+                        $config = $this->container()
+                            ->get(ConfigInterface::class)
+                            ->get(sprintf('nsq.%s', 'default'));
+                        /**
+                         * @var Nsq $nsq
+                         */
+                        $nsq = make(Nsq::class, [$this->container(), $config]);
+                        $serializer = $this->container()
+                            ->get(SymfonySerializer::class);
+
+                        $content = json_decode(Arr::get($data, 'content'), true, 512, JSON_THROW_ON_ERROR);
+                        $serializerObject = make($content['class'], [
+                            'identity' => $id,
+                            'timeout' => Arr::get($data, 'timeout'),
+                            'step' => Arr::get($data, 'step'),
+                            'name' => Arr::get($data, 'name'),
+                            'retryTimes' => 0,
+                        ]);
+                        $json = $serializer->serialize($serializerObject);
+                        $json = json_encode(array_merge([
+                            'body' => json_decode(
+                                $json,
+                                true,
+                                512,
+                                JSON_THROW_ON_ERROR
+                            ),
+                        ], ['class' => $serializerObject::class]), JSON_THROW_ON_ERROR);
+                        $bool = $nsq->publish(ManageJobCommand::TOPIC_PREFIX . 'task', $json, $delay);
+                        $json = $bool ? json_encode([
                             'code' => 0,
                             'msg' => 'ok!',
                             'data' => ['taskId' => $id],
+                        ], JSON_THROW_ON_ERROR) : json_encode([
+                            'code' => 1,
+                            'msg' => 'Unknown!',
+                            'data' => [],
                         ], JSON_THROW_ON_ERROR);
                     }
                     $buffer->write($json);
