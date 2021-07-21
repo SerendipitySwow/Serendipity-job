@@ -36,7 +36,6 @@ use Swow\Coroutine;
 use Swow\Coroutine\Exception as CoroutineException;
 use Swow\Http\Server;
 use Swow\Http\Server\Request as SwowRequest;
-use Swow\Http\Server\Session;
 use Swow\Http\Status;
 use Swow\Socket\Exception;
 use Swow\Socket\Exception as SocketException;
@@ -47,6 +46,9 @@ use const Swow\Errno\EMFILE;
 use const Swow\Errno\ENFILE;
 use const Swow\Errno\ENOMEM;
 
+/**
+ * Class ServerProvider
+ */
 class ServerProvider extends AbstractProvider
 {
     protected StdoutLoggerInterface $stdoutLogger;
@@ -82,7 +84,7 @@ class ServerProvider extends AbstractProvider
                             $request = null;
                             try {
                                 $request = $session->recvHttpRequest();
-                                $response = $this->dispatcher($request, $session);
+                                $response = $this->dispatcher($request);
                                 $session->sendHttpResponse($response);
                             } catch (HttpException $exception) {
                                 $session->error($exception->getCode(), $exception->getMessage());
@@ -409,7 +411,7 @@ class ServerProvider extends AbstractProvider
         ]);
     }
 
-    protected function dispatcher(SwowRequest $request, Session $session): Response
+    protected function dispatcher(SwowRequest $request): Response
     {
         $channel = new Channel();
         Coroutine::run(function () use ($request, $channel) {
