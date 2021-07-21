@@ -21,6 +21,7 @@ use Serendipity\Job\Contract\LoggerInterface;
 use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Serendipity\Job\Db\Command;
 use Serendipity\Job\Db\DB;
+use Serendipity\Job\Kernel\Http\Response;
 use Serendipity\Job\Kernel\Provider\AbstractProvider;
 use Serendipity\Job\Kernel\Router\RouteCollector;
 use Serendipity\Job\Kernel\Signature;
@@ -33,10 +34,8 @@ use Serendipity\Job\Util\Context;
 use SerendipitySwow\Nsq\Nsq;
 use Swow\Coroutine;
 use Swow\Coroutine\Exception as CoroutineException;
-use Swow\Http\Buffer;
 use Swow\Http\Server;
 use Swow\Http\Server\Request as SwowRequest;
-use Swow\Http\Server\Response as SwowResponse;
 use Swow\Http\Server\Session;
 use Swow\Http\Status;
 use Swow\Socket\Exception;
@@ -112,20 +111,15 @@ class ServerProvider extends AbstractProvider
     protected function makeFastRoute(): void
     {
         $this->fastRouteDispatcher = simpleDispatcher(function (RouteCollector $router) {
-            $router->get('/', static function (): SwowResponse {
-                $response = new SwowResponse();
-                $buffer = new Buffer();
-                $buffer->write(file_get_contents(BASE_PATH . '/storage/task.php'));
-                $response->setStatus(Status::OK);
-                $response->setHeader('Server', 'Serendipity-Job');
-                $response->setBody($buffer);
+            $router->get('/', static function (): Response {
+                $response = new Response();
 
-                return $response;
+                return $response->text(file_get_contents(BASE_PATH . '/storage/task.php'));
             });
             /*
              * 创建应用
              */
-            $router->post('/application/create', function () {
+            $router->post('/application/create', function (): Response {
                 /**
                  * @var SwowRequest $request
                  */
@@ -179,9 +173,9 @@ class ServerProvider extends AbstractProvider
                     $payload,
                     $secretKey
                 );
-                $response = new SwowResponse();
-                $buffer = new Buffer();
-                $id ? $buffer->write(json_encode([
+                $response = new Response();
+
+                return $response->json($id ? [
                     'code' => 0,
                     'msg' => 'Ok!',
                     'data' => [
@@ -190,22 +184,15 @@ class ServerProvider extends AbstractProvider
                         'appKey' => $appKey,
                         'payload' => $payload,
                     ],
-                ], JSON_THROW_ON_ERROR)) : $buffer->write(json_encode([
+                ] : [
                     'code' => 1,
                     'msg' => '创建应用失败!',
                     'data' => [],
-                ], JSON_THROW_ON_ERROR));
-                $response->setStatus(Status::OK);
-                $response->setHeader('Server', 'Serendipity-Job');
-                $response->setHeader('content-type', 'application/json; charset=utf-8');
-                $response->setBody($buffer);
-
-                return $response;
+                ]);
             });
             $router->addMiddleware(AuthMiddleware::class, function (RouteCollector $router) {
-                $router->post('/nsq/publish', function (): SwowResponse {
-                    $response = new SwowResponse();
-                    $buffer = new Buffer();
+                $router->post('/nsq/publish', function (): Response {
+                    $response = new Response();
                     /**
                      * @var SwowRequest $request
                      */
@@ -223,12 +210,11 @@ class ServerProvider extends AbstractProvider
                         ->get(SymfonySerializer::class);
                     $ret = DB::fetch('select * from task where id = ? limit 1;', [$params['task_id']]);
                     if (!$ret) {
-                        $buffer->write(json_encode([
+                        $response->json([
                             'code' => 1,
                             'msg' => sprintf('Unknown Task [%s]#', $params['task_id']),
                             'data' => [],
-                        ], JSON_THROW_ON_ERROR));
-                        $response->setBody($buffer);
+                        ]);
 
                         return $response;
                     }
@@ -250,29 +236,23 @@ class ServerProvider extends AbstractProvider
                         ),
                     ], ['class' => $serializerObject::class]), JSON_THROW_ON_ERROR);
                     $bool = $nsq->publish(ManageJobCommand::TOPIC_PREFIX . 'task', $json);
-                    $bool ? $buffer->write(json_encode([
+
+                    return $response->json($bool ? [
                         'code' => 0,
                         'msg' => 'Ok!',
                         'data' => [],
-                    ], JSON_THROW_ON_ERROR)) : $buffer->write(json_encode([
+                    ] : [
                         'code' => 1,
                         'msg' => '推送nsq失败!',
                         'data' => [],
-                    ], JSON_THROW_ON_ERROR));
-                    $response->setStatus(Status::OK);
-                    $response->setHeader('Server', 'Serendipity-Job');
-                    $response->setHeader('content-type', 'application/json; charset=utf-8');
-                    $response->setBody($buffer);
-
-                    return $response;
+                    ]);
                 });
                 /*
                  * 创建任务
                  * dag or task
                  */
-                $router->post('/task/create', function () {
-                    $response = new SwowResponse();
-                    $buffer = new Buffer();
+                $router->post('/task/create', function (): Response {
+                    $response = new Response();
                     /**
                      * @var SwowRequest $request
                      */
@@ -295,11 +275,11 @@ class ServerProvider extends AbstractProvider
                         $appKey,
                         $taskNo
                     ))) {
-                        $json = json_encode([
+                        $json = [
                             'code' => 1,
                             'msg' => '请勿重复提交!',
                             'data' => [],
-                        ], JSON_THROW_ON_ERROR);
+                        ];
                     } else {
                         $appKey = Arr::get($application, 'app_key');
                         $running = Carbon::parse($runtime)
@@ -361,34 +341,28 @@ class ServerProvider extends AbstractProvider
                             ),
                         ], ['class' => $serializerObject::class]), JSON_THROW_ON_ERROR);
                         $bool = $nsq->publish(ManageJobCommand::TOPIC_PREFIX . 'task', $json, $delay);
-                        $json = $bool ? json_encode([
+                        $json = $bool ? [
                             'code' => 0,
                             'msg' => 'ok!',
                             'data' => ['taskId' => $id],
-                        ], JSON_THROW_ON_ERROR) : json_encode([
+                        ] : [
                             'code' => 1,
                             'msg' => 'Unknown!',
                             'data' => [],
-                        ], JSON_THROW_ON_ERROR);
+                        ];
                     }
-                    $buffer->write($json);
-                    $response->setStatus(Status::OK);
-                    $response->setHeader('Server', 'Serendipity-Job');
-                    $response->setHeader('content-type', 'application/json; charset=utf-8');
-                    $response->setBody($buffer);
 
-                    return $response;
+                    return $response->json($json);
                 });
                 /*
                  * 查看任务详情
                  */
-                $router->get('/task/detail', function () {
+                $router->get('/task/detail', function (): Response {
                     /**
                      * @var SwowRequest $request
                      */
                     $request = Context::get(RequestInterface::class);
-                    $swowResponse = new SwowResponse();
-                    $buffer = new Buffer();
+                    $swowResponse = new Response();
                     $params = json_decode($request->getBody()
                         ->getContents(), true, 512, JSON_THROW_ON_ERROR);
                     $client = new Client();
@@ -402,14 +376,8 @@ class ServerProvider extends AbstractProvider
                         ]
                     );
 
-                    $buffer->write($response->getBody()
-                        ->getContents());
-                    $swowResponse->setStatus(Status::OK);
-                    $swowResponse->setHeader('Server', 'Serendipity-Job');
-                    $response->setHeader('content-type', 'application/json; charset=utf-8');
-                    $swowResponse->setBody($buffer);
-
-                    return $swowResponse;
+                    return $swowResponse->json(json_decode($response->getBody()
+                        ->getContents(), true, 512, JSON_THROW_ON_ERROR));
                 });
                 /*
                  * 取消任务
@@ -419,8 +387,7 @@ class ServerProvider extends AbstractProvider
                      * @var SwowRequest $request
                      */
                     $request = Context::get(RequestInterface::class);
-                    $swowResponse = new SwowResponse();
-                    $buffer = new Buffer();
+                    $swowResponse = new Response();
                     $params = $request->getQueryParams();
                     $client = new Client();
                     $config = $this->container()
@@ -433,14 +400,8 @@ class ServerProvider extends AbstractProvider
                         ]
                     );
 
-                    $buffer->write($response->getBody()
-                        ->getContents());
-                    $swowResponse->setStatus(Status::OK);
-                    $swowResponse->setHeader('Server', 'Serendipity-Job');
-                    $response->setHeader('content-type', 'application/json; charset=utf-8');
-                    $swowResponse->setBody($buffer);
-
-                    return $swowResponse;
+                    return $swowResponse->json(json_decode($response->getBody()
+                        ->getContents(), true, 512, JSON_THROW_ON_ERROR));
                 });
             });
         }, [
@@ -448,7 +409,7 @@ class ServerProvider extends AbstractProvider
         ]);
     }
 
-    protected function dispatcher(SwowRequest $request, Session $session): SwowResponse
+    protected function dispatcher(SwowRequest $request, Session $session): Response
     {
         $channel = new Channel();
         Coroutine::run(function () use ($request, $channel) {
@@ -466,16 +427,12 @@ class ServerProvider extends AbstractProvider
             $response = null;
             switch ($routeInfo[0]) {
                 case Dispatcher::NOT_FOUND:
-                    $buffer = new Buffer();
-                    $buffer->write(file_get_contents(BASE_PATH . '/storage/404.php'));
-                    $response = new SwowResponse();
-                    $response->setStatus(Status::NOT_FOUND);
-                    $response->setHeader('Server', 'Serendipity-Job');
-                    $response->setBody($buffer);
+                    $response = new Response();
+                    $response->text(file_get_contents(BASE_PATH . '/storage/404.php'));
                     break;
                 case Dispatcher::METHOD_NOT_ALLOWED:
                     //$allowedMethods = $routeInfo[1];
-                    $response = new SwowResponse();
+                    $response = new Response();
                     $response->error(Status::NOT_ALLOWED, 'Method Not Allowed');
                     break;
                 case Dispatcher::FOUND: // 找到对应的方法
@@ -490,13 +447,13 @@ class ServerProvider extends AbstractProvider
                         try {
                             $check = $middleware->process(Context::get(RequestInterface::class));
                             if (!$check) {
-                                $response = new SwowResponse();
+                                $response = new Response();
                                 $response->error(Status::UNAUTHORIZED, 'UNAUTHORIZED');
                                 break;
                             }
                         } catch (Throwable $exception) {
                             $this->logger->error(serendipity_format_throwable($exception));
-                            $response = new SwowResponse();
+                            $response = new Response();
                             $response->error(Status::INTERNAL_SERVER_ERROR);
                             break;
                         }

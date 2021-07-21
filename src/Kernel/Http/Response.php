@@ -18,24 +18,48 @@ class Response extends SwowResponse
 
     public function json(array $data, int $flags = JSON_THROW_ON_ERROR, int $depth = 512): self
     {
-        $this->handleJsonResponseHeader();
+        $this->withJsonResponseHeader();
         $json = json_encode($data, $flags, $depth);
-        $this->makeBuffer(strlen($json));
-        $this->writeBuffer($json);
-        $this->setBody($this->buffer);
+        $this->response($json);
 
         return $this;
     }
 
-    protected function handleJsonResponseHeader(): void
+    public function text(string $text): Response
     {
-        $this->setHeader('Server', 'Serendipity-Job')
-            ->setHeader('content-type', 'application/json; charset=utf-8');
+        $this->withTextResponseHeader();
+        $this->response($text);
+
+        return $this;
+    }
+
+    protected function response(string $str): void
+    {
+        $this->makeBuffer(strlen($str));
+        $this->writeBuffer($str);
+        $this->setBody($this->buffer);
+    }
+
+    protected function withTextResponseHeader(): void
+    {
+        $this->setResponseServerHeader();
+        $this->setHeader('Content-Type', 'Content-Type: text/html; charset=utf-8');
+    }
+
+    private function setResponseServerHeader(): void
+    {
+        $this->setHeader('Server', 'Serendipity-Job');
+    }
+
+    protected function withJsonResponseHeader(): void
+    {
+        $this->setResponseServerHeader();
+        $this->setHeader('content-type', 'application/json; charset=utf-8');
     }
 
     protected function makeBuffer(int $length = \Swow\Buffer::DEFAULT_SIZE): void
     {
-        $this->buffer = make(Buffer::class, ['size' => $length]);
+        $this->buffer = $this->buffer ?? make(Buffer::class, ['size' => $length]);
     }
 
     protected function writeBuffer(string $str = null): void

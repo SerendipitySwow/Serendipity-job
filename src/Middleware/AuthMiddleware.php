@@ -38,6 +38,12 @@ class AuthMiddleware
         return $this->signature->verifySignature($timestamp, $nonce, $payload, $appKey, $signature);
     }
 
+    /**
+     * todo //redis 存储application
+     * @param $appKey
+     *
+     * @return array|bool
+     */
     protected function getApplication($appKey): array | bool
     {
         $application = DB::fetch(sprintf(
