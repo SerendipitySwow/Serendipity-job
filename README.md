@@ -25,5 +25,28 @@ Run into the beauty of PHP8 and Swow
 3.Swow/channel push 和pop 都是毫秒.任务都可以支持毫秒.以后必须要注意.
 4.Di主要使用Hyperf/Di
 5.取消任务使用kill
+6.crontab随消费进程一起启动
 ```
 ## Come on!
+## Required
+````
+1.PHP8
+2.Nsq
+3.redis
+4.mysql
+````
+## Usage
+1.启动Serendipity-Job Server.
+````bash
+ php bin/serendipity-job serendipity-job:start
+ 
+````
+2.启动Job 进行任务消费
+```bash
+php bin/serendipity-job manage-job:start --type=task --limit=1 --host=127.0.0.1 --por
+t=9764
+```
+3.配置Crontab
+```php
+ (new Serendipity\Job\Crontab\Crontab())->setName('Foo')->setRule('*/5 * * * *')->setCallback([EchoCrontab::class, 'execute'])->setMemo('这是一个示例的定时任务'),
+```
