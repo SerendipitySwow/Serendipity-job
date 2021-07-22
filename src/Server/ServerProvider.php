@@ -119,14 +119,67 @@ class ServerProvider extends AbstractProvider
                 return $response->text(file_get_contents(BASE_PATH . '/storage/task.php'));
             });
             /*
-             * 创建应用
+             * 刷新应用签名
              */
-            $router->post('/application/create', function (): Response {
+            $router->post('/application/refresh-signature', function (): Response {
                 /**
                  * @var SwowRequest $request
                  */
+                $request = Context::get(RequestInterface::class);
+                $params = json_decode($request->getBody()
+                    ->getContents(), true, 512, JSON_THROW_ON_ERROR);
+                $response = new Response();
+                if (!$application = DB::fetch(sprintf(
+                    "select * from application where app_key = '%s' and secret_key = '%s'",
+                    $params['app_key'],
+                    $params['secret_key']
+                ))) {
+                    return $response->json([
+                        'code' => 1,
+                        'msg' => 'Unknown Application Key#',
+                        'data' => [],
+                    ]);
+                }
+                /**
+                 * @var Signature $signature
+                 */
+                $signature = make(Signature::class, [
+                    'options' => [
+                        'signatureSecret' => $params['secret_key'],
+                        'signatureApiKey' => $params['app_key'],
+                    ],
+                ]);
+                $timestamps = (string) time();
+                $nonce = $signature->generateNonce();
+                $payload = md5(Arr::get($application, 'app_name'));
+                $clientSignature = $signature->generateSignature(
+                    $timestamps,
+                    $nonce,
+                    $payload,
+                    $params['secret_key']
+                );
+
+                return $response->json([
+                    'code' => 0,
+                    'msg' => 'Ok!',
+                    'data' => [
+                        'nonce' => $nonce, 'timestamps' => $timestamps,
+                        'signature' => $clientSignature,
+                        'appKey' => Arr::get($application, 'app_key'),
+                        'payload' => $payload,
+                        'secretKey' => Arr::get($application, 'secret_key'),
+                    ],
+                ]);
+            });
+            /*
+             * 创建应用
+             */
+            $router->post('/application/create', function (): Response {
                 $appKey = Str::random();
                 $secretKey = Str::random(32);
+                /**
+                 * @var SwowRequest $request
+                 */
                 $request = Context::get(RequestInterface::class);
                 $params = json_decode($request->getBody()
                     ->getContents(), true, 512, JSON_THROW_ON_ERROR);
@@ -185,6 +238,7 @@ class ServerProvider extends AbstractProvider
                         'signature' => $clientSignature,
                         'appKey' => $appKey,
                         'payload' => $payload,
+                        'secretKey' => $secretKey,
                     ],
                 ] : [
                     'code' => 1,
