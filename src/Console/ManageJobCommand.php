@@ -159,10 +159,6 @@ final class ManageJobCommand extends Command
                             try {
                                 $request = $session->recvHttpRequest();
                                 switch ($request->getPath()) {
-                                    case '/':
-                                    {
-                                        break;
-                                    }
                                     case '/detail':
                                     {
                                         $params = $request->getQueryParams();

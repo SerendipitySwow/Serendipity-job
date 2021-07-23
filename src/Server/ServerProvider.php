@@ -145,11 +145,6 @@ class ServerProvider extends AbstractProvider
     protected function makeFastRoute(): void
     {
         $this->fastRouteDispatcher = simpleDispatcher(function (RouteCollector $router) {
-            $router->get('/', static function (): Response {
-                $response = new Response();
-
-                return $response->text(file_get_contents(BASE_PATH . '/storage/task.php'));
-            });
             /*
              * 刷新应用签名
              */
