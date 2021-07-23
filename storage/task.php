@@ -1,6 +1,8 @@
 <head>
     <title>Dashboard - Serendipity-Job</title>
     <meta charset="utf-8">
+    <link rel="shortcut icon" href="https://api.toolnb.com/codefileupdate/20210723025217345120X120.ico"/>
+    <link rel="bookmark" href="https://api.toolnb.com/codefileupdate/20210723025217345120X120.ico"/>
 </head>
 <body>
 <div class="section-center">
