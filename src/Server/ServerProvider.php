@@ -36,10 +36,10 @@ use Serendipity\Job\Util\Context;
 use SerendipitySwow\Nsq\Nsq;
 use Swow\Coroutine;
 use Swow\Coroutine\Exception as CoroutineException;
+use Swow\Http\Exception as HttpException;
 use Swow\Http\Server;
 use Swow\Http\Server\Request as SwowRequest;
 use Swow\Http\Status;
-use Swow\Socket\Exception;
 use Swow\Socket\Exception as SocketException;
 use Throwable;
 use function FastRoute\simpleDispatcher;
@@ -83,19 +83,49 @@ class ServerProvider extends AbstractProvider
                             if (!$session->isEstablished()) {
                                 break;
                             }
+                            $time = microtime(true);
                             $request = null;
                             try {
                                 $request = $session->recvHttpRequest();
                                 $response = $this->dispatcher($request);
                                 $session->sendHttpResponse($response);
-                            } catch (HttpException $exception) {
-                                $session->error($exception->getCode(), $exception->getMessage());
+                            } catch (Throwable $exception) {
+                                if ($exception instanceof HttpException) {
+                                    $session->error($exception->getCode(), $exception->getMessage());
+                                }
+                                throw $exception;
+                            } finally {
+                                $logger = $this->container()
+                                    ->get(LoggerFactory::class)
+                                    ->get('request');
+                                // 日志
+                                $time = microtime(true) - $time;
+                                $debug = 'URI: ' . $request->getUri()
+                                    ->getPath() . PHP_EOL;
+                                $debug .= 'TIME: ' . $time . PHP_EOL;
+                                if ($customData = $this->getCustomData()) {
+                                    $debug .= 'DATA: ' . $customData . PHP_EOL;
+                                }
+                                $debug .= 'REQUEST: ' . $this->getRequestString($request) . PHP_EOL;
+                                if (isset($response)) {
+                                    $debug .= 'RESPONSE: ' . $this->getResponseString($response) . PHP_EOL;
+                                }
+                                if (isset($exception) && $exception instanceof Throwable) {
+                                    $debug .= 'EXCEPTION: ' . $exception->getMessage() . PHP_EOL;
+                                }
+
+                                if ($time > 1) {
+                                    $logger->error($debug);
+                                } else {
+                                    $logger->info($debug);
+                                }
                             }
-                            if (!$request || !$request->getKeepAlive()) {
+                            if (!$request->getKeepAlive()) {
                                 break;
                             }
                         }
-                    } catch (Exception) {
+                    } catch (Throwable $throwable) {
+                        throw $throwable;
                         // you can log error here
                     } finally {
                         ## close session
@@ -542,5 +572,30 @@ class ServerProvider extends AbstractProvider
         });
 
         return $channel->pop();
+    }
+
+    protected function getCustomData(): string
+    {
+        return '';
+    }
+
+    protected function getResponseString(Response $response): string
+    {
+        return (string) $response->getBody();
+    }
+
+    protected function getRequestString(SwowRequest $request): string
+    {
+        $data = array_merge(
+            $request->getQueryParams(),
+            json_decode(
+                $request->getBodyAsString() !== '' ? $request->getBodyAsString() : '{}',
+                true,
+                512,
+                JSON_THROW_ON_ERROR
+            )
+        );
+
+        return json_encode($data, JSON_THROW_ON_ERROR);
     }
 }
