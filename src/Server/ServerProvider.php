@@ -16,6 +16,7 @@ use Hyperf\Utils\Str;
 use PDO;
 use Psr\Http\Message\RequestInterface;
 use Serendipity\Job\Console\ManageJobCommand;
+use Serendipity\Job\Constant\Statistical;
 use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\Contract\LoggerInterface;
 use Serendipity\Job\Contract\StdoutLoggerInterface;
@@ -28,6 +29,7 @@ use Serendipity\Job\Kernel\Signature;
 use Serendipity\Job\Kernel\Swow\ServerFactory;
 use Serendipity\Job\Logger\LoggerFactory;
 use Serendipity\Job\Middleware\AuthMiddleware;
+use Serendipity\Job\Redis\Lua\Hash\Incr;
 use Serendipity\Job\Serializer\SymfonySerializer;
 use Serendipity\Job\Util\Arr;
 use Serendipity\Job\Util\Context;
@@ -291,7 +293,17 @@ class ServerProvider extends AbstractProvider
                             JSON_THROW_ON_ERROR
                         ),
                     ], ['class' => $serializerObject::class]), JSON_THROW_ON_ERROR);
-                    $bool = $nsq->publish(ManageJobCommand::TOPIC_PREFIX . 'task', $json);
+                    $delay = strtotime($ret['runtime']) - time();
+                    if ($delay > 0) {
+                        /**
+                         * 加入延迟任务统计
+                         *
+                         * @var Incr $incr
+                         */
+                        $incr = make(Incr::class);
+                        $incr->eval([Statistical::TASK_DELAY, 24 * 60 * 60]);
+                    }
+                    $bool = $nsq->publish(ManageJobCommand::TOPIC_PREFIX . 'task', $json, $delay > 0 ? $delay : 0.0);
 
                     return $response->json($bool ? [
                         'code' => 0,
@@ -397,6 +409,15 @@ class ServerProvider extends AbstractProvider
                             ),
                         ], ['class' => $serializerObject::class]), JSON_THROW_ON_ERROR);
                         $bool = $nsq->publish(ManageJobCommand::TOPIC_PREFIX . 'task', $json, $delay);
+                        if ($delay > 0) {
+                            /**
+                             * 加入延迟任务统计
+                             *
+                             * @var Incr $incr
+                             */
+                            $incr = make(Incr::class);
+                            $incr->eval([Statistical::TASK_DELAY, 24 * 60 * 60]);
+                        }
                         $json = $bool ? [
                             'code' => 0,
                             'msg' => 'ok!',
