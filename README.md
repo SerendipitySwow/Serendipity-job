@@ -28,6 +28,12 @@ Run into the beauty of PHP8 and Swow
 5.取消任务使用kill
 6.crontab随消费进程一起启动
 ```
+
+## TODO
+* 测试任务的相关接口(创建任务,查看任务详情,取消任务,api推送任务,刷新应用接口)
+* 测试job的相关接口(取消任务,任务详情)
+* 完善api.md
+* 计划开发后台
 ## Come on!
 ## Thanks Hyperf.!
 ## Required
@@ -36,6 +42,7 @@ Run into the beauty of PHP8 and Swow
 2.Nsq
 3.redis
 4.mysql
+5.swow
 ````
 ## Usage
 1.启动Serendipity-Job Server.

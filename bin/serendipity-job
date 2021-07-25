@@ -6,11 +6,13 @@ declare( strict_types = 1 );
 
 use Psr\Container\ContainerInterface;
 use Serendipity\Job\Application;
-
+if (!extension_loaded('swow')) {
+    exit('Swow extension is required');
+}
 define('BASE_PATH', dirname(__DIR__));
 ini_set('display_errors', 'on');
 ini_set('display_startup_errors', 'on');
-ini_set('memory_limit', '1G');
+//ini_set('memory_limit', '1G');
 error_reporting(E_ALL);
 date_default_timezone_set('Asia/Shanghai');
 

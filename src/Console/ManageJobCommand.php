@@ -19,6 +19,7 @@ use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Serendipity\Job\Crontab\CrontabDispatcher;
 use Serendipity\Job\Db\DB;
 use Serendipity\Job\Event\CrontabEvent;
+use Serendipity\Job\Kernel\Http\Response;
 use Serendipity\Job\Kernel\Provider\KernelProvider;
 use Serendipity\Job\Nsq\Consumer\AbstractConsumer;
 use Serendipity\Job\Nsq\Consumer\DagConsumer;
@@ -28,10 +29,8 @@ use SerendipitySwow\Nsq\Nsq;
 use SerendipitySwow\Nsq\Result;
 use Swow\Coroutine;
 use Swow\Coroutine\Exception as CoroutineException;
-use Swow\Http\Buffer;
 use Swow\Http\Exception as HttpException;
 use Swow\Http\Server as HttpServer;
-use Swow\Http\Status;
 use Swow\Http\Status as HttpStatus;
 use Swow\Socket\Exception as SocketException;
 use Symfony\Component\Console\Input\InputOption;
@@ -173,33 +172,25 @@ final class ManageJobCommand extends Command
                                             'round' => $coroutine?->getRound(), //获取协程切换次数
                                             'elapsed' => $coroutine?->getElapsed(), //获取协程运行的时间以便于分析统计或找出僵尸协程
                                         ];
-                                        $buffer = new Buffer();
-                                        $response = new HttpServer\Response();
-                                        $response->setStatus(Status::OK);
-                                        $response->setHeader('Server', 'Serendipity-Job');
-                                        $buffer->write(json_encode([
+                                        $response = new Response();
+                                        $response->json([
                                             'code' => 0,
                                             'msg' => 'ok!',
                                             'data' => $data,
-                                        ], JSON_THROW_ON_ERROR));
-                                        $response->setBody($buffer);
+                                        ]);
                                         $session->sendHttpResponse($response);
                                         break;
                                     }
                                     case '/cancel':
                                         $params = $request->getQueryParams();
                                         $coroutine = Coroutine::get((int) $params['coroutine_id']);
-                                        $buffer = new Buffer();
-                                        $response = new HttpServer\Response();
-                                        $response->setStatus(Status::OK);
-                                        $response->setHeader('Server', 'Serendipity-Job');
+                                        $response = new Response();
                                         if (!$coroutine instanceof Coroutine) {
-                                            $buffer->write(json_encode([
+                                            $response->json([
                                                 'code' => 1,
                                                 'msg' => 'Unknown!',
                                                 'data' => [],
-                                            ], JSON_THROW_ON_ERROR));
-                                            $response->setBody($buffer);
+                                            ]);
                                             $session->sendHttpResponse($response);
                                             break;
                                         }
@@ -212,22 +203,21 @@ final class ManageJobCommand extends Command
                                             break;
                                         }
                                         if ($coroutine->getState() === $coroutine::STATE_LOCKED) {
-                                            $buffer->write(json_encode([
+                                            $response->json([
                                                 'code' => 1,
                                                 'msg' => 'coroutine block object locked	!',
                                                 'data' => [],
-                                            ], JSON_THROW_ON_ERROR));
-                                            $response->setBody($buffer);
+                                            ]);
                                             $session->sendHttpResponse($response);
                                             break;
                                         }
                                         $coroutine->kill();
                                         if ($coroutine->isAvailable()) {
-                                            $buffer->write(json_encode([
+                                            $response->json([
                                                 'code' => 1,
                                                 'msg' => 'Not fully killed, try again later...',
                                                 'data' => [],
-                                            ], JSON_THROW_ON_ERROR));
+                                            ]);
                                         } else {
                                             DB::execute(sprintf(
                                                 "update task set status  = %s,memo = '%s' where coroutine_id = %s and status = %s and id = %s",
@@ -242,13 +232,12 @@ final class ManageJobCommand extends Command
                                                 Task::TASK_ING,
                                                 $params['id']
                                             ));
-                                            $buffer->write(json_encode([
+                                            $response->json([
                                                 'code' => 0,
                                                 'msg' => 'Killed',
                                                 'data' => [],
-                                            ], JSON_THROW_ON_ERROR));
+                                            ]);
                                         }
-                                        $response->setBody($buffer);
                                         $session->sendHttpResponse($response);
                                         break;
                                     default:
