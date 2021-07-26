@@ -35,10 +35,14 @@ use Swow\Coroutine;
 //    'msg' => 'ok!',
 //    'data' => $data,
 //], JSON_THROW_ON_ERROR);
-
 $coroutine = Coroutine::run(function ($a) {
+//    var_dump(Coroutine::getMain());
+//    Coroutine::run(function (){
+//        var_dump(Coroutine::getCurrent()->getPrevious());
+//    });
     $b = Coroutine::yield();
 
     return $a . ' ' . $b;
 }, 'hello');
+var_dump($coroutine->getStateName());
 echo $coroutine->resume('world') . ' #' . PHP_EOL;
