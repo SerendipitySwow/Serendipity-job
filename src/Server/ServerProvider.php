@@ -11,12 +11,14 @@ namespace Serendipity\Job\Server;
 use Carbon\Carbon;
 use FastRoute\Dispatcher;
 use GuzzleHttp\Client;
+use GuzzleHttp\RequestOptions;
 use Hyperf\Engine\Channel;
 use Hyperf\Utils\Str;
 use PDO;
 use Psr\Http\Message\RequestInterface;
 use Serendipity\Job\Console\ManageJobCommand;
 use Serendipity\Job\Constant\Statistical;
+use Serendipity\Job\Constant\Task;
 use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\Contract\LoggerInterface;
 use Serendipity\Job\Contract\StdoutLoggerInterface;
@@ -375,13 +377,15 @@ class ServerProvider extends AbstractProvider
                         ];
                     } else {
                         $appKey = Arr::get($application, 'app_key');
+                        /*
                         $running = Carbon::parse($runtime)
                             ->lte(Carbon::now()
-                            ->toDateTimeString()) ? 1 : 0;
+                            ->toDateTimeString()) ? Task::TASK_ING : Task::TASK_TODO;
+                        */
                         $data = [
                             'app_key' => $appKey,
                             'task_no' => $taskNo,
-                            'status' => $running,
+                            'status' => Task::TASK_TODO,
                             'step' => Arr::get($application, 'step'),
                             'runtime' => $runtime,
                             'content' => is_array($content) ? json_encode($content, JSON_THROW_ON_ERROR) : $content,
@@ -465,8 +469,7 @@ class ServerProvider extends AbstractProvider
                      */
                     $request = Context::get(RequestInterface::class);
                     $swowResponse = new Response();
-                    $params = json_decode($request->getBody()
-                        ->getContents(), true, 512, JSON_THROW_ON_ERROR);
+                    $params = $request->getQueryParams();
                     $client = new Client();
                     $config = $this->container()
                         ->get(ConfigInterface::class)
@@ -474,7 +477,7 @@ class ServerProvider extends AbstractProvider
                     $response = $client->get(
                         sprintf('%s:%s/%s', $config['host'], $config['port'], 'detail'),
                         [
-                            'query' => ['coroutine_id' => $params['coroutine_id']],
+                            'query' => ['coroutine_id' => $params['coroutine_id'] ?? 0],
                         ]
                     );
 
@@ -490,15 +493,16 @@ class ServerProvider extends AbstractProvider
                      */
                     $request = Context::get(RequestInterface::class);
                     $swowResponse = new Response();
-                    $params = $request->getQueryParams();
+                    $params = json_decode($request->getBody()
+                        ->getContents(), true, 512, JSON_THROW_ON_ERROR);
                     $client = new Client();
                     $config = $this->container()
                         ->get(ConfigInterface::class)
                         ->get('task_server');
-                    $response = $client->get(
+                    $response = $client->post(
                         sprintf('%s:%s/%s', $config['host'], $config['port'], 'cancel'),
                         [
-                            'query' => ['coroutine_id' => $params['coroutine_id']],
+                            RequestOptions::JSON => ['coroutine_id' => $params['coroutine_id']],
                         ]
                     );
 

@@ -69,7 +69,7 @@
 | runtime | int | 否    | -   | 执行时间，示例 2021-03-05 12:00:00 |
 | content | string | 是    | -   | 任务内容(JSON 字符串) |
 | name | string | 是    | -   | 任务名称 |
-| timeout | int | 是    | -   | 任务的执行限制时间 |
+| timeout | int | 是    | -   | 任务的执行限制时间(单位是ms), |
 
 ### 返回结果
 
@@ -85,13 +85,13 @@
 
 ## 取消任务
 
-`uri`:/task/abort
+`uri`:/task/cancel
 
 ### 接口参数
 
 | 参数名     | 类型     | 是否必填 | 默认值 | 说明      |
 |---------|--------|------|-----|---------|
-| taskId | int | 是    | -   | 任务ID |
+| coroutine_id | int | 是    | -   | 任务运行的协程ID |
 
 > 程序会尽量拦截任务,不保证拦截成功率(越早拦截成功率越高)！
 
@@ -99,9 +99,9 @@
 
 ```
 {
-    "code": 200,
-    "data": {},
-    "message": ""
+    "code": 1,
+    "msg": "Unknown!",
+    "data": []
 }
 ```
 
@@ -133,31 +133,23 @@
 
 | 参数名     | 类型     | 是否必填 | 默认值 | 说明      |
 |---------|--------|------|-----|---------|
-| taskId | int | 是    | -   | 任务ID |
+| coroutine_id | int | 是    | -   | 任务执行的协程ID |
 
 ### 返回结果
 
 ```
 {
-    "code": 200,
+    "code": 0,
+    "msg": "ok!",
     "data": {
-        "taskId": "c0e539dd52d38a052fec7b96715a0ae7",
-        "taskNo": "a6",
-        "status": 2,
-        "step": 10,
-        "runtime": 1601255400,
-        "content": "haha",
-        "createdAt": 1601257976,
-        "updatedAt": 1601257978,
-        "logs": [
-            {
-                "retry": 1,
-                "remark": "API接口异常,数据请求失败!",
-                "createdAt": 1601257978,
-                "updatedAt": 0
-            }
-        ]
-    },
-    "message": ""
+        "state": null,
+        "trace_list": "null",
+        "executed_file_name": null,
+        "executed_function_name": null,
+        "executed_function_line": null,
+        "vars": null,
+        "round": null,
+        "elapsed": null
+    }
 }
 ```

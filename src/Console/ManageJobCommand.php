@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Serendipity\Job\Console;
 
 use Carbon\Carbon;
+use Exception;
 use Hyperf\Utils\ApplicationContext;
 use Psr\Container\ContainerInterface;
 use Serendipity\Job\Constant\Task;
@@ -182,7 +183,8 @@ final class ManageJobCommand extends Command
                                         break;
                                     }
                                     case '/cancel':
-                                        $params = $request->getQueryParams();
+                                        $params = json_decode($request->getBody()
+                                            ->getContents(), true, 512, JSON_THROW_ON_ERROR);
                                         $coroutine = Coroutine::get((int) $params['coroutine_id']);
                                         $response = new Response();
                                         if (!$coroutine instanceof Coroutine) {
