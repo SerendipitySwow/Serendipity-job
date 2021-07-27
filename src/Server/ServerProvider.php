@@ -363,11 +363,11 @@ class ServerProvider extends AbstractProvider
                     $runtime = $runtime ? Carbon::parse($runtime)
                         ->toDateTimeString() : Carbon::now()
                         ->toDateTimeString();
-                    if (DB::fetch(sprintf(
+                    if (current(DB::fetch(sprintf(
                         "select count(*) from task where app_key = '%s' and task_no = '%s'",
                         $appKey,
                         $taskNo
-                    ))) {
+                    ))) > 0) {
                         $json = [
                             'code' => 1,
                             'msg' => '请勿重复提交!',
@@ -384,7 +384,7 @@ class ServerProvider extends AbstractProvider
                             'status' => $running,
                             'step' => Arr::get($application, 'step'),
                             'runtime' => $runtime,
-                            'content' => $content,
+                            'content' => is_array($content) ? json_encode($content, JSON_THROW_ON_ERROR) : $content,
                             'timeout' => $timeout,
                             // $content  =  { "class": "\\Job\\SimpleJob\\","_params":{"startDate":"xx","endDate":"xxx"}},
                             'created_at' => Carbon::now()
@@ -553,6 +553,8 @@ class ServerProvider extends AbstractProvider
                                 $response->error(Status::UNAUTHORIZED, 'UNAUTHORIZED');
                                 break;
                             }
+                            $response = call($handler[0], $vars);
+                            break;
                         } catch (Throwable $exception) {
                             $this->logger->error(serendipity_format_throwable($exception));
                             $response = new Response();

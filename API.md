@@ -68,16 +68,16 @@
 | taskNo | string | 是    | -   | 任务编号 |
 | runtime | int | 否    | -   | 执行时间，示例 2021-03-05 12:00:00 |
 | content | string | 是    | -   | 任务内容(JSON 字符串) |
+| name | string | 是    | -   | 任务名称 |
+| timeout | int | 是    | -   | 任务的执行限制时间 |
 
 ### 返回结果
 
 ```
 {
-    "code": 200,
-    "data": {
-        "taskId": "04479d0a8ec8a5784cfededf7de970c5"
-    },
-    "message": ""
+    "code": 1,
+    "msg": "请勿重复提交!",
+    "data": []
 }
 ```
 
