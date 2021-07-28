@@ -47,14 +47,18 @@ class Waiter
             }
         });
 
-        $result = $channel->pop($timeout);
-        if ($result === false && $channel->isAvailable()) {
-            throw new Exception(sprintf('Channel wait failed, reason: Timed out for %s s', $timeout));
-        }
-        if ($result instanceof ExceptionThrower) {
-            throw $result->getThrowable();
-        }
+        try {
+            $result = $channel->pop($timeout);
+            if ($result === false && $channel->isAvailable()) {
+                throw new Exception(sprintf('Channel wait failed, reason: Timed out for %s s', $timeout));
+            }
+            if ($result instanceof ExceptionThrower) {
+                throw $result->getThrowable();
+            }
 
-        return $result;
+            return $result;
+        } catch (Throwable $e) {
+            throw $e;
+        }
     }
 }
