@@ -214,6 +214,19 @@ final class ManageJobCommand extends Command
                                             break;
                                         }
                                         $coroutine->kill();
+                                        DB::execute(sprintf(
+                                            "update task set status  = %s,memo = '%s' where coroutine_id = %s and status = %s and id = %s",
+                                            Task::TASK_CANCEL,
+                                            sprintf(
+                                                '客户度IP:%s取消了任务,请求时间:%s.',
+                                                $session->getPeerAddress(),
+                                                Carbon::now()
+                                                    ->toDateTimeString()
+                                            ),
+                                            $params['coroutine_id'],
+                                            Task::TASK_ING,
+                                            $params['id']
+                                        ));
                                         if ($coroutine->isAvailable()) {
                                             $response->json([
                                                 'code' => 1,
@@ -221,19 +234,6 @@ final class ManageJobCommand extends Command
                                                 'data' => [],
                                             ]);
                                         } else {
-                                            DB::execute(sprintf(
-                                                "update task set status  = %s,memo = '%s' where coroutine_id = %s and status = %s and id = %s",
-                                                Task::TASK_CANCEL,
-                                                sprintf(
-                                                    '客户度IP:%s取消了任务,请求时间:%s.',
-                                                    $session->getPeerAddress(),
-                                                    Carbon::now()
-                                                        ->toDateTimeString()
-                                                ),
-                                                $params['coroutine_id'],
-                                                Task::TASK_ING,
-                                                $params['id']
-                                            ));
                                             $response->json([
                                                 'code' => 0,
                                                 'msg' => 'Killed',
