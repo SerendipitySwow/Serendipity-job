@@ -426,7 +426,7 @@ class ServerProvider extends AbstractProvider
                             'timeout' => Arr::get($data, 'timeout'),
                             'step' => Arr::get($data, 'step'),
                             'name' => Arr::get($data, 'name'),
-                            'retryTimes' => 0,
+                            'retryTimes' => 1,
                         ]);
                         $json = $serializer->serialize($serializerObject);
                         $json = json_encode(array_merge([

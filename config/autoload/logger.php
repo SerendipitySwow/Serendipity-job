@@ -14,7 +14,29 @@ return [
         'handler' => [
             'class' => Monolog\Handler\RotatingFileHandler::class,
             'constructor' => [
-                'filename' => BASE_PATH . '/runtimes/logs/serendipity_job.log',
+                'filename' => BASE_PATH . '/runtimes/logs/server/serendipity_server.log',
+                'maxFiles' => 5,
+                'level' => Monolog\Logger::DEBUG,
+            ],
+        ],
+        'formatter' => [
+            'class' => JsonFormatter::class,
+            'constructor' => [
+                'batchMode' => JsonFormatter::BATCH_MODE_JSON,
+                'appendNewline' => true,
+            ],
+        ],
+        'processors' => [
+            [
+                'class' => AppendRequestIdProcessor::class,
+            ],
+        ],
+    ],
+    'job' => [
+        'handler' => [
+            'class' => Monolog\Handler\RotatingFileHandler::class,
+            'constructor' => [
+                'filename' => BASE_PATH . '/runtimes/logs/job/serendipity_job.log',
                 'maxFiles' => 5,
                 'level' => Monolog\Logger::DEBUG,
             ],
