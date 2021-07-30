@@ -502,7 +502,10 @@ class ServerProvider extends AbstractProvider
                     $response = $client->post(
                         sprintf('%s:%s/%s', $config['host'], $config['port'], 'cancel'),
                         [
-                            RequestOptions::JSON => ['coroutine_id' => $params['coroutine_id']],
+                            RequestOptions::JSON => [
+                                'coroutine_id' => $params['coroutine_id'],
+                                'id' => $params['id'],
+                            ],
                         ]
                     );
 
