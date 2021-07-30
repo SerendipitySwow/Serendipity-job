@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Serendipity\Job\Console;
 
 use Nette\Utils\Strings;
+use Serendipity\Job\Constant\Logo;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Helper\Table;
@@ -153,4 +154,18 @@ abstract class Command extends SymfonyCommand
      * Handle the current command.
      */
     abstract public function handle(): mixed;
+
+    protected function showLogo(): void
+    {
+        $this->output->writeln(sprintf('<info>%s</info>', Logo::LOGO));
+        $this->output->writeln([
+            '<info>Serendipity Job</info>',
+            '<info>===============</info>',
+            '',
+        ]);
+        $this->output->writeln([
+            '<comment>If You Want To Exit, You Can Press Ctrl + C To Exit#.<comment>',
+            '<info>===============</info>',
+        ]);
+    }
 }

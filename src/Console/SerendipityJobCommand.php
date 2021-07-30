@@ -8,7 +8,6 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Console;
 
-use Serendipity\Job\Constant\Logo;
 use Serendipity\Job\Kernel\Provider\KernelProvider;
 use Swow\Coroutine;
 
@@ -26,16 +25,7 @@ final class SerendipityJobCommand extends Command
 
     public function handle(): int
     {
-        $this->output->writeln(sprintf('<info>%s</info>', Logo::LOGO));
-        $this->output->writeln([
-            '<info>Serendipity Job</info>',
-            '<info>===============</info>',
-            '',
-        ]);
-        $this->output->writeln([
-            '<comment>If You Want To Exit, You Can Press Ctrl + C To Exit#.<comment>',
-            '<info>===============</info>',
-        ]);
+        $this->showLogo();
 
         Coroutine::run(function () {
             $this->bootStrap();

@@ -12,7 +12,6 @@ use Carbon\Carbon;
 use Exception;
 use Hyperf\Utils\ApplicationContext;
 use Psr\Container\ContainerInterface;
-use Serendipity\Job\Constant\Logo;
 use Serendipity\Job\Constant\Task;
 use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\Contract\EventDispatcherInterface;
@@ -122,16 +121,7 @@ final class ManageJobCommand extends Command
 
     public function handle(): int
     {
-        $this->output->writeln(sprintf('<info>%s</info>', Logo::LOGO));
-        $this->output->writeln([
-            '<info>Serendipity Job</info>',
-            '<info>===============</info>',
-            '',
-        ]);
-        $this->output->writeln([
-            '<comment>If You Want To Exit, You Can Press Ctrl + C To Exit#.<comment>',
-            '<info>===============</info>',
-        ]);
+        $this->showLogo();
         $this->bootStrap();
         $this->config = $this->container->get(ConfigInterface::class);
         $this->stdoutLogger = $this->container->get(StdoutLoggerInterface::class);
