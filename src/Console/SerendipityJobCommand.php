@@ -10,7 +10,7 @@ namespace Serendipity\Job\Console;
 
 use Serendipity\Job\Kernel\Provider\KernelProvider;
 use Swow\Coroutine;
-use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Command\Command as SymfonyCommand;
 
 final class SerendipityJobCommand extends Command
 {
@@ -32,7 +32,7 @@ final class SerendipityJobCommand extends Command
             $this->bootStrap();
         });
 
-        return Command::SUCCESS;
+        return SymfonyCommand::SUCCESS;
     }
 
     protected function bootStrap(): void

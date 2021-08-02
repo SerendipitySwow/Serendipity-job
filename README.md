@@ -17,6 +17,7 @@ Run into the beauty of PHP8 and Swow
 10.支持任务取消(完成)
 11.签名验证(完成)
 12.支持刷新应用签名(完成)
+13.redis锁限制同一个任务只能被一个协程消费
 ```
 
 ## Please note
@@ -28,6 +29,7 @@ Run into the beauty of PHP8 and Swow
 4.Di主要使用Hyperf/Di
 5.取消任务使用kill
 6.crontab随消费进程一起启动
+7.多协程消费使用redis锁限制同一时间任务只能被一个协程处理
 ```
 
 ## 接口文档
@@ -35,6 +37,12 @@ Run into the beauty of PHP8 and Swow
 见API.md
 
 ## TODO
+*
+```php
+//TODO 待解决  消费者开启5个进程时，连接nsq报错偶尔出现的问题
+PHP Warning:  [Fatal error in R10] Uncaught Swow\Socket\Exception: Socket write wait failed, reason: Timed out for 4 ms in /Users/heping/Serendipity-Job/vendor/serendipity-swow/sockets/src/Streams/Socket.php:124
+```
+* 完成dag任务投递
 
 * 计划开发后台
 
@@ -64,7 +72,7 @@ Run into the beauty of PHP8 and Swow
 2.启动Job 进行任务消费
 
 ```bash
-php bin/serendipity-job manage-job:start --type=task --limit=1 --host=127.0.0.1 --por
+php bin/serendipity-job manage-job:start --type=task --limit=5 --host=127.0.0.1 --por
 t=9764
 ```
 

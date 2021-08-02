@@ -34,7 +34,7 @@ use Swow\Http\Exception as HttpException;
 use Swow\Http\Server as HttpServer;
 use Swow\Http\Status as HttpStatus;
 use Swow\Socket\Exception as SocketException;
-use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Input\InputOption;
 use Throwable;
 use const Swow\Errno\EMFILE;
@@ -143,7 +143,7 @@ final class ManageJobCommand extends Command
         }
         $this->makeServer($host, $port);
 
-        return Command::SUCCESS;
+        return SymfonyCommand::SUCCESS;
     }
 
     protected function makeServer(string $host, int $port): void
