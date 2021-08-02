@@ -10,6 +10,7 @@ namespace Serendipity\Job\Console;
 
 use Serendipity\Job\Kernel\Provider\KernelProvider;
 use Swow\Coroutine;
+use Symfony\Component\Console\Command\Command;
 
 final class SerendipityJobCommand extends Command
 {
