@@ -41,7 +41,7 @@ class FeedCard extends Message
         return $this;
     }
 
-    public function send()
+    public function send(): bool | \Psr\Http\Message\ResponseInterface
     {
         $this->service->setMessage($this);
 

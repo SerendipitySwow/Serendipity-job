@@ -37,7 +37,7 @@ class Executor
 
     public function execute(Crontab $crontab): void
     {
-        if (!$crontab instanceof Crontab || !$crontab->getExecuteTime()) {
+        if (!$crontab->getExecuteTime()) {
             return;
         }
         $diff = $crontab->getExecuteTime()->diffInRealSeconds(new Carbon());

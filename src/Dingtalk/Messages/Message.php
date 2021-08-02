@@ -8,6 +8,8 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Dingtalk\Messages;
 
+use JetBrains\PhpStorm\ArrayShape;
+
 abstract class Message
 {
     protected array $message = [];
@@ -35,6 +37,7 @@ abstract class Message
         return $this->message + $this->at;
     }
 
+    #[ArrayShape(['at' => 'array'])]
     protected function makeAt($mobiles = [], $atAll = false): array
     {
         return [

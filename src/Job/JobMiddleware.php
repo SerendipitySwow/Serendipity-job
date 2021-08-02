@@ -8,7 +8,6 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Job;
 
-use InvalidArgumentException;
 use Serendipity\Job\Contract\JobInterface;
 use Serendipity\Job\Contract\JobMiddlewareInterface;
 
@@ -16,10 +15,6 @@ class JobMiddleware implements JobMiddlewareInterface
 {
     public function handle(JobInterface $job, \Closure $next): mixed
     {
-        if (!$job instanceof JobInterface) {
-            throw new InvalidArgumentException('参数无效');
-        }
-
         return $next($job);
     }
 }
