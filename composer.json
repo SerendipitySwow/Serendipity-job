@@ -5,7 +5,9 @@
         "swow",
         "coroutine",
         "php8",
-        "swoole"
+        "swoole",
+        "job",
+        "nsq"
     ],
     "authors": [
         {
