@@ -17,7 +17,7 @@ Run into the beauty of PHP8 and Swow
 10.支持任务取消(完成)
 11.签名验证(完成)
 12.支持刷新应用签名(完成)
-13.redis锁限制同一个任务只能被一个协程消费
+13.redis锁限制同一个任务只能被一个协程消费(完成)
 ```
 
 ## Please note

@@ -138,7 +138,7 @@ final class ManageJobCommand extends Command
         if ($limit !== null) {
             for ($i = 0; $i < $limit; $i++) {
                 $this->subscribe($i, $type);
-                $this->stdoutLogger->info(ucfirst($type) . 'Consumerd#' . $i . ' start.');
+                $this->stdoutLogger->info(ucfirst($type) . 'Consumer#' . $i . ' start.');
             }
         }
         $this->makeServer($host, $port);
@@ -284,12 +284,12 @@ final class ManageJobCommand extends Command
                     $this->config->get(sprintf('nsq.%s', 'default')),
                 ]);
                 $consumer = match ($type) {
-                    'task' => $this->makeConsumer(TaskConsumer::class, self::TOPIC_PREFIX . $type, 'Consumerd'),
-                    'dag' => $this->makeConsumer(DagConsumer::class, self::TOPIC_PREFIX . $type, 'Consumerd')
+                    'task' => $this->makeConsumer(TaskConsumer::class, self::TOPIC_PREFIX . $type, 'Consumer'),
+                    'dag' => $this->makeConsumer(DagConsumer::class, self::TOPIC_PREFIX . $type, 'Consumer')
                 };
                 $subscriber->subscribe(
                     self::TOPIC_PREFIX . $type,
-                    ucfirst($type) . 'Consumerd' . $i,
+                    ucfirst($type) . 'Consumer' . $i,
                     function (Message $message) use ($consumer, $i) {
                         try {
                             $result = $consumer->consume($message);
@@ -297,7 +297,7 @@ final class ManageJobCommand extends Command
                             //Segmentation fault
                             $this->stdoutLogger->error(sprintf(
                                 'Consumer failed to consume %s,reason: %s,file: %s,line: %s',
-                                'Consumerd' . $i,
+                                'Consumer' . $i,
                                 $error->getMessage(),
                                 $error->getFile(),
                                 $error->getLine()
