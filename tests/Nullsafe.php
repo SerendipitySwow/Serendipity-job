@@ -1,18 +1,17 @@
 <?php
-declare( strict_types = 1 );
+/**
+ * This file is part of Serendipity Job
+ * @license  https://github.com/serendipitySwow/Serendipity-job/blob/main/LICENSE
+ */
 
+declare(strict_types=1);
 
 class Socket1
 {
-    public $socket = null;
+    public $socket;
 
-    /**
-     * @return null
-     */
-    public function check ()
+    public function check()
     {
-        return (bool)$this->socket?->ischeck();
+        return (bool) $this->socket?->ischeck();
     }
 }
-
-

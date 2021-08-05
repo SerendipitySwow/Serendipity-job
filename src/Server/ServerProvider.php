@@ -342,6 +342,10 @@ class ServerProvider extends AbstractProvider
                         'data' => [],
                     ]);
                 });
+                //TODO dag任务投递
+                $router->post('/task/dag', function (): Response {
+                    return new Response();
+                });
                 /*
                  * 创建任务
                  * dag or task

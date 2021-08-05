@@ -20,6 +20,10 @@ Run into the beauty of PHP8 and Swow
 13.redis锁限制同一个任务只能被一个协程消费(完成)
 ```
 
+## 基于Vue、Vditor，所构建的在线 Markdown 编辑器，支持流程图、甘特图、时序图、任务列表、HTML 自动转换为 Markdown 等功能；🎉新增「所见即所得」编辑模式。
+
+[地址](https://github.com/nicejade/markdown-online-editor)
+
 ## Please note
 
 ```
@@ -38,6 +42,8 @@ Run into the beauty of PHP8 and Swow
 
 ## TODO
 * 完成dag任务投递
+
+* 测试dag
 
 * 计划开发后台
 
