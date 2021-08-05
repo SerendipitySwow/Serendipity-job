@@ -47,7 +47,7 @@
         "guzzlehttp/guzzle": "^7.3",
         "symfony/config": "^5.3",
         "serendipity-swow/nsq": "0.8",
-        "serendipity-swow/sockets": "^0.6.0",
+        "serendipity-swow/sockets": "^0.7.0",
         "hyperf/di": "2.2.*",
         "hyperf/engine-swow": "^1.1",
         "hyperf/contract": "2.2.*",

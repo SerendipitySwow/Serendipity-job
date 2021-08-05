@@ -37,11 +37,6 @@ Run into the beauty of PHP8 and Swow
 见API.md
 
 ## TODO
-*
-```php
-//TODO 待解决  消费者开启5个进程时，连接nsq报错偶尔出现的问题
-PHP Warning:  [Fatal error in R10] Uncaught Swow\Socket\Exception: Socket write wait failed, reason: Timed out for 4 ms in /Users/heping/Serendipity-Job/vendor/serendipity-swow/sockets/src/Streams/Socket.php:124
-```
 * 完成dag任务投递
 
 * 计划开发后台
