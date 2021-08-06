@@ -342,13 +342,53 @@ class ServerProvider extends AbstractProvider
                         'data' => [],
                     ]);
                 });
-                //TODO dag任务投递 workflow
+                /*
+                 * 投递dag任务
+                 */
                 $router->post('/task/dag', function (): Response {
-                    return new Response();
+                    $response = new Response();
+                    /**
+                     * @var SwowRequest $request
+                     */
+                    $request = Context::get(RequestInterface::class);
+                    $params = json_decode($request->getBody()
+                        ->getContents(), true, 512, JSON_THROW_ON_ERROR);
+                    if (!DB::fetch('select * from workflow where id = ? and status = ?  limit 1;', [Task::TASK_TODO, $params['task_id']])) {
+                        $response->json([
+                            'code' => 1,
+                            'msg' => sprintf('Unknown Workflow [%s] Or Workflow Is Finished#', $params['task_id']),
+                            'data' => [],
+                        ]);
+
+                        return $response;
+                    }
+                    $config = $this->container()
+                        ->get(ConfigInterface::class)
+                        ->get(sprintf('nsq.%s', 'default'));
+                    /**
+                     * @var Nsq $nsq
+                     */
+                    $nsq = make(Nsq::class, [$this->container(), $config]);
+                    $bool = $nsq->publish(
+                        ManageJobCommand::TOPIC_PREFIX . 'dag',
+                        json_encode([$params['id']], JSON_THROW_ON_ERROR)
+                    );
+
+                    $json = $bool ? [
+                        'code' => 0,
+                        'msg' => 'ok!',
+                        'data' => ['workflowId' => (int) $params['id']],
+                    ] : [
+                        'code' => 1,
+                        'msg' => 'Workflow Published Nsq Failed!',
+                        'data' => [],
+                    ];
+
+                    return $response->json($json);
                 });
                 /*
                  * 创建任务
-                 * dag or task
+                 * task
                  */
                 $router->post('/task/create', function (): Response {
                     $response = new Response();
