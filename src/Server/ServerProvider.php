@@ -127,6 +127,7 @@ class ServerProvider extends AbstractProvider
                             }
                         }
                     } catch (Throwable $throwable) {
+                        $this->logger->error(serendipity_format_throwable($throwable));
                         throw $throwable;
                         // you can log error here
                     } finally {
@@ -353,10 +354,10 @@ class ServerProvider extends AbstractProvider
                     $request = Context::get(RequestInterface::class);
                     $params = json_decode($request->getBody()
                         ->getContents(), true, 512, JSON_THROW_ON_ERROR);
-                    if (!DB::fetch('select * from workflow where id = ? and status = ?  limit 1;', [Task::TASK_TODO, $params['task_id']])) {
+                    if (!DB::fetch('select * from workflow where id = ? and status = ?  limit 1;', [$params['workflow_id'], Task::TASK_TODO])) {
                         $response->json([
                             'code' => 1,
-                            'msg' => sprintf('Unknown Workflow [%s] Or Workflow Is Finished#', $params['task_id']),
+                            'msg' => sprintf('Unknown Workflow [%s] Or Workflow Is Finished#', $params['workflow_id']),
                             'data' => [],
                         ]);
 
@@ -371,13 +372,13 @@ class ServerProvider extends AbstractProvider
                     $nsq = make(Nsq::class, [$this->container(), $config]);
                     $bool = $nsq->publish(
                         ManageJobCommand::TOPIC_PREFIX . 'dag',
-                        json_encode([$params['id']], JSON_THROW_ON_ERROR)
+                        json_encode([$params['workflow_id']], JSON_THROW_ON_ERROR)
                     );
 
                     $json = $bool ? [
                         'code' => 0,
                         'msg' => 'ok!',
-                        'data' => ['workflowId' => (int) $params['id']],
+                        'data' => ['workflowId' => (int) $params['workflow_id']],
                     ] : [
                         'code' => 1,
                         'msg' => 'Workflow Published Nsq Failed!',
