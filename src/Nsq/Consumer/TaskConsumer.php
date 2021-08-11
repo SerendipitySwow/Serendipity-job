@@ -23,7 +23,6 @@ use SerendipitySwow\Nsq\Message;
 use SerendipitySwow\Nsq\Nsq;
 use SerendipitySwow\Nsq\Result;
 use Throwable;
-use function Serendipity\Job\Kernel\serendipity_format_throwable;
 
 class TaskConsumer extends AbstractConsumer
 {
@@ -125,7 +124,7 @@ class TaskConsumer extends AbstractConsumer
             ));
         } catch (Throwable $e) {
             $this->logger->error(sprintf(
-                'Task ID:[%s] Time:[%s] Error#.',
+                'Task ID:[%s] Time:[%s] Error#. Please check details at Dingding Talk.',
                 $job->getIdentity(),
                 Carbon::now()
                     ->toDateTimeString()
@@ -134,6 +133,9 @@ class TaskConsumer extends AbstractConsumer
                 'last_error' => get_class($e),
                 'last_error_message' => $e->getMessage(),
                 'counter' => $job->getCounter(),
+                'task_id' => $job->getIdentity(),
+                'last_error_line' => $e->getLine(),
+                'last_error_file' => $e->getFile(),
             ];
             //retry
             if ($job->canRetry($job->getCounter(), $e)) {
@@ -170,7 +172,7 @@ class TaskConsumer extends AbstractConsumer
                 //failed
                 $job->failed($payload);
             }
-            $this->dingTalk->text(serendipity_format_throwable($e));
+            $this->dingTalk->text(json_encode($payload, JSON_THROW_ON_ERROR|JSON_UNESCAPED_UNICODE));
             throw $e;
         }
     }

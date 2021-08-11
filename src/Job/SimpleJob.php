@@ -35,7 +35,7 @@ class SimpleJob implements JobInterface
     {
         echo '输出一个字符串.' . PHP_EOL;
         sleep(20);
-//        throw new \Exception('抛出异常');
+        throw new \Exception('抛出异常');
     }
 
     public function canRetry(int $counter, $error): bool

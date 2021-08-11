@@ -57,7 +57,6 @@ class DagConsumer extends AbstractConsumer
                         }
                     }
                     */
-                    /*
                     $content = json_decode($value->content, true, 512, JSON_THROW_ON_ERROR);
                     $class = make($content['class'], $content['_params']);
                     // 暂不考虑支持协程单例mysql模式.
@@ -67,12 +66,10 @@ class DagConsumer extends AbstractConsumer
                             $class ?? $value->content
                         ));
                     }
-                    */
 
                     echo $value->task_no . "\n";
-                /*
-                return $class->run();
-                */
+
+                    return $class->run();
                 }, $value->timeout, $value->task_no);
                 $dag->addVertex($this->vertexes[$value->task_no]);
             }
@@ -83,9 +80,9 @@ SQL;
             $source = DB::query($source, [$id]);
             $this->tree($dag, $source);
             try {
-                echo 'Workflow Start #....' . PHP_EOL;
+                $this->logger->info('Workflow Start #....', ['workflow_id' => $id]);
                 $dag->run();
-                echo 'Workflow End #....' . PHP_EOL;
+                $this->logger->info('Workflow End #....', ['workflow_id' => $id]);
                 $this->container->get(EventDispatcherInterface::class)
                     ->dispatch(
                         new UpdateWorkflowEvent($id, Task::TASK_SUCCESS),
@@ -93,7 +90,7 @@ SQL;
                     );
             } catch (Throwable $throwable) {
                 $this->dingTalk->text(serendipity_format_throwable($throwable));
-                $this->logger->error(sprintf('Dag Error[%s]#', $throwable->getMessage()));
+                $this->logger->error(sprintf('Workflow Error[%s]#', $throwable->getMessage()));
             }
         }, $id, $tasks, $dag);
 

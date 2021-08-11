@@ -7,6 +7,7 @@
 declare(strict_types=1);
 
 use Monolog\Formatter\JsonFormatter;
+use Monolog\Formatter\LineFormatter;
 use Serendipity\Job\Kernel\Logger\AppendRequestIdProcessor;
 
 return [
@@ -42,10 +43,11 @@ return [
             ],
         ],
         'formatter' => [
-            'class' => JsonFormatter::class,
+            'class' => LineFormatter::class,
             'constructor' => [
-                'batchMode' => JsonFormatter::BATCH_MODE_JSON,
-                'appendNewline' => true,
+                'format' => null,
+                'dateFormat' => 'Y-m-d H:i:s',
+                'allowInlineLineBreaks' => true,
             ],
         ],
         'processors' => [
