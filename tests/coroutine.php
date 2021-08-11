@@ -7,7 +7,7 @@
 declare(strict_types=1);
 
 use Swow\Coroutine;
-
+require_once   dirname(__DIR__).'/vendor/autoload.php';
 //$a = 1;
 //$coroutine = Coroutine::run(function () use ($a) {
 //    try {
@@ -35,11 +35,13 @@ use Swow\Coroutine;
 //    'msg' => 'ok!',
 //    'data' => $data,
 //], JSON_THROW_ON_ERROR);
+\Swow\Debug\Debugger::runOnTTY();
 $coroutine = Coroutine::run(function ($a) {
 //    var_dump(Coroutine::getMain());
-//    Coroutine::run(function (){
-//        var_dump(Coroutine::getCurrent()->getPrevious());
-//    });
+    Coroutine::run(function (){
+        var_dump(Coroutine::getCurrent()->getPrevious());
+        sleep(100);
+    });
     $b = Coroutine::yield();
 
     return $a . ' ' . $b;
