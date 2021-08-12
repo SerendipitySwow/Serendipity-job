@@ -11,6 +11,7 @@ namespace Serendipity\Job\Kernel\Lock;
 use Exception;
 use Redis;
 use Serendipity\Job\Redis\RedisProxy;
+use Swow\Coroutine;
 
 class RedisLock
 {
@@ -51,7 +52,7 @@ class RedisLock
         $retryTimes = max($retryTimes, 1);
         $key = self::REDIS_LOCK_KEY_PREFIX . $name;
         while ($retryTimes-- > 0) {
-            $kVal = microtime(true) + $expire;
+            $kVal = microtime(true) + $expire + Coroutine::getCurrent()->getId();
             $lock = (bool) $this->getLock($key, $expire, $kVal); //上锁
             if ($lock) {
                 $this->lockedNames[$key] = $kVal;
@@ -101,8 +102,6 @@ LUA;
         if ($this->lock($name, $expire, $retryTimes, $sleep)) {
             try {
                 $func();
-            } catch (Exception $e) {
-                throw $e;
             } finally {
                 $this->unlock($name);
             }

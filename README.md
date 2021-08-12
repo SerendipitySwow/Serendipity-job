@@ -47,6 +47,8 @@ Run into the beauty of PHP8 and Swow
 
 * 计划开发后台
 
+* 解决并发消费任务时的问题
+
 ## Come on!
 
 ## Thanks Hyperf.!

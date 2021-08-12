@@ -18,7 +18,7 @@ interface JobInterface
     public function handle(): void;
 
     /**
-     * Determine whether current job can retry if fail.
+     * Determine whether current job can retry if failed.
      *
      * @param $error
      */

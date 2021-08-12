@@ -432,6 +432,7 @@ class ServerProvider extends AbstractProvider
                             'task_no' => $taskNo,
                             'status' => Task::TASK_TODO,
                             'step' => Arr::get($application, 'step'),
+                            'retry_times' => 1,
                             'runtime' => $runtime,
                             'content' => is_array($content) ? json_encode($content, JSON_THROW_ON_ERROR) : $content,
                             'timeout' => $timeout,
