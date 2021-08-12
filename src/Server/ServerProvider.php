@@ -11,11 +11,14 @@ namespace Serendipity\Job\Server;
 use Carbon\Carbon;
 use FastRoute\Dispatcher;
 use GuzzleHttp\Client;
+use GuzzleHttp\RequestOptions;
 use Hyperf\Engine\Channel;
 use Hyperf\Utils\Str;
 use PDO;
 use Psr\Http\Message\RequestInterface;
 use Serendipity\Job\Console\ManageJobCommand;
+use Serendipity\Job\Constant\Statistical;
+use Serendipity\Job\Constant\Task;
 use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\Contract\LoggerInterface;
 use Serendipity\Job\Contract\StdoutLoggerInterface;
@@ -28,17 +31,17 @@ use Serendipity\Job\Kernel\Signature;
 use Serendipity\Job\Kernel\Swow\ServerFactory;
 use Serendipity\Job\Logger\LoggerFactory;
 use Serendipity\Job\Middleware\AuthMiddleware;
+use Serendipity\Job\Redis\Lua\Hash\Incr;
 use Serendipity\Job\Serializer\SymfonySerializer;
 use Serendipity\Job\Util\Arr;
 use Serendipity\Job\Util\Context;
 use SerendipitySwow\Nsq\Nsq;
 use Swow\Coroutine;
 use Swow\Coroutine\Exception as CoroutineException;
+use Swow\Http\Exception as HttpException;
 use Swow\Http\Server;
 use Swow\Http\Server\Request as SwowRequest;
-use Swow\Http\Server\Session;
 use Swow\Http\Status;
-use Swow\Socket\Exception;
 use Swow\Socket\Exception as SocketException;
 use Throwable;
 use function FastRoute\simpleDispatcher;
@@ -47,6 +50,9 @@ use const Swow\Errno\EMFILE;
 use const Swow\Errno\ENFILE;
 use const Swow\Errno\ENOMEM;
 
+/**
+ * Class ServerProvider
+ */
 class ServerProvider extends AbstractProvider
 {
     protected StdoutLoggerInterface $stdoutLogger;
@@ -79,19 +85,50 @@ class ServerProvider extends AbstractProvider
                             if (!$session->isEstablished()) {
                                 break;
                             }
+                            $time = microtime(true);
                             $request = null;
                             try {
                                 $request = $session->recvHttpRequest();
-                                $response = $this->dispatcher($request, $session);
+                                $response = $this->dispatcher($request);
                                 $session->sendHttpResponse($response);
-                            } catch (HttpException $exception) {
-                                $session->error($exception->getCode(), $exception->getMessage());
+                            } catch (Throwable $exception) {
+                                if ($exception instanceof HttpException) {
+                                    $session->error($exception->getCode(), $exception->getMessage());
+                                }
+                                throw $exception;
+                            } finally {
+                                $logger = $this->container()
+                                    ->get(LoggerFactory::class)
+                                    ->get('request');
+                                // 日志
+                                $time = microtime(true) - $time;
+                                $debug = 'URI: ' . $request->getUri()
+                                    ->getPath() . PHP_EOL;
+                                $debug .= 'TIME: ' . $time . PHP_EOL;
+                                if ($customData = $this->getCustomData()) {
+                                    $debug .= 'DATA: ' . $customData . PHP_EOL;
+                                }
+                                $debug .= 'REQUEST: ' . $this->getRequestString($request) . PHP_EOL;
+                                if (isset($response)) {
+                                    $debug .= 'RESPONSE: ' . $this->getResponseString($response) . PHP_EOL;
+                                }
+                                if (isset($exception) && $exception instanceof Throwable) {
+                                    $debug .= 'EXCEPTION: ' . $exception->getMessage() . PHP_EOL;
+                                }
+
+                                if ($time > 1) {
+                                    $logger->error($debug);
+                                } else {
+                                    $logger->info($debug);
+                                }
                             }
-                            if (!$request || !$request->getKeepAlive()) {
+                            if (!$request->getKeepAlive()) {
                                 break;
                             }
                         }
-                    } catch (Exception) {
+                    } catch (Throwable $throwable) {
+                        $this->logger->error(serendipity_format_throwable($throwable));
+                        throw $throwable;
                         // you can log error here
                     } finally {
                         ## close session
@@ -111,20 +148,68 @@ class ServerProvider extends AbstractProvider
     protected function makeFastRoute(): void
     {
         $this->fastRouteDispatcher = simpleDispatcher(function (RouteCollector $router) {
-            $router->get('/', static function (): Response {
+            /*
+             * 刷新应用签名
+             */
+            $router->post('/application/refresh-signature', function (): Response {
+                /**
+                 * @var SwowRequest $request
+                 */
+                $request = Context::get(RequestInterface::class);
+                $params = json_decode($request->getBody()
+                    ->getContents(), true, 512, JSON_THROW_ON_ERROR);
                 $response = new Response();
+                if (!$application = DB::fetch(sprintf(
+                    "select * from application where app_key = '%s' and secret_key = '%s'",
+                    $params['app_key'],
+                    $params['secret_key']
+                ))) {
+                    return $response->json([
+                        'code' => 1,
+                        'msg' => 'Unknown Application Key#',
+                        'data' => [],
+                    ]);
+                }
+                /**
+                 * @var Signature $signature
+                 */
+                $signature = make(Signature::class, [
+                    'options' => [
+                        'signatureSecret' => $params['secret_key'],
+                        'signatureApiKey' => $params['app_key'],
+                    ],
+                ]);
+                $timestamps = (string) time();
+                $nonce = $signature->generateNonce();
+                $payload = md5(Arr::get($application, 'app_name'));
+                $clientSignature = $signature->generateSignature(
+                    $timestamps,
+                    $nonce,
+                    $payload,
+                    $params['secret_key']
+                );
 
-                return $response->text(file_get_contents(BASE_PATH . '/storage/task.php'));
+                return $response->json([
+                    'code' => 0,
+                    'msg' => 'Ok!',
+                    'data' => [
+                        'nonce' => $nonce, 'timestamps' => $timestamps,
+                        'signature' => $clientSignature,
+                        'appKey' => Arr::get($application, 'app_key'),
+                        'payload' => $payload,
+                        'secretKey' => Arr::get($application, 'secret_key'),
+                    ],
+                ]);
             });
             /*
              * 创建应用
              */
             $router->post('/application/create', function (): Response {
+                $appKey = Str::random();
+                $secretKey = Str::random(32);
                 /**
                  * @var SwowRequest $request
                  */
-                $appKey = Str::random();
-                $secretKey = Str::random(32);
                 $request = Context::get(RequestInterface::class);
                 $params = json_decode($request->getBody()
                     ->getContents(), true, 512, JSON_THROW_ON_ERROR);
@@ -183,6 +268,7 @@ class ServerProvider extends AbstractProvider
                         'signature' => $clientSignature,
                         'appKey' => $appKey,
                         'payload' => $payload,
+                        'secretKey' => $secretKey,
                     ],
                 ] : [
                     'code' => 1,
@@ -235,7 +321,17 @@ class ServerProvider extends AbstractProvider
                             JSON_THROW_ON_ERROR
                         ),
                     ], ['class' => $serializerObject::class]), JSON_THROW_ON_ERROR);
-                    $bool = $nsq->publish(ManageJobCommand::TOPIC_PREFIX . 'task', $json);
+                    $delay = strtotime($ret['runtime']) - time();
+                    if ($delay > 0) {
+                        /**
+                         * 加入延迟任务统计
+                         *
+                         * @var Incr $incr
+                         */
+                        $incr = make(Incr::class);
+                        $incr->eval([Statistical::TASK_DELAY, 24 * 60 * 60]);
+                    }
+                    $bool = $nsq->publish(ManageJobCommand::TOPIC_PREFIX . 'task', $json, $delay > 0 ? $delay : 0.0);
 
                     return $response->json($bool ? [
                         'code' => 0,
@@ -248,8 +344,52 @@ class ServerProvider extends AbstractProvider
                     ]);
                 });
                 /*
+                 * 投递dag任务
+                 */
+                $router->post('/task/dag', function (): Response {
+                    $response = new Response();
+                    /**
+                     * @var SwowRequest $request
+                     */
+                    $request = Context::get(RequestInterface::class);
+                    $params = json_decode($request->getBody()
+                        ->getContents(), true, 512, JSON_THROW_ON_ERROR);
+                    if (!DB::fetch('select * from workflow where id = ? and status = ?  limit 1;', [$params['workflow_id'], Task::TASK_TODO])) {
+                        $response->json([
+                            'code' => 1,
+                            'msg' => sprintf('Unknown Workflow [%s] Or Workflow Is Finished#', $params['workflow_id']),
+                            'data' => [],
+                        ]);
+
+                        return $response;
+                    }
+                    $config = $this->container()
+                        ->get(ConfigInterface::class)
+                        ->get(sprintf('nsq.%s', 'default'));
+                    /**
+                     * @var Nsq $nsq
+                     */
+                    $nsq = make(Nsq::class, [$this->container(), $config]);
+                    $bool = $nsq->publish(
+                        ManageJobCommand::TOPIC_PREFIX . 'dag',
+                        json_encode([$params['workflow_id']], JSON_THROW_ON_ERROR)
+                    );
+
+                    $json = $bool ? [
+                        'code' => 0,
+                        'msg' => 'ok!',
+                        'data' => ['workflowId' => (int) $params['workflow_id']],
+                    ] : [
+                        'code' => 1,
+                        'msg' => 'Workflow Published Nsq Failed!',
+                        'data' => [],
+                    ];
+
+                    return $response->json($json);
+                });
+                /*
                  * 创建任务
-                 * dag or task
+                 * task
                  */
                 $router->post('/task/create', function (): Response {
                     $response = new Response();
@@ -270,11 +410,11 @@ class ServerProvider extends AbstractProvider
                     $runtime = $runtime ? Carbon::parse($runtime)
                         ->toDateTimeString() : Carbon::now()
                         ->toDateTimeString();
-                    if (DB::fetch(sprintf(
+                    if (current(DB::fetch(sprintf(
                         "select count(*) from task where app_key = '%s' and task_no = '%s'",
                         $appKey,
                         $taskNo
-                    ))) {
+                    ))) > 0) {
                         $json = [
                             'code' => 1,
                             'msg' => '请勿重复提交!',
@@ -282,16 +422,19 @@ class ServerProvider extends AbstractProvider
                         ];
                     } else {
                         $appKey = Arr::get($application, 'app_key');
+                        /*
                         $running = Carbon::parse($runtime)
                             ->lte(Carbon::now()
-                            ->toDateTimeString()) ? 1 : 0;
+                            ->toDateTimeString()) ? Task::TASK_ING : Task::TASK_TODO;
+                        */
                         $data = [
                             'app_key' => $appKey,
                             'task_no' => $taskNo,
-                            'status' => $running,
+                            'status' => Task::TASK_TODO,
                             'step' => Arr::get($application, 'step'),
+                            'retry_times' => 1,
                             'runtime' => $runtime,
-                            'content' => $content,
+                            'content' => is_array($content) ? json_encode($content, JSON_THROW_ON_ERROR) : $content,
                             'timeout' => $timeout,
                             // $content  =  { "class": "\\Job\\SimpleJob\\","_params":{"startDate":"xx","endDate":"xxx"}},
                             'created_at' => Carbon::now()
@@ -329,7 +472,7 @@ class ServerProvider extends AbstractProvider
                             'timeout' => Arr::get($data, 'timeout'),
                             'step' => Arr::get($data, 'step'),
                             'name' => Arr::get($data, 'name'),
-                            'retryTimes' => 0,
+                            'retryTimes' => 1,
                         ]);
                         $json = $serializer->serialize($serializerObject);
                         $json = json_encode(array_merge([
@@ -341,6 +484,15 @@ class ServerProvider extends AbstractProvider
                             ),
                         ], ['class' => $serializerObject::class]), JSON_THROW_ON_ERROR);
                         $bool = $nsq->publish(ManageJobCommand::TOPIC_PREFIX . 'task', $json, $delay);
+                        if ($delay > 0) {
+                            /**
+                             * 加入延迟任务统计
+                             *
+                             * @var Incr $incr
+                             */
+                            $incr = make(Incr::class);
+                            $incr->eval([Statistical::TASK_DELAY, 24 * 60 * 60]);
+                        }
                         $json = $bool ? [
                             'code' => 0,
                             'msg' => 'ok!',
@@ -363,8 +515,7 @@ class ServerProvider extends AbstractProvider
                      */
                     $request = Context::get(RequestInterface::class);
                     $swowResponse = new Response();
-                    $params = json_decode($request->getBody()
-                        ->getContents(), true, 512, JSON_THROW_ON_ERROR);
+                    $params = $request->getQueryParams();
                     $client = new Client();
                     $config = $this->container()
                         ->get(ConfigInterface::class)
@@ -372,7 +523,7 @@ class ServerProvider extends AbstractProvider
                     $response = $client->get(
                         sprintf('%s:%s/%s', $config['host'], $config['port'], 'detail'),
                         [
-                            'query' => ['coroutine_id' => $params['coroutine_id']],
+                            'query' => ['coroutine_id' => $params['coroutine_id'] ?? 0],
                         ]
                     );
 
@@ -388,15 +539,19 @@ class ServerProvider extends AbstractProvider
                      */
                     $request = Context::get(RequestInterface::class);
                     $swowResponse = new Response();
-                    $params = $request->getQueryParams();
+                    $params = json_decode($request->getBody()
+                        ->getContents(), true, 512, JSON_THROW_ON_ERROR);
                     $client = new Client();
                     $config = $this->container()
                         ->get(ConfigInterface::class)
                         ->get('task_server');
-                    $response = $client->get(
+                    $response = $client->post(
                         sprintf('%s:%s/%s', $config['host'], $config['port'], 'cancel'),
                         [
-                            'query' => ['coroutine_id' => $params['coroutine_id']],
+                            RequestOptions::JSON => [
+                                'coroutine_id' => $params['coroutine_id'],
+                                'id' => $params['id'],
+                            ],
                         ]
                     );
 
@@ -409,7 +564,7 @@ class ServerProvider extends AbstractProvider
         ]);
     }
 
-    protected function dispatcher(SwowRequest $request, Session $session): Response
+    protected function dispatcher(SwowRequest $request): Response
     {
         $channel = new Channel();
         Coroutine::run(function () use ($request, $channel) {
@@ -451,6 +606,8 @@ class ServerProvider extends AbstractProvider
                                 $response->error(Status::UNAUTHORIZED, 'UNAUTHORIZED');
                                 break;
                             }
+                            $response = call($handler[0], $vars);
+                            break;
                         } catch (Throwable $exception) {
                             $this->logger->error(serendipity_format_throwable($exception));
                             $response = new Response();
@@ -465,5 +622,30 @@ class ServerProvider extends AbstractProvider
         });
 
         return $channel->pop();
+    }
+
+    protected function getCustomData(): string
+    {
+        return '';
+    }
+
+    protected function getResponseString(Response $response): string
+    {
+        return (string) $response->getBody();
+    }
+
+    protected function getRequestString(SwowRequest $request): string
+    {
+        $data = array_merge(
+            $request->getQueryParams(),
+            json_decode(
+                $request->getBodyAsString() !== '' ? $request->getBodyAsString() : '{}',
+                true,
+                512,
+                JSON_THROW_ON_ERROR
+            )
+        );
+
+        return json_encode($data, JSON_THROW_ON_ERROR);
     }
 }

@@ -7,6 +7,7 @@
 declare(strict_types=1);
 
 use Monolog\Formatter\JsonFormatter;
+use Monolog\Formatter\LineFormatter;
 use Serendipity\Job\Kernel\Logger\AppendRequestIdProcessor;
 
 return [
@@ -14,7 +15,7 @@ return [
         'handler' => [
             'class' => Monolog\Handler\RotatingFileHandler::class,
             'constructor' => [
-                'filename' => BASE_PATH . '/runtimes/logs/serendipity_job.log',
+                'filename' => BASE_PATH . '/runtimes/logs/server/serendipity_server.log',
                 'maxFiles' => 5,
                 'level' => Monolog\Logger::DEBUG,
             ],
@@ -24,6 +25,29 @@ return [
             'constructor' => [
                 'batchMode' => JsonFormatter::BATCH_MODE_JSON,
                 'appendNewline' => true,
+            ],
+        ],
+        'processors' => [
+            [
+                'class' => AppendRequestIdProcessor::class,
+            ],
+        ],
+    ],
+    'job' => [
+        'handler' => [
+            'class' => Monolog\Handler\RotatingFileHandler::class,
+            'constructor' => [
+                'filename' => BASE_PATH . '/runtimes/logs/job/serendipity_job.log',
+                'maxFiles' => 5,
+                'level' => Monolog\Logger::DEBUG,
+            ],
+        ],
+        'formatter' => [
+            'class' => LineFormatter::class,
+            'constructor' => [
+                'format' => null,
+                'dateFormat' => 'Y-m-d H:i:s',
+                'allowInlineLineBreaks' => true,
             ],
         ],
         'processors' => [

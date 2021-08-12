@@ -1,12 +1,14 @@
 #!/usr/bin/env php
 <?php
 
-declare( strict_types = 1 );
-
+declare(strict_types=1);
 
 use Psr\Container\ContainerInterface;
 use Serendipity\Job\Application;
 
+if (!extension_loaded('swow')) {
+    exit('Swow extension is required');
+}
 define('BASE_PATH', dirname(__DIR__));
 ini_set('display_errors', 'on');
 ini_set('display_startup_errors', 'on');
@@ -16,10 +18,10 @@ date_default_timezone_set('Asia/Shanghai');
 
 require_once BASE_PATH . '/vendor/autoload.php';
 
-( static function () {
+(static function () {
     Hyperf\Di\ClassLoader::init();
     /** @var ContainerInterface $container */
     $container = require BASE_PATH . '/config/container.php';
     $application = $container->get(Application::class);
     $application->run();
-} )();
+})();

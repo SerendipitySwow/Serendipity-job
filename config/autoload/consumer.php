@@ -6,8 +6,7 @@
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Db\Exception;
-
-class InvalidDriverException extends RuntimeException
-{
-}
+return [
+    'task_redis_consumer_time' => 60,
+    'task_redis_cache_time' => 24 * 60 * 60,
+];

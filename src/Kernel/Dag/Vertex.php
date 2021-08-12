@@ -31,7 +31,7 @@ class Vertex
      */
     public array $children = [];
 
-    public static function make(callable $job, int $timeout = 5, string $key = null, ): self
+    public static function make(callable $job, int $timeout = 5 * 1000, string $key = null, ): self
     {
         $closure = \Closure::fromCallable($job);
         if ($key === null) {
@@ -49,7 +49,7 @@ class Vertex
     #[Pure]
     public static function of(
         Runner $job,
-        int $timeout = 5,
+        int $timeout = 5 * 1000,
         string $key = null,
     ): self {
         if ($key === null) {

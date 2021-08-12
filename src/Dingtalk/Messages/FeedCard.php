@@ -5,11 +5,6 @@
  */
 
 declare(strict_types=1);
-/**
- * This file is part of Task-Schedule.
- *
- * @license  https://github.com/Hyperf-Glory/Task-Schedule/main/LICENSE
- */
 
 namespace Serendipity\Job\Dingtalk\Messages;
 
@@ -46,7 +41,7 @@ class FeedCard extends Message
         return $this;
     }
 
-    public function send()
+    public function send(): bool | \Psr\Http\Message\ResponseInterface
     {
         $this->service->setMessage($this);
 

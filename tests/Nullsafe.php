@@ -6,8 +6,12 @@
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Db\Exception;
-
-class InvalidDriverException extends RuntimeException
+class Socket1
 {
+    public $socket;
+
+    public function check()
+    {
+        return (bool) $this->socket?->ischeck();
+    }
 }

@@ -6,8 +6,4 @@
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Db\Exception;
-
-class InvalidDriverException extends RuntimeException
-{
-}
+var_dump(json_decode('{}', true, 512, JSON_THROW_ON_ERROR));

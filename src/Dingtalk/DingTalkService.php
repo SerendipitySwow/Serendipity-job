@@ -62,9 +62,7 @@ class DingTalkService
     {
         $this->mobiles = $mobiles;
         $this->atAll = $atAll;
-        if ($this->message) {
-            $this->message->sendAt($mobiles, $atAll);
-        }
+        $this->message?->sendAt($mobiles, $atAll);
     }
 
     /**

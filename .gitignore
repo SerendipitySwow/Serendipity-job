@@ -26,5 +26,4 @@ vendor
 runtimes
 composer.lock
 socket
-nsq
 

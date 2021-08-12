@@ -55,11 +55,8 @@ class Command
             return $this->quoteColumn($value) . ' = :' . strtoupper($value);
         }, array_keys($columns));
         $this->sql = 'UPDATE ' . $this->quoteTable($table) . ' SET ' . implode(',', $sets);
-        if (is_string($condition)) {
-            $this->sql .= ' WHERE ' . $condition;
-        } else {
-            throw new RuntimeException('condition must be a string');
-        }
+
+        $this->sql .= ' WHERE ' . $condition;
 
         $this->params = $params;
         foreach ($columns as $k => $v) {
