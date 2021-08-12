@@ -16,7 +16,6 @@ use Serendipity\Job\Contract\EventDispatcherInterface;
 use Serendipity\Job\Contract\JobInterface;
 use Serendipity\Job\Db\DB;
 use Serendipity\Job\Event\UpdateJobEvent;
-use Serendipity\Job\Kernel\Lock\RedisLock;
 use Serendipity\Job\Redis\Lua\Hash\Incr;
 use Serendipity\Job\Util\Coroutine;
 use SerendipitySwow\Nsq\Message;
@@ -24,9 +23,6 @@ use SerendipitySwow\Nsq\Nsq;
 use SerendipitySwow\Nsq\Result;
 use Throwable;
 
-/**
- * TODO 开启10个消费者时，重复消费失败的任务还是有问题.
- */
 class TaskConsumer extends AbstractConsumer
 {
     protected const TASK_CONSUMER_REDIS_PREFIX = 'TaskIDEntity#%s-%s';
@@ -52,72 +48,60 @@ class TaskConsumer extends AbstractConsumer
 
             return Result::DROP;
         }
-        /**
-         * @var RedisLock $lock
-         */
-        $lock = make(RedisLock::class, [$redis]);
-        /**
-         * @var Incr $incr
-         */
+
         $incr = make(Incr::class);
-        if ($lock->lock(sprintf('%s#%s', $job->getIdentity(), $job->getCounter()), ($job->getTimeout() / 1000) + random_int(1, 5))) {
-            return $this->waiter->wait(function () use ($job, $incr, $lock) {
-                try {
-                    //协程退出前释放锁
-                    Coroutine::defer(fn () => $lock->unlock(sprintf('%s#%s', $job->getIdentity(), $job->getCounter())));
-                    //修改当前那个协程在执行此任务
-                    DB::execute(
-                        sprintf(
-                            'update task set coroutine_id = %s,status = %s where id = %s;',
-                            \Swow\Coroutine::getCurrent()
-                                ->getId(),
-                            Task::TASK_ING,
-                            $job->getIdentity(),
-                        )
+
+        return $this->waiter->wait(function () use ($job, $incr) {
+            try {
+                //修改当前那个协程在执行此任务,用于取消任务
+                DB::execute(
+                    sprintf(
+                        'update task set coroutine_id = %s,status = %s where id = %s;',
+                        \Swow\Coroutine::getCurrent()
+                            ->getId(),
+                        Task::TASK_ING,
+                        $job->getIdentity(),
+                    )
+                );
+                $this->handle($job);
+                //记录此消息已被消费而且任务已被执行完成
+                $incr->eval([
+                    sprintf(
+                        static::TASK_CONSUMER_REDIS_PREFIX,
+                        $job->getIdentity(),
+                        $job->getCounter()
+                    ),
+                    $this->config->get('consumer.task_redis_consumer_time'),
+                ]);
+                //加入成功执行统计
+                $incr->eval([Statistical::TASK_SUCCESS, $this->config->get('consumer.task_redis_cache_time')]);
+                $this->container->get(EventDispatcherInterface::class)
+                    ->dispatch(
+                        new UpdateJobEvent($job->getIdentity(), Task::TASK_SUCCESS),
+                        UpdateJobEvent::UPDATE_JOB
                     );
-                    $this->handle($job);
+                $result = Result::ACK;
+            } catch (Throwable $e) {
+                //加入失败执行统计
+                $incr->eval([Statistical::TASK_FAILURE,  $this->config->get('consumer.task_redis_cache_time')]);
+                $this->logger->error(
+                    sprintf(
+                        'Uncaptured exception[%s:%s] detected in %s::%d.',
+                        get_class($e),
+                        $e->getMessage(),
+                        $e->getFile(),
+                        $e->getLine()
+                    ),
+                    [
+                        'driver' => $job::class,
+                    ]
+                );
 
-                    //记录此消息已被消费而且任务已被执行完成
-                    $incr->eval([
-                        sprintf(
-                            static::TASK_CONSUMER_REDIS_PREFIX,
-                            $job->getIdentity(),
-                            $job->getCounter()
-                        ),
-                        $this->config->get('consumer.task_redis_consumer_time'),
-                    ]);
-                    //加入成功执行统计
-                    $incr->eval([Statistical::TASK_SUCCESS, $this->config->get('consumer.task_redis_cache_time')]);
-                    $this->container->get(EventDispatcherInterface::class)
-                        ->dispatch(
-                            new UpdateJobEvent($job->getIdentity(), Task::TASK_SUCCESS),
-                            UpdateJobEvent::UPDATE_JOB
-                        );
-                    $result = Result::ACK;
-                } catch (Throwable $e) {
-                    //加入失败执行统计
-                    $incr->eval([Statistical::TASK_FAILURE,  $this->config->get('consumer.task_redis_cache_time')]);
-                    $this->logger->error(
-                        sprintf(
-                            'Uncaptured exception[%s:%s] detected in %s::%d.',
-                            get_class($e),
-                            $e->getMessage(),
-                            $e->getFile(),
-                            $e->getLine()
-                        ),
-                        [
-                            'driver' => $job::class,
-                        ]
-                    );
+                $result = Result::DROP;
+            }
 
-                    $result = Result::DROP;
-                }
-
-                return $result;
-            }, $job->getTimeout());
-        }
-
-        return Result::DROP;
+            return $result;
+        }, $job->getTimeout());
     }
 
     /**

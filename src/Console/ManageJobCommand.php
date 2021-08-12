@@ -75,13 +75,6 @@ final class ManageJobCommand extends Command
                     'task'
                 ),
                 new InputOption(
-                    'limit',
-                    'l',
-                    InputOption::VALUE_REQUIRED,
-                    'Configure the number of coroutines to process tasks',
-                    1
-                ),
-                new InputOption(
                     'host',
                     'host',
                     InputOption::VALUE_REQUIRED,
@@ -101,9 +94,7 @@ final class ManageJobCommand extends Command
                     The <info>%command.name%</info> command consumes tasks
 
                         <info>php %command.full_name%</info>
-
-                    Use the --limit option configure the number of coroutines to process tasks:
-                        <info>php %command.full_name% --limit=10</info>
+                        
                     Use the --type option Select the type of task to be performed (dag, task),If you choose dag, limit is best configured to 1:
                         <info>php %command.full_name% --type=task</info>
                     Use the --host Configure HttpServer host:
@@ -127,7 +118,6 @@ final class ManageJobCommand extends Command
         $this->config = $this->container->get(ConfigInterface::class);
         $this->stdoutLogger = $this->container->get(StdoutLoggerInterface::class);
         $this->stdoutLogger->info('Consumer Task Successfully Processed#');
-        $limit = $this->input->getOption('limit');
         $type = $this->input->getOption('type');
         $port = (int) $this->input->getOption('port');
         $host = $this->input->getOption('host');
@@ -135,12 +125,7 @@ final class ManageJobCommand extends Command
             $this->stdoutLogger->error('Invalid task parameters.');
             exit(1);
         }
-        if ($limit !== null) {
-            for ($i = 0; $i < $limit; $i++) {
-                $this->subscribe($i, $type);
-                $this->stdoutLogger->info(ucfirst($type) . 'Consumer#' . $i . ' start.');
-            }
-        }
+        $this->subscribe($type);
         $this->makeServer($host, $port);
 
         return SymfonyCommand::SUCCESS;
@@ -272,10 +257,10 @@ final class ManageJobCommand extends Command
         }
     }
 
-    protected function subscribe(int $i, string $type): void
+    protected function subscribe(string $type): void
     {
         Coroutine::run(
-            function () use ($i, $type) {
+            function () use ($type) {
                 /**
                  * @var NSq $subscriber
                  */
@@ -289,15 +274,15 @@ final class ManageJobCommand extends Command
                 };
                 $subscriber->subscribe(
                     self::TOPIC_PREFIX . $type,
-                    ucfirst($type) . 'Consumer' . $i,
-                    function (Message $message) use ($consumer, $i) {
+                    ucfirst($type) . 'Consumer',
+                    function (Message $message) use ($consumer) {
                         try {
                             $result = $consumer->consume($message);
                         } catch (Throwable $error) {
                             //Segmentation fault
                             $this->stdoutLogger->error(sprintf(
                                 'Consumer failed to consume %s,reason: %s,file: %s,line: %s',
-                                'Consumer' . $i,
+                                'Consumer',
                                 $error->getMessage(),
                                 $error->getFile(),
                                 $error->getLine()
