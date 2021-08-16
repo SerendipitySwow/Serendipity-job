@@ -83,7 +83,7 @@ class TaskConsumer extends AbstractConsumer
                 $result = Result::ACK;
             } catch (Throwable $e) {
                 //加入失败执行统计
-                $incr->eval([Statistical::TASK_FAILURE,  $this->config->get('consumer.task_redis_cache_time')]);
+                $incr->eval([Statistical::TASK_FAILURE, $this->config->get('consumer.task_redis_cache_time')]);
                 $this->logger->error(
                     sprintf(
                         'Uncaptured exception[%s:%s] detected in %s::%d.',
@@ -187,6 +187,14 @@ class TaskConsumer extends AbstractConsumer
             } else {
                 //failed
                 $job->failed($payload);
+                DB::execute(
+                    sprintf(
+                        "update task set status = %s,memo = '%s'  where id = %s;",
+                        Task::TASK_ERROR,
+                        json_encode($payload, JSON_THROW_ON_ERROR),
+                        $job->getIdentity()
+                    )
+                );
             }
             $this->dingTalk->text(json_encode($payload, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE));
             throw $e;

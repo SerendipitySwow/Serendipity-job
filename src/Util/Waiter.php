@@ -20,6 +20,8 @@ class Waiter
 
     protected int $popTimeout = 10;
 
+    protected ?int $coroutineId = null;
+
     public function __construct(int $timeout = 10)
     {
         $this->popTimeout = $timeout * 1000;
@@ -37,7 +39,7 @@ class Waiter
         }
 
         $channel = new Channel(1);
-        Coroutine::create(function () use ($channel, $closure) {
+        $this->coroutineId = Coroutine::create(function () use ($channel, $closure) {
             try {
                 $result = $closure();
             } catch (Throwable $exception) {
@@ -58,6 +60,7 @@ class Waiter
 
             return $result;
         } catch (Throwable $e) {
+            \Swow\Coroutine::get($this->coroutineId)?->throw($e);
             throw $e;
         }
     }
