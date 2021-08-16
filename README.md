@@ -6,7 +6,7 @@ Run into the beauty of PHP8 and Swow
 
 ```
 1.支持Api投递任务.推送Nsq进行消费.(完成)
-2.支持任务单个运行，并限制在时间内.(完成)
+2.支持任务单个运行，并限制在时间内.超出限制时间抛异常(完成)
 3.支持任务编排,单个任务限制时间.(完成)
 4.支持任务编排支持事务.(暂不考虑)
 5.支持重试机制,中间件(完成)
@@ -32,7 +32,9 @@ Run into the beauty of PHP8 and Swow
 4.Di主要使用Hyperf/Di
 5.取消任务使用kill
 6.crontab随消费进程一起启动
-7.不建议使用多个消费者消费任务,心智负担很重
+7.不建议使用多个消费者消费任务,心智负担很重,所以取消了多个消费者
+8.限制任务执行时间通过channel 限制pop时间如果pop超时直接对执行任务的协程抛出异常.$coroutine->throw($exception);
+[ERROR] Consumer failed to consume Consumer,reason: Channel wait producer failed, reason: Timed out for 5000 ms,file: /Users/heping/Serendipity-Job/src/Util/Waiter.php,line: 53
 ```
 
 ## 接口文档
@@ -40,15 +42,11 @@ Run into the beauty of PHP8 and Swow
 见API.md
 
 ## TODO
-* 完成dag任务投递
-
-* 测试dag
-
 * 计划开发后台
 
 ## Come on!
 
-## Thanks Hyperf.!
+## Thanks Hyperf.Swow!
 
 ## Required
 
@@ -66,15 +64,17 @@ Run into the beauty of PHP8 and Swow
 
 ````bash
  php bin/serendipity-job serendipity-job:start
- 
 ````
 
 2.启动Job 进行任务消费
 
 ```bash
-php bin/serendipity-job manage-job:start --type=task --limit=5 --host=127.0.0.1 --por
-t=9764
+php bin/serendipity-job manage-job:start --type=task  --host=127.0.0.1 --port=9764
 ```
+#### 参数详解
+1. type 任务类型task或者dag
+2. host server host监听地址,用于取消任务或者查卡任务详情
+3. port server port监听端口号
 
 3.配置Crontab
 
