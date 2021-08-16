@@ -24,6 +24,7 @@ use Serendipity\Job\Contract\LoggerInterface;
 use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Serendipity\Job\Db\Command;
 use Serendipity\Job\Db\DB;
+use Serendipity\Job\Kernel\Http\Request as SerendipityRequest;
 use Serendipity\Job\Kernel\Http\Response;
 use Serendipity\Job\Kernel\Provider\AbstractProvider;
 use Serendipity\Job\Kernel\Router\RouteCollector;
@@ -88,7 +89,7 @@ class ServerProvider extends AbstractProvider
                             $time = microtime(true);
                             $request = null;
                             try {
-                                $request = $session->recvHttpRequest();
+                                $request = $session->recvHttpRequest(make(SerendipityRequest::class));
                                 $response = $this->dispatcher($request);
                                 $session->sendHttpResponse($response);
                             } catch (Throwable $exception) {
@@ -153,11 +154,10 @@ class ServerProvider extends AbstractProvider
              */
             $router->post('/application/refresh-signature', function (): Response {
                 /**
-                 * @var SwowRequest $request
+                 * @var SerendipityRequest $request
                  */
                 $request = Context::get(RequestInterface::class);
-                $params = json_decode($request->getBody()
-                    ->getContents(), true, 512, JSON_THROW_ON_ERROR);
+                $params = $request->post();
                 $response = new Response();
                 if (!$application = DB::fetch(sprintf(
                     "select * from application where app_key = '%s' and secret_key = '%s'",
@@ -208,11 +208,10 @@ class ServerProvider extends AbstractProvider
                 $appKey = Str::random();
                 $secretKey = Str::random(32);
                 /**
-                 * @var SwowRequest $request
+                 * @var SerendipityRequest $request
                  */
                 $request = Context::get(RequestInterface::class);
-                $params = json_decode($request->getBody()
-                    ->getContents(), true, 512, JSON_THROW_ON_ERROR);
+                $params = $request->post();
                 $data = [
                     'status' => 1,
                     'app_key' => $appKey,
@@ -280,11 +279,10 @@ class ServerProvider extends AbstractProvider
                 $router->post('/nsq/publish', function (): Response {
                     $response = new Response();
                     /**
-                     * @var SwowRequest $request
+                     * @var SerendipityRequest $request
                      */
                     $request = Context::get(RequestInterface::class);
-                    $params = json_decode($request->getBody()
-                        ->getContents(), true, 512, JSON_THROW_ON_ERROR);
+                    $params = $request->post();
                     $config = $this->container()
                         ->get(ConfigInterface::class)
                         ->get(sprintf('nsq.%s', 'default'));
@@ -349,11 +347,10 @@ class ServerProvider extends AbstractProvider
                 $router->post('/task/dag', function (): Response {
                     $response = new Response();
                     /**
-                     * @var SwowRequest $request
+                     * @var SerendipityRequest $request
                      */
                     $request = Context::get(RequestInterface::class);
-                    $params = json_decode($request->getBody()
-                        ->getContents(), true, 512, JSON_THROW_ON_ERROR);
+                    $params = $request->post();
                     if (!DB::fetch('select * from workflow where id = ? and status = ?  limit 1;', [$params['workflow_id'], Task::TASK_TODO])) {
                         $response->json([
                             'code' => 1,
@@ -394,11 +391,10 @@ class ServerProvider extends AbstractProvider
                 $router->post('/task/create', function (): Response {
                     $response = new Response();
                     /**
-                     * @var SwowRequest $request
+                     * @var SerendipityRequest $request
                      */
                     $request = Context::get(RequestInterface::class);
-                    $params = json_decode($request->getBody()
-                        ->getContents(), true, 512, JSON_THROW_ON_ERROR);
+                    $params = $request->post();
                     $appKey = $request->getHeaderLine('app_key');
                     $application = $request->getHeader('application');
                     $taskNo = Arr::get($params, 'taskNo');
@@ -511,11 +507,11 @@ class ServerProvider extends AbstractProvider
                  */
                 $router->get('/task/detail', function (): Response {
                     /**
-                     * @var SwowRequest $request
+                     * @var SerendipityRequest $request
                      */
                     $request = Context::get(RequestInterface::class);
                     $swowResponse = new Response();
-                    $params = $request->getQueryParams();
+                    $params = $request->get();
                     $client = new Client();
                     $config = $this->container()
                         ->get(ConfigInterface::class)
@@ -535,12 +531,11 @@ class ServerProvider extends AbstractProvider
                  */
                 $router->post('/task/cancel', function () {
                     /**
-                     * @var SwowRequest $request
+                     * @var SerendipityRequest $request
                      */
                     $request = Context::get(RequestInterface::class);
                     $swowResponse = new Response();
-                    $params = json_decode($request->getBody()
-                        ->getContents(), true, 512, JSON_THROW_ON_ERROR);
+                    $params = $request->post();
                     $client = new Client();
                     $config = $this->container()
                         ->get(ConfigInterface::class)
