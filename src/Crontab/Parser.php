@@ -10,6 +10,7 @@ namespace Serendipity\Job\Crontab;
 
 use Carbon\Carbon;
 use InvalidArgumentException;
+use JetBrains\PhpStorm\ArrayShape;
 
 class Parser
 {
@@ -140,10 +141,18 @@ class Parser
         return (int) $startTime;
     }
 
+    #[ArrayShape([
+        'second' => 'array|int[]',
+        'minutes' => 'array',
+        'hours' => 'array',
+        'day' => 'array',
+        'month' => 'array',
+        'week' => 'array'
+    ])]
     private function parseDate(string $crontabString): array
     {
         $cron = preg_split('/[\\s]+/i', trim($crontabString));
-        if (count($cron) == 6) {
+        if (count($cron) === 6) {
             $date = [
                 'second' => $this->parseSegment($cron[0], 0, 59),
                 'minutes' => $this->parseSegment($cron[1], 0, 59),
