@@ -40,7 +40,15 @@
 | remark | string | 否    |  当前时间   | 任务描述|
 
 > 任务重试时间分别为执行结束后的5秒 10秒 15秒,最大值3600。
-
+```json
+{
+    "appName": "帅的批爆1",
+    "step": 10,
+    "retryTotal": 0,
+    "linkUrl": "http://127.0.0.1",
+    "remark": "呵呵"
+}
+```
 ### 返回结果
 
 ```json
@@ -71,13 +79,30 @@
 | name | string | 是    | -   | 任务名称 |
 | timeout | int | 是    | -   | 任务的执行限制时间(单位是ms), |
 
+```json
+{
+    "taskNo": "taskNo82",
+    "content": {
+        "class": "\\Serendipity\\Job\\Job\\SimpleJob",
+        "_params": {
+            "startDate": "2021-07-27 17:50:50",
+            "endDate": "2021-07-27 17:50:50"
+        }
+    },
+    "timeout": 60000,
+    "name": "name",
+    "runtime": "2021-07-27 17:30:30"
+}
+```
 ### 返回结果
 
-```
+```json
 {
-    "code": 1,
-    "msg": "请勿重复提交!",
-    "data": []
+    "code": 0,
+    "msg": "ok!",
+    "data": {
+        "taskId": 81
+    }
 }
 ```
 
@@ -94,10 +119,15 @@
 | id | int | 是    | -   | 任务ID |
 
 > 程序会尽量拦截任务,不保证拦截成功率(越早拦截成功率越高)！
-
+```json
+{
+    "coroutine_id":6,
+    "id":18
+}
+```
 ### 返回结果
 
-```
+```json
 {
     "code": 1,
     "msg": "Unknown!",
@@ -117,19 +147,19 @@
 
 ### 返回结果
 
-```
+```json
 {
     "code": 0,
     "msg": "ok!",
     "data": {
-        "state": null,
-        "trace_list": "null",
-        "executed_file_name": null,
-        "executed_function_name": null,
-        "executed_function_line": null,
-        "vars": null,
-        "round": null,
-        "elapsed": null
+        "state": "waiting",
+        "trace_list": "[{\"file\":\"\\/Users\\/heping\\/Serendipity-Job\\/src\\/Job\\/SimpleJob.php\",\"line\":37,\"function\":\"sleep\",\"args\":[20]},{\"file\":\"\\/Users\\/heping\\/Serendipity-Job\\/src\\/Nsq\\/Consumer\\/TaskConsumer.php\",\"line\":125,\"function\":\"handle\",\"class\":\"Serendipity\\\\Job\\\\Job\\\\SimpleJob\",\"object\":{\"identity\":81,\"timeout\":60000,\"retryTimes\":1,\"name\":\"name\",\"step\":10},\"type\":\"->\",\"args\":[]},{\"file\":\"\\/Users\\/heping\\/Serendipity-Job\\/vendor\\/hyperf\\/utils\\/src\\/Pipeline.php\",\"line\":104,\"function\":\"Serendipity\\\\Job\\\\Nsq\\\\Consumer\\\\{closure}\",\"class\":\"Serendipity\\\\Job\\\\Nsq\\\\Consumer\\\\TaskConsumer\",\"object\":{},\"type\":\"->\",\"args\":[{\"identity\":81,\"timeout\":60000,\"retryTimes\":1,\"name\":\"name\",\"step\":10}]},{\"file\":\"\\/Users\\/heping\\/Serendipity-Job\\/src\\/Job\\/JobMiddleware.php\",\"line\":18,\"function\":\"Hyperf\\\\Utils\\\\{closure}\",\"class\":\"Hyperf\\\\Utils\\\\Pipeline\",\"type\":\"::\",\"args\":[{\"identity\":81,\"timeout\":60000,\"retryTimes\":1,\"name\":\"name\",\"step\":10}]},{\"file\":\"\\/Users\\/heping\\/Serendipity-Job\\/vendor\\/hyperf\\/utils\\/src\\/Pipeline.php\",\"line\":137,\"function\":\"handle\",\"class\":\"Serendipity\\\\Job\\\\Job\\\\JobMiddleware\",\"object\":{},\"type\":\"->\",\"args\":[{\"identity\":81,\"timeout\":60000,\"retryTimes\":1,\"name\":\"name\",\"step\":10},{}]},{\"file\":\"\\/Users\\/heping\\/Serendipity-Job\\/vendor\\/hyperf\\/utils\\/src\\/Pipeline.php\",\"line\":95,\"function\":\"Hyperf\\\\Utils\\\\{closure}\",\"class\":\"Hyperf\\\\Utils\\\\Pipeline\",\"object\":{},\"type\":\"->\",\"args\":[{\"identity\":81,\"timeout\":60000,\"retryTimes\":1,\"name\":\"name\",\"step\":10}]},{\"file\":\"\\/Users\\/heping\\/Serendipity-Job\\/src\\/Nsq\\/Consumer\\/TaskConsumer.php\",\"line\":126,\"function\":\"then\",\"class\":\"Hyperf\\\\Utils\\\\Pipeline\",\"object\":{},\"type\":\"->\",\"args\":[{}]},{\"file\":\"\\/Users\\/heping\\/Serendipity-Job\\/src\\/Nsq\\/Consumer\\/TaskConsumer.php\",\"line\":67,\"function\":\"handle\",\"class\":\"Serendipity\\\\Job\\\\Nsq\\\\Consumer\\\\TaskConsumer\",\"object\":{},\"type\":\"->\",\"args\":[{\"identity\":81,\"timeout\":60000,\"retryTimes\":1,\"name\":\"name\",\"step\":10}]},{\"file\":\"\\/Users\\/heping\\/Serendipity-Job\\/src\\/Util\\/Waiter.php\",\"line\":44,\"function\":\"Serendipity\\\\Job\\\\Nsq\\\\Consumer\\\\{closure}\",\"class\":\"Serendipity\\\\Job\\\\Nsq\\\\Consumer\\\\TaskConsumer\",\"object\":{},\"type\":\"->\",\"args\":[]},{\"file\":\"\\/Users\\/heping\\/Serendipity-Job\\/vendor\\/hyperf\\/utils\\/src\\/Functions.php\",\"line\":271,\"function\":\"Serendipity\\\\Job\\\\Util\\\\{closure}\",\"class\":\"Serendipity\\\\Job\\\\Util\\\\Waiter\",\"object\":{},\"type\":\"->\",\"args\":[]},{\"file\":\"\\/Users\\/heping\\/Serendipity-Job\\/src\\/Util\\/Coroutine.php\",\"line\":60,\"function\":\"call\",\"args\":[{}]},{\"function\":\"Serendipity\\\\Job\\\\Util\\\\{closure}\",\"class\":\"Serendipity\\\\Job\\\\Util\\\\Coroutine\",\"type\":\"::\",\"args\":[]}]",
+        "executed_file_name": "/Users/heping/Serendipity-Job/src/Job/SimpleJob.php",
+        "executed_function_name": "sleep",
+        "executed_function_line": 37,
+        "vars": [],
+        "round": 509,
+        "elapsed": 9805
     }
 }
 ```
@@ -143,10 +173,14 @@
 | 参数名     | 类型     | 是否必填 | 默认值 | 说明      |
 |---------|--------|------|-----|---------|
 | task_id | int | 是    | -   | 任务ID |
-
+```json
+{
+    "task_id": 1
+}
+```
 ### 返回结果
 
-```
+```json
 {
     "code": 0,
     "msg": "ok!",

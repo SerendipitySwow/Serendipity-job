@@ -114,10 +114,10 @@ final class ManageJobCommand extends Command
 
     public function handle(): int
     {
-        $this->showLogo();
-        $this->bootStrap();
         $this->config = $this->container->get(ConfigInterface::class);
         $this->stdoutLogger = $this->container->get(StdoutLoggerInterface::class);
+        $this->showLogo();
+        $this->bootStrap();
         $this->stdoutLogger->info('Consumer Task Successfully Processed#');
         $type = $this->input->getOption('type');
         $port = (int) $this->input->getOption('port');
@@ -152,14 +152,22 @@ final class ManageJobCommand extends Command
                                         $params = $request->getQueryParams();
                                         $coroutine = Coroutine::get((int) $params['coroutine_id']);
                                         $data = [
-                                            'state' => $coroutine?->getStateName(), //当前协程
-                                            'trace_list' => Json::encode($coroutine?->getTrace()), //协程函数调用栈
-                                            'executed_file_name' => $coroutine?->getExecutedFilename(), //获取执行文件名
-                                            'executed_function_name' => $coroutine?->getExecutedFunctionName(), //获取执行的函数名称
-                                            'executed_function_line' => $coroutine?->getExecutedLineno(), //获得执行的文件行数
-                                            'vars' => $coroutine?->getDefinedVars(), //获取定义的变量
-                                            'round' => $coroutine?->getRound(), //获取协程切换次数
-                                            'elapsed' => $coroutine?->getElapsed(), //获取协程运行的时间以便于分析统计或找出僵尸协程
+                                            'state' => $coroutine?->getStateName(),
+                                            //当前协程
+                                            'trace_list' => Json::encode($coroutine?->getTrace()),
+                                            //协程函数调用栈
+                                            'executed_file_name' => $coroutine?->getExecutedFilename(),
+                                            //获取执行文件名
+                                            'executed_function_name' => $coroutine?->getExecutedFunctionName(),
+                                            //获取执行的函数名称
+                                            'executed_function_line' => $coroutine?->getExecutedLineno(),
+                                            //获得执行的文件行数
+                                            'vars' => $coroutine?->getDefinedVars(),
+                                            //获取定义的变量
+                                            'round' => $coroutine?->getRound(),
+                                            //获取协程切换次数
+                                            'elapsed' => $coroutine?->getElapsed(),
+                                            //获取协程运行的时间以便于分析统计或找出僵尸协程
                                         ];
                                         $response = new Response();
                                         $response->json([
@@ -171,8 +179,10 @@ final class ManageJobCommand extends Command
                                         break;
                                     }
                                     case '/cancel':
-                                        $params = Json::decode($request->getBody()
-                                            ->getContents());
+                                        $params = Json::decode(
+                                            $request->getBody()
+                                                ->getContents()
+                                        );
                                         $coroutine = Coroutine::get((int) $params['coroutine_id']);
                                         $response = new Response();
                                         if (!$coroutine instanceof Coroutine) {
@@ -185,11 +195,13 @@ final class ManageJobCommand extends Command
                                             break;
                                         }
                                         if ($coroutine === Coroutine::getCurrent()) {
-                                            $session->respond(Json::encode([
-                                                'code' => 1,
-                                                'msg' => '参数错误!',
-                                                'data' => [],
-                                            ]));
+                                            $session->respond(
+                                                Json::encode([
+                                                    'code' => 1,
+                                                    'msg' => '参数错误!',
+                                                    'data' => [],
+                                                ])
+                                            );
                                             break;
                                         }
                                         if ($coroutine->getState() === $coroutine::STATE_LOCKED) {
@@ -202,19 +214,21 @@ final class ManageJobCommand extends Command
                                             break;
                                         }
                                         $coroutine->kill();
-                                        DB::execute(sprintf(
-                                            "update task set status  = %s,memo = '%s' where coroutine_id = %s and status = %s and id = %s",
-                                            Task::TASK_CANCEL,
+                                        DB::execute(
                                             sprintf(
-                                                '客户度IP:%s取消了任务,请求时间:%s.',
-                                                $session->getPeerAddress(),
-                                                Carbon::now()
-                                                    ->toDateTimeString()
-                                            ),
-                                            $params['coroutine_id'],
-                                            Task::TASK_ING,
-                                            $params['id']
-                                        ));
+                                                "update task set status  = %s,memo = '%s' where coroutine_id = %s and status = %s and id = %s",
+                                                Task::TASK_CANCEL,
+                                                sprintf(
+                                                    '客户度IP:%s取消了任务,请求时间:%s.',
+                                                    $session->getPeerAddress(),
+                                                    Carbon::now()
+                                                        ->toDateTimeString()
+                                                ),
+                                                $params['coroutine_id'],
+                                                Task::TASK_ING,
+                                                $params['id']
+                                            )
+                                        );
                                         if ($coroutine->isAvailable()) {
                                             $response->json([
                                                 'code' => 1,
@@ -278,13 +292,15 @@ final class ManageJobCommand extends Command
                             $result = $consumer->consume($message);
                         } catch (Throwable $error) {
                             //Segmentation fault
-                            $this->stdoutLogger->error(sprintf(
-                                'Consumer failed to consume %s,reason: %s,file: %s,line: %s',
-                                'Consumer',
-                                $error->getMessage(),
-                                $error->getFile(),
-                                $error->getLine()
-                            ));
+                            $this->stdoutLogger->error(
+                                sprintf(
+                                    'Consumer failed to consume %s,reason: %s,file: %s,line: %s',
+                                    'Consumer',
+                                    $error->getMessage(),
+                                    $error->getFile(),
+                                    $error->getLine()
+                                )
+                            );
                             $result = Result::DROP;
                         }
 
@@ -322,12 +338,14 @@ final class ManageJobCommand extends Command
 
     protected function dispatchCrontab(): void
     {
-        $this->container->get(EventDispatcherInterface::class)
-            ->dispatch(
-                new CrontabEvent(),
-                CrontabEvent::CRONTAB_REGISTER
-            );
-        $this->container->get(CrontabDispatcher::class)
-            ->handle();
+        if ($this->config->get('crontab.enable')) {
+            $this->container->get(EventDispatcherInterface::class)
+                ->dispatch(
+                    new CrontabEvent(),
+                    CrontabEvent::CRONTAB_REGISTER
+                );
+            $this->container->get(CrontabDispatcher::class)
+                ->handle();
+        }
     }
 }
