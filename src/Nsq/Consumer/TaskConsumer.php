@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Serendipity\Job\Nsq\Consumer;
 
 use Carbon\Carbon;
+use Hyperf\Utils\Codec\Json;
 use InvalidArgumentException;
 use Serendipity\Job\Constant\Statistical;
 use Serendipity\Job\Constant\Task;
@@ -160,16 +161,12 @@ class TaskConsumer extends AbstractConsumer
                  */
                 $nsq = make(Nsq::class, [$this->container, $config]);
                 Coroutine::create(function () use ($nsq, $message, $job) {
-                    $json = json_encode(
+                    $json = Json::encode(
                         array_merge([
-                            'body' => json_decode(
-                                $message,
-                                true,
-                                512,
-                                JSON_THROW_ON_ERROR
+                            'body' => Json::decode(
+                                $message
                             ),
-                        ], ['class' => $job::class]),
-                        JSON_THROW_ON_ERROR
+                        ], ['class' => $job::class])
                     );
                     $nsq->publish($this->getTopic(), $json, $job->getStep());
                     $this->logger->info(sprintf('TaskConsumer Retry Task:%s#.', $job->getIdentity()));
@@ -191,24 +188,24 @@ class TaskConsumer extends AbstractConsumer
                     sprintf(
                         "update task set status = %s,memo = '%s'  where id = %s;",
                         Task::TASK_ERROR,
-                        json_encode($payload, JSON_THROW_ON_ERROR),
+                        Json::encode($payload),
                         $job->getIdentity()
                     )
                 );
             }
-            $this->dingTalk->text(json_encode($payload, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE));
+            $this->dingTalk->text(Json::encode($payload, JSON_UNESCAPED_UNICODE));
             throw $e;
         }
     }
 
     protected function deserializeMessage(Message $message): mixed
     {
-        $body = json_decode($message->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        $body = Json::decode($message->getBody());
         /*
          * @var JobInterface $job
          */
         return $this->serializer->deserialize(
-            json_encode($body['body'] ?? '', JSON_THROW_ON_ERROR),
+            Json::encode($body['body'] ?? ''),
             $body['class'] ?? throw new InvalidArgumentException('Unknown class.')
         );
     }

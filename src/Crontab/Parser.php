@@ -147,7 +147,7 @@ class Parser
         'hours' => 'array',
         'day' => 'array',
         'month' => 'array',
-        'week' => 'array'
+        'week' => 'array',
     ])]
     private function parseDate(string $crontabString): array
     {

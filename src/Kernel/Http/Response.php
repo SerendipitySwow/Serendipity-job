@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Kernel\Http;
 
+use Hyperf\Utils\Codec\Json;
 use RuntimeException;
 use Swow\Http\Buffer;
 use Swow\Http\Server\Response as SwowResponse;
@@ -19,7 +20,7 @@ class Response extends SwowResponse
     public function json(array $data, int $flags = JSON_THROW_ON_ERROR, int $depth = 512): self
     {
         $this->withJsonResponseHeader();
-        $json = json_encode($data, $flags, $depth);
+        $json = Json::encode($data, $flags, $depth);
         $this->response($json);
 
         return $this;

@@ -10,8 +10,8 @@ namespace Serendipity\Job\Dingtalk\Http;
 
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
+use Hyperf\Utils\Codec\Json;
 use InvalidArgumentException;
-use JsonException;
 use Psr\Http\Message\ResponseInterface;
 use Serendipity\Job\Dingtalk\ClientInterface;
 
@@ -51,7 +51,7 @@ class Client implements ClientInterface
         $client = new \GuzzleHttp\Client($this->options);
 
         return $client->post($this->getRobotUrl(), array_merge($this->options, [
-            'body' => json_encode($params, JSON_THROW_ON_ERROR),
+            'body' => Json::encode($params, JSON_THROW_ON_ERROR),
             'headers' => [
                 'Content-Type' => 'application/json',
             ],

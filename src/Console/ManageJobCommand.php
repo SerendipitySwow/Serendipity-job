@@ -11,6 +11,7 @@ namespace Serendipity\Job\Console;
 use Carbon\Carbon;
 use Exception;
 use Hyperf\Utils\ApplicationContext;
+use Hyperf\Utils\Codec\Json;
 use Psr\Container\ContainerInterface;
 use Serendipity\Job\Constant\Task;
 use Serendipity\Job\Contract\ConfigInterface;
@@ -152,7 +153,7 @@ final class ManageJobCommand extends Command
                                         $coroutine = Coroutine::get((int) $params['coroutine_id']);
                                         $data = [
                                             'state' => $coroutine?->getStateName(), //当前协程
-                                            'trace_list' => json_encode($coroutine?->getTrace(), JSON_THROW_ON_ERROR), //协程函数调用栈
+                                            'trace_list' => Json::encode($coroutine?->getTrace()), //协程函数调用栈
                                             'executed_file_name' => $coroutine?->getExecutedFilename(), //获取执行文件名
                                             'executed_function_name' => $coroutine?->getExecutedFunctionName(), //获取执行的函数名称
                                             'executed_function_line' => $coroutine?->getExecutedLineno(), //获得执行的文件行数
@@ -170,8 +171,8 @@ final class ManageJobCommand extends Command
                                         break;
                                     }
                                     case '/cancel':
-                                        $params = json_decode($request->getBody()
-                                            ->getContents(), true, 512, JSON_THROW_ON_ERROR);
+                                        $params = Json::decode($request->getBody()
+                                            ->getContents());
                                         $coroutine = Coroutine::get((int) $params['coroutine_id']);
                                         $response = new Response();
                                         if (!$coroutine instanceof Coroutine) {
@@ -184,11 +185,11 @@ final class ManageJobCommand extends Command
                                             break;
                                         }
                                         if ($coroutine === Coroutine::getCurrent()) {
-                                            $session->respond(json_encode([
+                                            $session->respond(Json::encode([
                                                 'code' => 1,
                                                 'msg' => '参数错误!',
                                                 'data' => [],
-                                            ], JSON_THROW_ON_ERROR));
+                                            ]));
                                             break;
                                         }
                                         if ($coroutine->getState() === $coroutine::STATE_LOCKED) {
@@ -261,9 +262,6 @@ final class ManageJobCommand extends Command
     {
         Coroutine::run(
             function () use ($type) {
-                /**
-                 * @var NSq $subscriber
-                 */
                 $subscriber = make(Nsq::class, [
                     $this->container,
                     $this->config->get(sprintf('nsq.%s', 'default')),
