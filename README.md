@@ -48,6 +48,7 @@ Run into the beauty of PHP8 and Swow
 * 完善文档
 * SQL 
 * 环境
+* phpunit
 
 ## Come on!
 
