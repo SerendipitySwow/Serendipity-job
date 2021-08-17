@@ -25,7 +25,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": "tests"
+            "SerendipityTest\\": "tests"
         }
     },
     "require": {
@@ -66,6 +66,7 @@
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
         ],
+        "test": "phpunit --prepend tests/bootstrap.php -c phpunit.xml --colors=always",
         "cs-fix": [ "@php vendor/bin/php-cs-fixer fix" ],
         "analyse": "phpstan analyse --memory-limit 300M -l 0 -c phpstan.neon ./app ./config"
     },
