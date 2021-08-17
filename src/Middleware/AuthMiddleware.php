@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Serendipity\Job\Middleware;
 
 use Hyperf\Utils\ApplicationContext;
+use Hyperf\Utils\Codec\Json;
 use InvalidArgumentException;
 use Psr\Http\Message\RequestInterface;
 use Serendipity\Job\Db\DB;
@@ -43,7 +44,6 @@ class AuthMiddleware
     /**
      * @param $appKey
      *
-     * @throws \JsonException
      * @return array|bool
      */
     protected function getApplication($appKey): array | bool
@@ -56,14 +56,11 @@ class AuthMiddleware
                 "SELECT * FROM application WHERE app_key = '%s' AND status = '1' AND is_deleted = '0'",
                 $appKey
             ));
-            $redis->set(sprintf('APP_KEY:%s', $appKey), json_encode($application, JSON_THROW_ON_ERROR), 24 * 60 * 60);
+            $redis->set(sprintf('APP_KEY:%s', $appKey), Json::encode($application), 24 * 60 * 60);
         }
 
-        return is_string($application) && $application[0] === '{' ? json_decode(
-            $application,
-            true,
-            512,
-            JSON_THROW_ON_ERROR
+        return is_string($application) && $application[0] === '{' ? Json::decode(
+            $application
         ) : $application ?? false;
     }
 

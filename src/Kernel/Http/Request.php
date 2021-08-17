@@ -8,6 +8,9 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Kernel\Http;
 
+use Hyperf\Utils\Codec\Json;
+use JetBrains\PhpStorm\Pure;
+use Serendipity\Job\Util\Arr;
 use Swow\Http\Server\Request as SwowRequest;
 
 class Request extends SwowRequest
@@ -16,23 +19,17 @@ class Request extends SwowRequest
     {
         return array_merge(
             $this->getQueryParams(),
-            json_decode(
-                    $this->getBodyAsString() !== '' ? $this->getBodyAsString() : '{}',
-                    true,
-                    512,
-                    JSON_THROW_ON_ERROR
-                )
+            Json::decode(
+                $this->getBodyAsString() !== '' ? $this->getBodyAsString() : '{}',
+            )
         ) ?? [];
     }
 
     public function post(string $key = null, mixed $default = null): mixed
     {
-        $body = json_decode(
+        $body = Json::decode(
             $this->getBody()
                 ->getContents(),
-            true,
-            512,
-            JSON_THROW_ON_ERROR
         );
 
         return $key === null ? $body : $body[$key] ?? $default;
@@ -43,5 +40,44 @@ class Request extends SwowRequest
         $params = $this->getQueryParams();
 
         return $key === null ? $params : $params[$key] ?? $default;
+    }
+
+    /**
+     * @param string $method
+     *
+     * @return bool
+     */
+    #[Pure]
+    public function isMethod(string $method): bool
+    {
+        return $this->getMethod() === strtoupper($method);
+    }
+
+    /**
+     * @param null $default
+     */
+    public function file(string $key, $default = null): mixed
+    {
+        return Arr::get($this->getUploadedFiles(), $key, $default);
+    }
+
+    /**
+     * Determine if the uploaded data contains a file.
+     */
+    public function hasFile(string $key): bool
+    {
+        if ($file = $this->file($key)) {
+            return $this->isValidFile($file);
+        }
+
+        return false;
+    }
+
+    /**
+     * Check that the given file is a valid SplFileInfo instance.
+     */
+    protected function isValidFile(mixed $file): bool
+    {
+        return $file instanceof SplFileInfo && $file->getPath() !== '';
     }
 }

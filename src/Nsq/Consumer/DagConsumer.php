@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Nsq\Consumer;
 
+use Hyperf\Utils\Codec\Json;
 use Serendipity\Job\Constant\Task;
 use Serendipity\Job\Contract\DagInterface;
 use Serendipity\Job\Contract\EventDispatcherInterface;
@@ -31,7 +32,7 @@ class DagConsumer extends AbstractConsumer
 
     public function consume(Message $message): ?string
     {
-        [ $id ] = json_decode($message->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        [ $id ] = Json::decode($message->getBody());
         $dag = new Dag();
         $tasks = DB::query('select `task_id` from vertex_edge where workflow_id = ?;', [$id]);
         if (empty($tasks)) {
@@ -57,7 +58,7 @@ class DagConsumer extends AbstractConsumer
                         }
                     }
                     */
-                    $content = json_decode($value->content, true, 512, JSON_THROW_ON_ERROR);
+                    $content = Json::decode($value->content);
                     $class = make($content['class'], $content['_params']);
                     // 暂不考虑支持协程单例mysql模式.
                     if (!$class instanceof DagInterface) {

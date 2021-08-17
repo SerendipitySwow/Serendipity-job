@@ -13,6 +13,7 @@ use FastRoute\Dispatcher;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
 use Hyperf\Engine\Channel;
+use Hyperf\Utils\Codec\Json;
 use Hyperf\Utils\Str;
 use PDO;
 use Psr\Http\Message\RequestInterface;
@@ -103,8 +104,7 @@ class ServerProvider extends AbstractProvider
                                     ->get('request');
                                 // 日志
                                 $time = microtime(true) - $time;
-                                $debug = 'URI: ' . $request->getUri()
-                                    ->getPath() . PHP_EOL;
+                                $debug = 'URI: ' . $request->getUri()?->getPath() . PHP_EOL;
                                 $debug .= 'TIME: ' . $time . PHP_EOL;
                                 if ($customData = $this->getCustomData()) {
                                     $debug .= 'DATA: ' . $customData . PHP_EOL;
@@ -302,7 +302,7 @@ class ServerProvider extends AbstractProvider
 
                         return $response;
                     }
-                    $content = json_decode($ret['content'], true, 512, JSON_THROW_ON_ERROR);
+                    $content = Json::decode($ret['content'], );
                     $serializerObject = make($content['class'], [
                         'identity' => $ret['id'],
                         'timeout' => $ret['timeout'],
@@ -311,14 +311,11 @@ class ServerProvider extends AbstractProvider
                         'retryTimes' => $ret['retry_times'],
                     ]);
                     $json = $serializer->serialize($serializerObject);
-                    $json = json_encode(array_merge([
-                        'body' => json_decode(
-                            $json,
-                            true,
-                            512,
-                            JSON_THROW_ON_ERROR
+                    $json = Json::encode(array_merge([
+                        'body' => Json::decode(
+                            $json
                         ),
-                    ], ['class' => $serializerObject::class]), JSON_THROW_ON_ERROR);
+                    ], ['class' => $serializerObject::class]));
                     $delay = strtotime($ret['runtime']) - time();
                     if ($delay > 0) {
                         /**
@@ -369,7 +366,7 @@ class ServerProvider extends AbstractProvider
                     $nsq = make(Nsq::class, [$this->container(), $config]);
                     $bool = $nsq->publish(
                         ManageJobCommand::TOPIC_PREFIX . 'dag',
-                        json_encode([$params['workflow_id']], JSON_THROW_ON_ERROR)
+                        Json::encode([$params['workflow_id']])
                     );
 
                     $json = $bool ? [
@@ -430,7 +427,7 @@ class ServerProvider extends AbstractProvider
                             'step' => Arr::get($application, 'step'),
                             'retry_times' => 1,
                             'runtime' => $runtime,
-                            'content' => is_array($content) ? json_encode($content, JSON_THROW_ON_ERROR) : $content,
+                            'content' => is_array($content) ? Json::encode($content) : $content,
                             'timeout' => $timeout,
                             // $content  =  { "class": "\\Job\\SimpleJob\\","_params":{"startDate":"xx","endDate":"xxx"}},
                             'created_at' => Carbon::now()
@@ -462,7 +459,7 @@ class ServerProvider extends AbstractProvider
                         $serializer = $this->container()
                             ->get(SymfonySerializer::class);
 
-                        $content = json_decode(Arr::get($data, 'content'), true, 512, JSON_THROW_ON_ERROR);
+                        $content = Json::decode(Arr::get($data, 'content'));
                         $serializerObject = make($content['class'], [
                             'identity' => $id,
                             'timeout' => Arr::get($data, 'timeout'),
@@ -471,14 +468,11 @@ class ServerProvider extends AbstractProvider
                             'retryTimes' => 1,
                         ]);
                         $json = $serializer->serialize($serializerObject);
-                        $json = json_encode(array_merge([
-                            'body' => json_decode(
-                                $json,
-                                true,
-                                512,
-                                JSON_THROW_ON_ERROR
+                        $json = Json::encode(array_merge([
+                            'body' => Json::decode(
+                                $json
                             ),
-                        ], ['class' => $serializerObject::class]), JSON_THROW_ON_ERROR);
+                        ], ['class' => $serializerObject::class]));
                         $bool = $nsq->publish(ManageJobCommand::TOPIC_PREFIX . 'task', $json, $delay);
                         if ($delay > 0) {
                             /**
@@ -523,8 +517,8 @@ class ServerProvider extends AbstractProvider
                         ]
                     );
 
-                    return $swowResponse->json(json_decode($response->getBody()
-                        ->getContents(), true, 512, JSON_THROW_ON_ERROR));
+                    return $swowResponse->json(Json::decode($response->getBody()
+                        ->getContents()));
                 });
                 /*
                  * 取消任务
@@ -550,8 +544,8 @@ class ServerProvider extends AbstractProvider
                         ]
                     );
 
-                    return $swowResponse->json(json_decode($response->getBody()
-                        ->getContents(), true, 512, JSON_THROW_ON_ERROR));
+                    return $swowResponse->json(Json::decode($response->getBody()
+                        ->getContents()));
                 });
             });
         }, [
@@ -633,14 +627,11 @@ class ServerProvider extends AbstractProvider
     {
         $data = array_merge(
             $request->getQueryParams(),
-            json_decode(
-                $request->getBodyAsString() !== '' ? $request->getBodyAsString() : '{}',
-                true,
-                512,
-                JSON_THROW_ON_ERROR
+            Json::decode(
+                $request->getBodyAsString() !== '' ? $request->getBodyAsString() : '{}'
             )
         );
 
-        return json_encode($data, JSON_THROW_ON_ERROR);
+        return Json::encode($data);
     }
 }
