@@ -70,7 +70,7 @@ class AuthMiddleware
          * @var Request $SwowRequest
          */
         $SwowRequest = Context::get(RequestInterface::class);
-        $SwowRequest = $SwowRequest->withAddedHeader('application', $application);
+        $SwowRequest = $SwowRequest->withHeader('application', $application);
         Context::set(RequestInterface::class, $SwowRequest);
     }
 }

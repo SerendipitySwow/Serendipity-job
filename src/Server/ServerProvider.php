@@ -305,7 +305,7 @@ class ServerProvider extends AbstractProvider
 
                         return $response;
                     }
-                    $content = Json::decode($ret['content'], );
+                    $content = Json::decode($ret['content']);
                     $serializerObject = make($content['class'], [
                         'identity' => $ret['id'],
                         'timeout' => $ret['timeout'],
