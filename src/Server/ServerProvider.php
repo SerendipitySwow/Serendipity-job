@@ -99,12 +99,15 @@ class ServerProvider extends AbstractProvider
                                 }
                                 throw $exception;
                             } finally {
+                                if ($request === null) {
+                                    return;
+                                }
                                 $logger = $this->container()
                                     ->get(LoggerFactory::class)
                                     ->get('request');
                                 // 日志
                                 $time = microtime(true) - $time;
-                                $debug = 'URI: ' . $request->getUri()?->getPath() . PHP_EOL;
+                                $debug = 'URI: ' . $request->getUri()->getPath() . PHP_EOL;
                                 $debug .= 'TIME: ' . $time . PHP_EOL;
                                 if ($customData = $this->getCustomData()) {
                                     $debug .= 'DATA: ' . $customData . PHP_EOL;
