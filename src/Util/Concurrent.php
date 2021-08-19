@@ -11,6 +11,7 @@ namespace Serendipity\Job\Util;
 use Hyperf\Engine\Channel;
 use Hyperf\Utils\ApplicationContext;
 use Serendipity\Job\Contract\StdoutLoggerInterface;
+use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
 
 /**
  * @method bool isFull()
@@ -59,7 +60,7 @@ class Concurrent
     {
         $this->channel->push(true);
 
-        Coroutine::create(function () use ($callable) {
+        SerendipitySwowCo::create(function () use ($callable) {
             try {
                 $callable();
             } catch (\Throwable $exception) {

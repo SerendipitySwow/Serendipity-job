@@ -37,8 +37,8 @@ use Serendipity\Job\Redis\Lua\Hash\Incr;
 use Serendipity\Job\Serializer\SymfonySerializer;
 use Serendipity\Job\Util\Arr;
 use Serendipity\Job\Util\Context;
+use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
 use SerendipitySwow\Nsq\Nsq;
-use Swow\Coroutine;
 use Swow\Coroutine\Exception as CoroutineException;
 use Swow\Http\Exception as HttpException;
 use Swow\Http\Server;
@@ -81,7 +81,7 @@ class ServerProvider extends AbstractProvider
         while (true) {
             try {
                 $session = $server->acceptSession();
-                Coroutine::run(function () use ($session) {
+                SerendipitySwowCo::create(function () use ($session) {
                     try {
                         while (true) {
                             if (!$session->isEstablished()) {
@@ -559,7 +559,7 @@ class ServerProvider extends AbstractProvider
     protected function dispatcher(SwowRequest $request): Response
     {
         $channel = new Channel();
-        Coroutine::run(function () use ($request, $channel) {
+        SerendipitySwowCo::create(function () use ($request, $channel) {
             \Swow\defer(function () {
                 Context::destroy(RequestInterface::class);
             });

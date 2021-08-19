@@ -18,7 +18,7 @@ use Serendipity\Job\Contract\JobInterface;
 use Serendipity\Job\Db\DB;
 use Serendipity\Job\Event\UpdateJobEvent;
 use Serendipity\Job\Redis\Lua\Hash\Incr;
-use Serendipity\Job\Util\Coroutine;
+use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
 use SerendipitySwow\Nsq\Message;
 use SerendipitySwow\Nsq\Nsq;
 use SerendipitySwow\Nsq\Result;
@@ -160,7 +160,7 @@ class TaskConsumer extends AbstractConsumer
                  *          push nsq
                  */
                 $nsq = make(Nsq::class, [$this->container, $config]);
-                Coroutine::create(function () use ($nsq, $message, $job) {
+                SerendipitySwowCo::create(function () use ($nsq, $message, $job) {
                     $json = Json::encode(
                         array_merge([
                             'body' => Json::decode(

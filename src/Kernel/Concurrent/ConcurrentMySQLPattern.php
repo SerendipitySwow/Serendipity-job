@@ -14,7 +14,7 @@ use Psr\Log\LoggerInterface;
 use Serendipity\job\Kernel\Concurrent\Exception\MySQLRuntimeException;
 use Serendipity\Job\Util\Coordinator\Constants;
 use Serendipity\Job\Util\Coordinator\CoordinatorManager;
-use Serendipity\Job\Util\Coroutine;
+use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
 use Throwable;
 
 class ConcurrentMySQLPattern
@@ -52,7 +52,7 @@ class ConcurrentMySQLPattern
     public function loop(): void
     {
         $this->chan = new Channel(1);
-        Coroutine::create(function () {
+        SerendipitySwowCo::create(function () {
             while (true) {
                 try {
                     $closure = $this->chan->pop();
@@ -71,7 +71,7 @@ class ConcurrentMySQLPattern
         static $once;
         if (!isset($once)) {
             $once = true;
-            Coroutine::create(function () {
+            SerendipitySwowCo::create(function () {
                 CoordinatorManager::until(Constants::COMMADN_EXIT)->yield();
                 if ($this->chan) {
                     $this->chan->close();

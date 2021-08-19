@@ -77,7 +77,7 @@ class Coroutine
 
         try {
             return $coroutine->getId();
-        } catch (\Throwable) {
+        } catch (Throwable) {
             return -1;
         }
     }

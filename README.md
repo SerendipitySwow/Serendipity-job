@@ -36,6 +36,8 @@ Run into the beauty of PHP8 and Swow
 8.限制任务执行时间通过channel 限制pop时间如果pop超时直接对执行任务的协程抛出异常.$coroutine->throw($exception);
 [ERROR] Consumer failed to consume Consumer,reason: Channel wait producer failed, reason: Timed out for 5000 ms,file: /Users/heping/Serendipity-Job/src/Util/Waiter.php,line: 53
 9.不建议同时启动dag和task两个消费。最好单独部署两个项目,server需要连接对应消费端启动的server查看任务详情或者取消任务.而且定时任务没有做集群处理。多台机器只能执行一个任务.
+10.请尽量使用框架自带协程的创建方法,主要用日志上下文管理
+Serendipity\Job\Util\Coroutine::create()
 ```
 
 ## 接口文档

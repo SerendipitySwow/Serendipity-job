@@ -26,10 +26,11 @@ use Serendipity\Job\Kernel\Provider\KernelProvider;
 use Serendipity\Job\Nsq\Consumer\AbstractConsumer;
 use Serendipity\Job\Nsq\Consumer\DagConsumer;
 use Serendipity\Job\Nsq\Consumer\TaskConsumer;
+use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
 use SerendipitySwow\Nsq\Message;
 use SerendipitySwow\Nsq\Nsq;
 use SerendipitySwow\Nsq\Result;
-use Swow\Coroutine;
+use Swow\Coroutine as SwowCo;
 use Swow\Coroutine\Exception as CoroutineException;
 use Swow\Http\Exception as HttpException;
 use Swow\Http\Server as HttpServer;
@@ -140,7 +141,7 @@ final class ManageJobCommand extends Command
         while (true) {
             try {
                 $session = $server->acceptSession();
-                Coroutine::run(function () use ($session) {
+                SerendipitySwowCo::create(function () use ($session) {
                     try {
                         while (true) {
                             $request = null;
@@ -150,7 +151,7 @@ final class ManageJobCommand extends Command
                                     case '/detail':
                                     {
                                         $params = $request->getQueryParams();
-                                        $coroutine = Coroutine::get((int) $params['coroutine_id']);
+                                        $coroutine = SwowCo::get((int) $params['coroutine_id']);
                                         $data = [
                                             'state' => $coroutine?->getStateName(),
                                             //当前协程
@@ -183,9 +184,9 @@ final class ManageJobCommand extends Command
                                             $request->getBody()
                                                 ->getContents()
                                         );
-                                        $coroutine = Coroutine::get((int) $params['coroutine_id']);
+                                        $coroutine = SwowCo::get((int) $params['coroutine_id']);
                                         $response = new Response();
-                                        if (!$coroutine instanceof Coroutine) {
+                                        if (!$coroutine instanceof SwowCo) {
                                             $response->json([
                                                 'code' => 1,
                                                 'msg' => 'Unknown!',
@@ -194,7 +195,7 @@ final class ManageJobCommand extends Command
                                             $session->sendHttpResponse($response);
                                             break;
                                         }
-                                        if ($coroutine === Coroutine::getCurrent()) {
+                                        if ($coroutine === SwowCo::getCurrent()) {
                                             $session->respond(
                                                 Json::encode([
                                                     'code' => 1,
@@ -274,7 +275,7 @@ final class ManageJobCommand extends Command
 
     protected function subscribe(string $type): void
     {
-        Coroutine::run(
+        SerendipitySwowCo::create(
             function () use ($type) {
                 $subscriber = make(Nsq::class, [
                     $this->container,
@@ -333,7 +334,7 @@ final class ManageJobCommand extends Command
     {
         KernelProvider::create(self::COMMAND_PROVIDER_NAME)
             ->bootApp();
-        Coroutine::run(fn () => $this->dispatchCrontab());
+        SerendipitySwowCo::create(fn () => $this->dispatchCrontab());
     }
 
     protected function dispatchCrontab(): void

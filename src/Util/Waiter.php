@@ -11,7 +11,9 @@ namespace Serendipity\Job\Util;
 use Closure;
 use Exception;
 use Hyperf\Utils\Exception\ExceptionThrower;
+use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
 use Swow\Channel;
+use Swow\Coroutine as SwowCo;
 use Throwable;
 
 class Waiter
@@ -39,7 +41,7 @@ class Waiter
         }
 
         $channel = new Channel(1);
-        $this->coroutineId = Coroutine::create(function () use ($channel, $closure) {
+        $this->coroutineId = SerendipitySwowCo::create(function () use ($channel, $closure) {
             try {
                 $result = $closure();
             } catch (Throwable $exception) {
@@ -60,7 +62,7 @@ class Waiter
 
             return $result;
         } catch (Throwable $e) {
-            \Swow\Coroutine::get($this->coroutineId)?->throw($e);
+            SwowCo::get($this->coroutineId)?->throw($e);
             throw $e;
         }
     }
