@@ -561,7 +561,7 @@ class ServerProvider extends AbstractProvider
     {
         $channel = new Channel();
         SerendipitySwowCo::create(function () use ($request, $channel) {
-            \Swow\defer(function () {
+            SerendipitySwowCo::defer(function () {
                 Context::destroy(RequestInterface::class);
             });
             Context::set(RequestInterface::class, $request);
