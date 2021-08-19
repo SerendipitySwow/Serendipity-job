@@ -18,7 +18,7 @@ use Swow\Coroutine;
  * @internal
  * @coversNothing
  */
-class HttpTestCase extends TestCase
+class HttpTest extends TestCase
 {
     protected GuzzleHttpClient $client;
 
@@ -104,19 +104,24 @@ class HttpTestCase extends TestCase
                     ],
                 ]);
                 $this->assertInstanceOf(ResponseInterface::class, $response);
-//                $this->assertJsonStringEqualsJsonString((string) $response->getBody(), json_encode([
-//                                                                                                       'code' => 1,
-//                                                                                                       'msg' => '请勿重复提交!',
-//                                                                                                       'data' => [],
-//                                                                                                   ]));
-//                $this->assertJsonStringNotEqualsJsonString((string) $response->getBody(), json_encode([
-//                                                                                                          'code' => 0,
-//                                                                                                          'msg' => 'success',
-//                                                                                                          'data' => [
-//                                                                                                              'taskID' => 82,
-//                                                                                                          ],
-//                                                                                                      ]));
+//                $this->assertJsonStringEqualsJsonString((string) $response->getBody(),
+//                                                        json_encode([
+//                                                                        'code' => 1,
+//                                                                        'msg' => '请勿重复提交!',
+//                                                                        'data' => [],
+//                                                                    ], JSON_THROW_ON_ERROR)
+//                );
+//                $this->assertJsonStringNotEqualsJsonString((string) $response->getBody(),
+//                                                           json_encode([
+//                                                                           'code' => 0,
+//                                                                           'msg' => 'success',
+//                                                                           'data' => [
+//                                                                               'taskID' => 82,
+//                                                                           ],
+//                                                                       ], JSON_THROW_ON_ERROR)
+//                );
             });
         }
+        $this->assertIsInt($i);
     }
 }
