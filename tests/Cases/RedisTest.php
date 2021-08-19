@@ -19,10 +19,10 @@ class RedisTest extends TestCase
 {
     public function testRedis(): void
     {
-//        for ($i = 0; $i < 10; $i++) {
-//            $lock = make(RedisLock::class);
-//            $true = $lock->lock('sdfsdf', 5 * 60);
-//            $this->assertTrue($true, '加锁失败');
-//        }
+        for ($i = 0; $i < 10; $i++) {
+            $lock = make(RedisLock::class);
+            $true = $lock->lock('sdfsdf', 5 * 60);
+            $this->assertTrue($true, '加锁失败');
+        }
     }
 }
