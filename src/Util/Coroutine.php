@@ -65,8 +65,9 @@ class Coroutine
                         /* @var LoggerInterface $logger */
                         $logger = $container->get(StdoutLoggerInterface::class);
                         $logger->warning(sprintf(
-                            'Uncaptured exception[%s] detected in %s::%d.',
+                            'Uncaptured exception[%s] {%s} detected in %s::%d.',
                             get_class($throwable),
+                            $throwable->getMessage(),
                             $throwable->getFile(),
                             $throwable->getLine()
                         ));

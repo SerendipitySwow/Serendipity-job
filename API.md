@@ -3,7 +3,22 @@
 需要PHP8+、MySQL,Redis,Nsq,Swow
 
 # 接口鉴权
-
+部分接口需要签名验证,需要添加header头
+```
+nonce:nm33An1FX22SAjZK
+signature:ZjUyZTE3M2RkMmUyYzY5MTEyYzRhNTFiZmFkOWFjYjZlZGZhMmJkZGUwZTRjYmViZjVkMWExNmQ4M2FiYjQ0Yw==
+app_key:E3F5l1uKFcXUe1gd
+payload:57bcd60eefcac9701fd2407080a5a7b0
+timestamps:1627371056
+```
+代码
+```php
+$timestamp = $request->getHeaderLine('timestamps') ?? '';
+$nonce = $request->getHeaderLine('nonce') ?? '';
+$payload = $request->getHeaderLine('payload') ?? '';
+$appKey = $request->getHeaderLine('app_key') ?? '';
+$signature = $request->getHeaderLine('signature') ?? '';
+```
 ## 接口地址
 
 `url`：http://127.0.0.1:9502
