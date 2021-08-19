@@ -98,7 +98,7 @@ class HttpTest extends TestCase
                                 'endDate' => '2021-07-27 17:50:50',
                             ],
                         ],
-                        'timeout' => 600000,
+                        'timeout' => 6000,
                         'name' => 'SimpleJob',
                         'runtime' => '2021-07-27 17:50:50',
                     ],

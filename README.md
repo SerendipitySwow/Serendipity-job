@@ -46,13 +46,10 @@ Serendipity\Job\Util\Coroutine::create()
 
 ## TODO
 * 计划开发后台
-* 做压力测试
 * 测试dag
 * 完善文档
 * SQL 
 * 环境
-* phpunit
-
 ## Come on!
 
 ## Thanks Hyperf.Swow!
