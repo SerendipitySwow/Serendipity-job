@@ -77,7 +77,7 @@ class HttpTestCase extends TestCase
 
     public function testStress(): void
     {
-        for ($i = 0; $i < 10; $i++) {
+        for ($i = 0; $i < 50; $i++) {
             Coroutine::run(function () {
                 $client = new GuzzleHttpClient();
                 $response = $client->post('/task/create', [

@@ -102,13 +102,14 @@ class ServerProvider extends AbstractProvider
                                 if ($request === null) {
                                     return;
                                 }
+                                /*@var LoggerInterface $logger */
                                 $logger = $this->container()
                                     ->get(LoggerFactory::class)
                                     ->get('request');
                                 // 日志
                                 $time = microtime(true) - $time;
                                 $debug = 'URI: ' . $request->getUri()->getPath() . PHP_EOL;
-                                $debug .= 'TIME: ' . $time . PHP_EOL;
+                                $debug .= 'TIME: ' . $time * 1000 . 'ms' . PHP_EOL;
                                 if ($customData = $this->getCustomData()) {
                                     $debug .= 'DATA: ' . $customData . PHP_EOL;
                                 }
