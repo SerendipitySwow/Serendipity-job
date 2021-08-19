@@ -80,7 +80,7 @@ class ServerProvider extends AbstractProvider
         $this->makeFastRoute();
         while (true) {
             try {
-                $session = $server->acceptSession();
+                $session = $server->acceptConnection();
                 SerendipitySwowCo::create(function () use ($session) {
                     try {
                         while (true) {
