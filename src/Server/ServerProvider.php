@@ -80,22 +80,22 @@ class ServerProvider extends AbstractProvider
         $this->makeFastRoute();
         while (true) {
             try {
-                $session = $server->acceptConnection();
-                SerendipitySwowCo::create(function () use ($session) {
+                $connection = $server->acceptConnection();
+                SerendipitySwowCo::create(function () use ($connection) {
                     try {
                         while (true) {
-                            if (!$session->isEstablished()) {
+                            if (!$connection->isEstablished()) {
                                 break;
                             }
                             $time = microtime(true);
                             $request = null;
                             try {
-                                $request = $session->recvHttpRequest(make(SerendipityRequest::class));
+                                $request = $connection->recvHttpRequest(make(SerendipityRequest::class));
                                 $response = $this->dispatcher($request);
-                                $session->sendHttpResponse($response);
+                                $connection->sendHttpResponse($response);
                             } catch (Throwable $exception) {
                                 if ($exception instanceof HttpException) {
-                                    $session->error($exception->getCode(), $exception->getMessage());
+                                    $connection->error($exception->getCode(), $exception->getMessage());
                                 }
                                 throw $exception;
                             } finally {
@@ -137,7 +137,7 @@ class ServerProvider extends AbstractProvider
                         // you can log error here
                     } finally {
                         ## close session
-                        $session->close();
+                        $connection->close();
                     }
                 });
             } catch (SocketException | CoroutineException $exception) {

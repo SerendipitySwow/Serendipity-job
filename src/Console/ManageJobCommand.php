@@ -140,13 +140,13 @@ final class ManageJobCommand extends Command
             ->listen();
         while (true) {
             try {
-                $session = $server->acceptSession();
-                SerendipitySwowCo::create(function () use ($session) {
+                $connection = $server->acceptConnection();
+                SerendipitySwowCo::create(function () use ($connection) {
                     try {
                         while (true) {
                             $request = null;
                             try {
-                                $request = $session->recvHttpRequest();
+                                $request = $connection->recvHttpRequest();
                                 switch ($request->getPath()) {
                                     case '/detail':
                                     {
@@ -176,7 +176,7 @@ final class ManageJobCommand extends Command
                                             'msg' => 'ok!',
                                             'data' => $data,
                                         ]);
-                                        $session->sendHttpResponse($response);
+                                        $connection->sendHttpResponse($response);
                                         break;
                                     }
                                     case '/cancel':
@@ -192,11 +192,11 @@ final class ManageJobCommand extends Command
                                                 'msg' => 'Unknown!',
                                                 'data' => [],
                                             ]);
-                                            $session->sendHttpResponse($response);
+                                            $connection->sendHttpResponse($response);
                                             break;
                                         }
                                         if ($coroutine === SwowCo::getCurrent()) {
-                                            $session->respond(
+                                            $connection->respond(
                                                 Json::encode([
                                                     'code' => 1,
                                                     'msg' => '参数错误!',
@@ -211,7 +211,7 @@ final class ManageJobCommand extends Command
                                                 'msg' => 'coroutine block object locked	!',
                                                 'data' => [],
                                             ]);
-                                            $session->sendHttpResponse($response);
+                                            $connection->sendHttpResponse($response);
                                             break;
                                         }
                                         $coroutine->kill();
@@ -221,7 +221,7 @@ final class ManageJobCommand extends Command
                                                 Task::TASK_CANCEL,
                                                 sprintf(
                                                     '客户度IP:%s取消了任务,请求时间:%s.',
-                                                    $session->getPeerAddress(),
+                                                    $connection->getPeerAddress(),
                                                     Carbon::now()
                                                         ->toDateTimeString()
                                                 ),
@@ -243,15 +243,15 @@ final class ManageJobCommand extends Command
                                                 'data' => [],
                                             ]);
                                         }
-                                        $session->sendHttpResponse($response);
+                                        $connection->sendHttpResponse($response);
                                         break;
                                     default:
                                     {
-                                        $session->error(HttpStatus::NOT_FOUND);
+                                        $connection->error(HttpStatus::NOT_FOUND);
                                     }
                                 }
                             } catch (HttpException $exception) {
-                                $session->error($exception->getCode(), $exception->getMessage());
+                                $connection->error($exception->getCode(), $exception->getMessage());
                             }
                             if (!$request || !$request->getKeepAlive()) {
                                 break;
@@ -260,7 +260,7 @@ final class ManageJobCommand extends Command
                     } catch (Exception) {
                         // you can log error here
                     } finally {
-                        $session->close();
+                        $connection->close();
                     }
                 });
             } catch (SocketException | CoroutineException $exception) {
