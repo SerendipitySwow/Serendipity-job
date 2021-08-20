@@ -48,7 +48,6 @@ Serendipity\Job\Util\Coroutine::create()
 * 计划开发后台
 * 测试dag
 * 完善文档
-* SQL 
 * 环境
 ## Come on!
 
