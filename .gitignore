@@ -6,3 +6,4 @@ storage/*.key
 vendor
 runtimes
 composer.lock
+/tests/CodeCoverage
