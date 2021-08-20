@@ -18,10 +18,11 @@ use Serendipity\Job\Contract\JobInterface;
 use Serendipity\Job\Db\DB;
 use Serendipity\Job\Event\UpdateJobEvent;
 use Serendipity\Job\Redis\Lua\Hash\Incr;
-use Serendipity\Job\Util\Coroutine;
+use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
 use SerendipitySwow\Nsq\Message;
 use SerendipitySwow\Nsq\Nsq;
 use SerendipitySwow\Nsq\Result;
+use Swow\Coroutine as SwowCo;
 use Throwable;
 
 class TaskConsumer extends AbstractConsumer
@@ -43,12 +44,6 @@ class TaskConsumer extends AbstractConsumer
 
             return Result::DROP;
         }
-        //如果任务执行完成则删除此条消息
-        if (DB::fetch('select * from task where id = ? and status = ?', [$job->getIdentity(), Task::TASK_SUCCESS])) {
-            $this->logger->debug('Task is successfully');
-
-            return Result::DROP;
-        }
 
         $incr = make(Incr::class);
 
@@ -58,7 +53,7 @@ class TaskConsumer extends AbstractConsumer
                 DB::execute(
                     sprintf(
                         'update task set coroutine_id = %s,status = %s where id = %s;',
-                        \Swow\Coroutine::getCurrent()
+                        SwowCo::getCurrent()
                             ->getId(),
                         Task::TASK_ING,
                         $job->getIdentity(),
@@ -97,7 +92,6 @@ class TaskConsumer extends AbstractConsumer
                         'driver' => $job::class,
                     ]
                 );
-
                 $result = Result::DROP;
             }
 
@@ -160,7 +154,7 @@ class TaskConsumer extends AbstractConsumer
                  *          push nsq
                  */
                 $nsq = make(Nsq::class, [$this->container, $config]);
-                Coroutine::create(function () use ($nsq, $message, $job) {
+                SerendipitySwowCo::create(function () use ($nsq, $message, $job) {
                     $json = Json::encode(
                         array_merge([
                             'body' => Json::decode(

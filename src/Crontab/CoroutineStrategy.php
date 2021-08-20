@@ -10,7 +10,7 @@ namespace Serendipity\Job\Crontab;
 
 use Carbon\Carbon;
 use Psr\Container\ContainerInterface;
-use Serendipity\Job\Util\Coroutine;
+use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
 
 class CoroutineStrategy
 {
@@ -21,7 +21,7 @@ class CoroutineStrategy
 
     public function dispatch(Crontab $crontab): void
     {
-        Coroutine::create(function () use ($crontab) {
+        SerendipitySwowCo::create(function () use ($crontab) {
             if ($crontab->getExecuteTime() instanceof Carbon) {
                 $wait = $crontab->getExecuteTime()
                     ->getTimeStamp() - time();

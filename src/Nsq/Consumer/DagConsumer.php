@@ -17,9 +17,9 @@ use Serendipity\Job\Event\UpdateWorkflowEvent;
 use Serendipity\Job\Kernel\Dag\Dag;
 use Serendipity\Job\Kernel\Dag\Exception\InvalidArgumentException;
 use Serendipity\Job\Kernel\Dag\Vertex;
+use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
 use SerendipitySwow\Nsq\Message;
 use SerendipitySwow\Nsq\Result;
-use Swow\Coroutine;
 use Throwable;
 use function Serendipity\Job\Kernel\serendipity_format_throwable;
 
@@ -39,7 +39,7 @@ class DagConsumer extends AbstractConsumer
             return Result::DROP;
         }
 
-        Coroutine::run(function ($id, $tasks, $dag) {
+        SerendipitySwowCo::create(function ($id, $tasks, $dag) {
             /**
              * @var Dag $dag
              */

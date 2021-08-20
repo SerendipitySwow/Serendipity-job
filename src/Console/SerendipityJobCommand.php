@@ -9,7 +9,7 @@ declare(strict_types=1);
 namespace Serendipity\Job\Console;
 
 use Serendipity\Job\Kernel\Provider\KernelProvider;
-use Swow\Coroutine;
+use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 
 final class SerendipityJobCommand extends Command
@@ -28,7 +28,7 @@ final class SerendipityJobCommand extends Command
     {
         $this->showLogo();
 
-        Coroutine::run(function () {
+        SerendipitySwowCo::create(function () {
             $this->bootStrap();
         });
 

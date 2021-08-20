@@ -37,8 +37,8 @@ use Serendipity\Job\Redis\Lua\Hash\Incr;
 use Serendipity\Job\Serializer\SymfonySerializer;
 use Serendipity\Job\Util\Arr;
 use Serendipity\Job\Util\Context;
+use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
 use SerendipitySwow\Nsq\Nsq;
-use Swow\Coroutine;
 use Swow\Coroutine\Exception as CoroutineException;
 use Swow\Http\Exception as HttpException;
 use Swow\Http\Server;
@@ -80,32 +80,36 @@ class ServerProvider extends AbstractProvider
         $this->makeFastRoute();
         while (true) {
             try {
-                $session = $server->acceptSession();
-                Coroutine::run(function () use ($session) {
+                $connection = $server->acceptConnection();
+                SerendipitySwowCo::create(function () use ($connection) {
                     try {
                         while (true) {
-                            if (!$session->isEstablished()) {
+                            if (!$connection->isEstablished()) {
                                 break;
                             }
                             $time = microtime(true);
                             $request = null;
                             try {
-                                $request = $session->recvHttpRequest(make(SerendipityRequest::class));
+                                $request = $connection->recvHttpRequest(make(SerendipityRequest::class));
                                 $response = $this->dispatcher($request);
-                                $session->sendHttpResponse($response);
+                                $connection->sendHttpResponse($response);
                             } catch (Throwable $exception) {
                                 if ($exception instanceof HttpException) {
-                                    $session->error($exception->getCode(), $exception->getMessage());
+                                    $connection->error($exception->getCode(), $exception->getMessage());
                                 }
                                 throw $exception;
                             } finally {
+                                if ($request === null) {
+                                    return;
+                                }
+                                /*@var LoggerInterface $logger */
                                 $logger = $this->container()
                                     ->get(LoggerFactory::class)
                                     ->get('request');
                                 // 日志
                                 $time = microtime(true) - $time;
-                                $debug = 'URI: ' . $request->getUri()?->getPath() . PHP_EOL;
-                                $debug .= 'TIME: ' . $time . PHP_EOL;
+                                $debug = 'URI: ' . $request->getUri()->getPath() . PHP_EOL;
+                                $debug .= 'TIME: ' . $time * 1000 . 'ms' . PHP_EOL;
                                 if ($customData = $this->getCustomData()) {
                                     $debug .= 'DATA: ' . $customData . PHP_EOL;
                                 }
@@ -133,7 +137,7 @@ class ServerProvider extends AbstractProvider
                         // you can log error here
                     } finally {
                         ## close session
-                        $session->close();
+                        $connection->close();
                     }
                 });
             } catch (SocketException | CoroutineException $exception) {
@@ -302,7 +306,7 @@ class ServerProvider extends AbstractProvider
 
                         return $response;
                     }
-                    $content = Json::decode($ret['content'], );
+                    $content = Json::decode($ret['content']);
                     $serializerObject = make($content['class'], [
                         'identity' => $ret['id'],
                         'timeout' => $ret['timeout'],
@@ -556,8 +560,8 @@ class ServerProvider extends AbstractProvider
     protected function dispatcher(SwowRequest $request): Response
     {
         $channel = new Channel();
-        Coroutine::run(function () use ($request, $channel) {
-            \Swow\defer(function () {
+        SerendipitySwowCo::create(function () use ($request, $channel) {
+            SerendipitySwowCo::defer(function () {
                 Context::destroy(RequestInterface::class);
             });
             Context::set(RequestInterface::class, $request);

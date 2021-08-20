@@ -19,7 +19,7 @@ class Context
     public static function set(string $id, $value)
     {
         if (Coroutine::inCoroutine()) {
-            Co::getContextFor()[$id] = $value;
+            Co::getContextFor()[$id] = $value;   //or Co::getContextFor()->$id = $value  ArrayObject
         } else {
             static::$nonCoContext[$id] = $value;
         }

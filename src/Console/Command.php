@@ -30,6 +30,24 @@ abstract class Command extends SymfonyCommand
 
     protected SymfonyStyle $output;
 
+    /**
+     * The default verbosity of output commands.
+     *
+     * @var int
+     */
+    protected $verbosity = OutputInterface::VERBOSITY_NORMAL;
+
+    /**
+     * The mapping between human readable verbosity levels and Symfony's OutputInterface.
+     */
+    protected array $verbosityMap = [
+        'v' => OutputInterface::VERBOSITY_VERBOSE,
+        'vv' => OutputInterface::VERBOSITY_VERY_VERBOSE,
+        'vvv' => OutputInterface::VERBOSITY_DEBUG,
+        'quiet' => OutputInterface::VERBOSITY_QUIET,
+        'normal' => OutputInterface::VERBOSITY_NORMAL,
+    ];
+
     public function __construct(string $name = null)
     {
         if (!$name && $this->name) {
@@ -137,6 +155,17 @@ abstract class Command extends SymfonyCommand
         $this->comment('*     ' . $string . '     *');
         $this->comment(str_repeat('*', $length));
         $this->output->newLine();
+    }
+
+    protected function parseVerbosity($level = null): int
+    {
+        if (isset($this->verbosityMap[$level])) {
+            $level = $this->verbosityMap[$level];
+        } elseif (!is_int($level)) {
+            $level = $this->verbosity;
+        }
+
+        return $level;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): mixed

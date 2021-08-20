@@ -9,8 +9,9 @@ declare(strict_types=1);
 namespace Serendipity\Job\Kernel\Lock;
 
 use Exception;
+use Hyperf\Utils\ApplicationContext;
 use Redis;
-use Serendipity\Job\Redis\RedisProxy;
+use Serendipity\Job\Redis\RedisFactory;
 use Swow\Coroutine;
 
 class RedisLock
@@ -24,18 +25,11 @@ class RedisLock
 
     private array $lockedNames = [];
 
-    private Redis | RedisProxy $redis;
+    private string $name;
 
-    /**
-     * RedisLock constructor.
-     */
-    public function __construct(Redis | RedisProxy $redis)
+    public function __construct(string $name = 'default')
     {
-        $this->redis = $redis;
-    }
-
-    private function __clone()
-    {
+        $this->name = $name;
     }
 
     /**
@@ -143,8 +137,10 @@ LUA;
      */
     private function execLuaScript(string $script, array $params, int $keyNum = 1): mixed
     {
-        $hash = $this->redis->script('load', $script);
+        $redis = ApplicationContext::getContainer()->get(RedisFactory::class)
+            ->get($this->name);
+        $hash = $redis->script('load', $script);
 
-        return $this->redis->evalSha($hash, $params, $keyNum);
+        return $redis->evalSha($hash, $params, $keyNum);
     }
 }

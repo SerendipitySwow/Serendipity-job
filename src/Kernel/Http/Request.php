@@ -28,8 +28,7 @@ class Request extends SwowRequest
     public function post(string $key = null, mixed $default = null): mixed
     {
         $body = Json::decode(
-            $this->getBody()
-                ->getContents(),
+            $this->getBodyAsString(),
         );
 
         return $key === null ? $body : $body[$key] ?? $default;
