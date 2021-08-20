@@ -84,9 +84,6 @@ class ServerProvider extends AbstractProvider
                 SerendipitySwowCo::create(function () use ($connection) {
                     try {
                         while (true) {
-                            if (!$connection->isEstablished()) {
-                                break;
-                            }
                             $time = microtime(true);
                             $request = null;
                             try {
