@@ -1,6 +1,6 @@
-# Serendipity-Job  For Swow 任务平台
+# 🚀Serendipity-Job  For 🏆Swow 任务平台
 
-Run into the beauty of PHP8 and Swow
+🚀 🏆  Task Platform Developed Based On Swow and Php8
 
 ## Features
 
@@ -65,6 +65,7 @@ Serendipity\Job\Util\Coroutine::create()
 ````
 
 ## Usage
+[使用说明](usage.md)
 
 1.启动Serendipity-Job Server.
 
