@@ -91,25 +91,6 @@ class Dag implements Runner
                     $this->scheduleChildren($element, $queue, $visited);
                 });
             }, $element->timeout);
-            /*
-            $concurrent->create(function () use ($queue, $visited, $element, &$results) {
-                try {
-                    $results[$element->key] = $this->waiter->wait(function () use ($element, $results) {
-                        return call($element->value, [$results]);
-                    }, $element->timeout);
-                } catch (Throwable $e) {
-                    $queue->push($e);
-                    throw $e;
-                }
-                $visited[$element->key]->close();
-                if (empty($element->children)) {
-                    return;
-                }
-                Coroutine::create(function () use ($element, $queue, $visited) {
-                    $this->scheduleChildren($element, $queue, $visited);
-                });
-            });
-            */
         }
 
         // wait for all pending tasks to resolve
