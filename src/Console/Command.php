@@ -32,10 +32,8 @@ abstract class Command extends SymfonyCommand
 
     /**
      * The default verbosity of output commands.
-     *
-     * @var int
      */
-    protected $verbosity = OutputInterface::VERBOSITY_NORMAL;
+    protected int $verbosity = OutputInterface::VERBOSITY_NORMAL;
 
     /**
      * The mapping between human readable verbosity levels and Symfony's OutputInterface.

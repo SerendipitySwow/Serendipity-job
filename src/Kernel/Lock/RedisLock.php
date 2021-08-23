@@ -10,14 +10,11 @@ namespace Serendipity\Job\Kernel\Lock;
 
 use Exception;
 use Hyperf\Utils\ApplicationContext;
-use Redis;
 use Serendipity\Job\Redis\RedisFactory;
 use Swow\Coroutine;
 
 class RedisLock
 {
-    protected const REDIS_LOCK_PREFIX = 'redis:lock:';
-
     /**
      * redis key前缀
      */
@@ -40,7 +37,7 @@ class RedisLock
      * @param int $retryTimes 重试次数
      * @param int $sleep 重试休息微秒
      */
-    public function lock(string $name, int $expire = 5, int $retryTimes = 10, int $sleep = 10000): bool
+    public function lock(string $name, int $expire = 5, int $retryTimes = 5, int $sleep = 10000): bool
     {
         $lock = false;
         $retryTimes = max($retryTimes, 1);

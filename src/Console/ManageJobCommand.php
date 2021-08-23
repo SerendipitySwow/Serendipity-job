@@ -117,7 +117,6 @@ final class ManageJobCommand extends Command
     {
         $this->config = $this->container->get(ConfigInterface::class);
         $this->stdoutLogger = $this->container->get(StdoutLoggerInterface::class);
-        $this->showLogo();
         $this->bootStrap();
         $this->stdoutLogger->info('Consumer Task Successfully Processed#');
         $type = $this->input->getOption('type');
@@ -332,6 +331,7 @@ final class ManageJobCommand extends Command
 
     protected function bootStrap(): void
     {
+        $this->showLogo();
         KernelProvider::create(self::COMMAND_PROVIDER_NAME)
             ->bootApp();
         SerendipitySwowCo::create(fn () => $this->dispatchCrontab());

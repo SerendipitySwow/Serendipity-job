@@ -12,18 +12,6 @@ namespace Serendipity\Job\Kernel;
 
 use Throwable;
 
-if (!function_exists('serendipity_tcp_pack')) {
-    function serendipity_tcp_pack(string $data): string
-    {
-        return pack('n', strlen($data)) . $data;
-    }
-}
-if (!function_exists('serendipity_tcp_length')) {
-    function serendipity_tcp_length(string $head): int
-    {
-        return unpack('n', $head)[1];
-    }
-}
 if (!function_exists('serendipity_format_throwable')) {
     function serendipity_format_throwable(Throwable $throwable): string
     {

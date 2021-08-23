@@ -194,7 +194,8 @@ class ServerProvider extends AbstractProvider
                     'code' => 0,
                     'msg' => 'Ok!',
                     'data' => [
-                        'nonce' => $nonce, 'timestamps' => $timestamps,
+                        'nonce' => $nonce,
+                        'timestamps' => $timestamps,
                         'signature' => $clientSignature,
                         'appKey' => Arr::get($application, 'app_key'),
                         'payload' => $payload,
@@ -576,11 +577,10 @@ class ServerProvider extends AbstractProvider
                     $response->text(file_get_contents(BASE_PATH . '/storage/404.php'));
                     break;
                 case Dispatcher::METHOD_NOT_ALLOWED:
-                    //$allowedMethods = $routeInfo[1];
                     $response = new Response();
                     $response->error(Status::NOT_ALLOWED, 'Method Not Allowed');
                     break;
-                case Dispatcher::FOUND: // 找到对应的方法
+                case Dispatcher::FOUND:
                     [ , $handler, $vars ] = $routeInfo;
                     if (is_array($handler) && $handler['middlewares']) {
                         //middleware
