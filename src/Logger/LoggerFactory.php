@@ -14,7 +14,7 @@ use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\FormattableHandlerInterface;
 use Monolog\Handler\HandlerInterface;
 use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
+use Monolog\Logger as MonologLogger;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Serendipity\Job\Contract\ConfigInterface;
@@ -85,7 +85,7 @@ class LoggerFactory
         $handlerClass = Arr::get($config, 'handler.class', StreamHandler::class);
         $handlerConstructor = Arr::get($config, 'handler.constructor', [
             'stream' => BASE_PATH . '/runtime/logs/hyperf.log',
-            'level' => Logger::DEBUG,
+            'level' => MonologLogger::DEBUG,
         ]);
 
         return [
