@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 use Swow\Coroutine;
 
-require_once dirname(__DIR__) . '/vendor/autoload.php';
+require_once (dirname(__DIR__)) . '/../vendor/autoload.php';
 //$a = 1;
 //$coroutine = Coroutine::run(function () use ($a) {
 //    try {
@@ -36,6 +36,13 @@ require_once dirname(__DIR__) . '/vendor/autoload.php';
 //    'msg' => 'ok!',
 //    'data' => $data,
 //], JSON_THROW_ON_ERROR);
+$id = \Serendipity\Job\Util\Coroutine::create(function (){
+    echo 1;
+    \Hyperf\Engine\Coroutine::getContextFor()->task = 1;
+    var_dump(\Hyperf\Engine\Coroutine::getContextFor());
+});
+
+exit;
 \Swow\Debug\Debugger::runOnTTY();
 $coroutine = Coroutine::run(function ($a) {
 //    var_dump(Coroutine::getMain());

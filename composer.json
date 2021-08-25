@@ -54,7 +54,8 @@
         "hyperf/utils": "2.2.*",
         "hyperf/pool": "2.2.*",
         "multiplex/multiplex": "^0.3.1",
-        "nikic/fast-route": "^1.3"
+        "nikic/fast-route": "^1.3",
+        "swlib/archer": "^1.1"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",
