@@ -53,6 +53,7 @@ Serendipity\Job\Util\Coroutine::create()
 * 测试dag
 * 完善文档
 * 环境
+* archer  swlib-archer
 ## Come on!
 
 ## Thanks Hyperf.Swow!

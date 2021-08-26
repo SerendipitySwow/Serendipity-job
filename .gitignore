@@ -7,3 +7,4 @@ vendor
 runtimes
 composer.lock
 /tests/CodeCoverage
+archer

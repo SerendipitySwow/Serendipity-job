@@ -61,6 +61,7 @@
         "roave/security-advisories": "dev-latest",
         "phpunit/phpunit": "^9.5",
         "friendsofphp/php-cs-fixer": "^3.0",
+        "serendipity-swow/archer": "0.1",
         "symfony/var-dumper": "^5.2"
     },
     "scripts": {
@@ -71,6 +72,12 @@
         "cs-fix": [ "@php vendor/bin/php-cs-fixer fix" ],
         "analyse": "phpstan analyse --memory-limit 300M -l 0 -c phpstan.neon ./app ./config"
     },
+    "repositories": {
+       "serendipity-swow/archer": {
+       "type": "path",
+       "url": "./archer"
+     }
+   },
     "bin": [
         "bin/serendipity-job"
     ]

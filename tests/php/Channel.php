@@ -5,7 +5,39 @@
  */
 
 declare(strict_types=1);
-require_once __DIR__ . '/../vendor/autoload.php';
+
+use SerendipitySwow\Archer\Archer;
+
+require_once(dirname(__DIR__)) . '/../vendor/autoload.php';
+//Swow\Debug\Debugger::runOnTTY();
+$callback = function (string $method, ...$param) {
+    return $param;
+};
+$task1 = Archer::taskDefer($callback, ['get', 'some_key']);
+$task2 = Archer::taskDefer($callback, ['hget', 'a', 'b']);
+$task3 = Archer::taskDefer($callback, ['lget', 'k1', 10]);
+
+sleep(20);
+
+var_dump($task1->recv(1));
+var_dump($task2->recv(1));
+var_dump($task3->recv(1));
+
+exit;
+$channel = new \Hyperf\Engine\Channel(10);
+
+try {
+//    $channel->push(2);
+    sleep(1);
+} catch (Throwable $throwable) {
+    var_dump($throwable);
+}
+
+\Swow\Coroutine::run(function () use ($channel) {
+    $channel->pop(1);
+});
+//var_dump($channel->__debugInfo());
+exit;
 $channel = new \Swow\Channel();
 $coroutine = \Swow\Coroutine::run(function () use ($channel) {
     try {
