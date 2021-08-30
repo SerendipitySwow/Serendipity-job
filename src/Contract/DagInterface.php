@@ -17,7 +17,7 @@ interface DagInterface
      *
      * @return int|string
      */
-    public function getIdentity(): int | string;
+    public function getIdentity(): int|string;
 
     /**
      * Get dag action time

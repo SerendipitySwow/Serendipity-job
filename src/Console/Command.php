@@ -24,7 +24,7 @@ abstract class Command extends SymfonyCommand
      *
      * @var null|string
      */
-    protected string | null $name = null;
+    protected string|null $name = null;
 
     protected InputInterface $input;
 
@@ -72,7 +72,7 @@ abstract class Command extends SymfonyCommand
     public function table(
         array $headers,
         array $rows,
-        null | string $tableStyle = 'default',
+        null|string $tableStyle = 'default',
         array $columnStyles = []
     ): void {
         $table = new Table($this->output);

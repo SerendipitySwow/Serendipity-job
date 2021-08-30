@@ -22,7 +22,7 @@ class RouteCollector extends FastRouteCollector
      *
      * @param string|string[] $middlewareClass The middleware to use
      */
-    public function addMiddleware(array | string $middlewareClass, callable $func): void
+    public function addMiddleware(array|string $middlewareClass, callable $func): void
     {
         array_push($this->currentMiddlewares, ...(array) $middlewareClass);
         $func($this);

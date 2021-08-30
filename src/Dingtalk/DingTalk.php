@@ -55,7 +55,7 @@ class DingTalk
     /**
      * @return false|ResponseInterface
      */
-    public function text(string $content = ''): bool | ResponseInterface
+    public function text(string $content = ''): bool|ResponseInterface
     {
         return $this->dingTalkService
             ->setTextMessage($content)
@@ -68,7 +68,7 @@ class DingTalk
      *
      * @return ActionCard|Message
      */
-    public function action($title, $text): ActionCard | Message
+    public function action($title, $text): ActionCard|Message
     {
         return $this->dingTalkService
             ->setActionCardMessage($title, $text);
@@ -92,7 +92,7 @@ class DingTalk
      *
      * @return false|ResponseInterface
      */
-    public function link($title, $text, $url, string $picUrl = ''): bool | ResponseInterface
+    public function link($title, $text, $url, string $picUrl = ''): bool|ResponseInterface
     {
         return $this->dingTalkService
             ->setLinkMessage($title, $text, $url, $picUrl)
@@ -105,7 +105,7 @@ class DingTalk
      *
      * @return false|ResponseInterface
      */
-    public function markdown($title, $markdown): bool | ResponseInterface
+    public function markdown($title, $markdown): bool|ResponseInterface
     {
         return $this->dingTalkService
             ->setMarkdownMessage($title, $markdown)
@@ -118,7 +118,7 @@ class DingTalk
      *
      * @return ActionCard|Message
      */
-    public function actionCard($title, $markdown, int $hideAvatar = 0, int $btnOrientation = 0): ActionCard | Message
+    public function actionCard($title, $markdown, int $hideAvatar = 0, int $btnOrientation = 0): ActionCard|Message
     {
         return $this->dingTalkService
             ->setActionCardMessage($title, $markdown, $hideAvatar, $btnOrientation);
@@ -127,7 +127,7 @@ class DingTalk
     /**
      * @return FeedCard|Message
      */
-    public function feed(): FeedCard | Message
+    public function feed(): FeedCard|Message
     {
         return $this->dingTalkService
             ->setFeedCardMessage();

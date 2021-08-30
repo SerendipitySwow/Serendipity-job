@@ -16,7 +16,7 @@ use Swow\Socket;
 
 class Server implements ServerInterface
 {
-    protected \Swow\Http\Server | Socket | null $server;
+    protected \Swow\Http\Server|Socket|null $server;
 
     protected ?int $port = null;
 

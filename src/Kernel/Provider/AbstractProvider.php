@@ -27,7 +27,7 @@ abstract class AbstractProvider implements ProviderContract
     }
 
     #[Pure]
-    public function container(): ContainerInterface | Container
+    public function container(): ContainerInterface|Container
     {
         return ApplicationContext::getContainer();
     }

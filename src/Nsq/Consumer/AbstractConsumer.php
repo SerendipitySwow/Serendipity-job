@@ -120,7 +120,7 @@ abstract class AbstractConsumer
         return $this->redisPool;
     }
 
-    protected function redis(string $redisPool = null): RedisProxy | Redis
+    protected function redis(string $redisPool = null): RedisProxy|Redis
     {
         return $this->container->get(RedisFactory::class)
             ->get($redisPool ?? $this->getRedisPool());

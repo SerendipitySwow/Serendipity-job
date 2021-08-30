@@ -27,7 +27,7 @@ class Coordinator
      *
      * @return bool returns true if the coordinator has been woken up
      */
-    public function yield(float | int $timeout = -1): bool
+    public function yield(float|int $timeout = -1): bool
     {
         $this->channel->pop((float) $timeout);
 

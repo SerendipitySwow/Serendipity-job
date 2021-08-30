@@ -33,7 +33,7 @@ class Parser
      *@throws InvalidArgumentException
      * @return Carbon[]
      */
-    public function parse(string $crontabString, int | Carbon $startTime = null): array
+    public function parse(string $crontabString, int|Carbon $startTime = null): array
     {
         if (!$this->isValid($crontabString)) {
             throw new InvalidArgumentException('Invalid cron string: ' . $crontabString);

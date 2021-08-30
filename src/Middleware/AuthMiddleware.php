@@ -46,7 +46,7 @@ class AuthMiddleware
      *
      * @return array|bool
      */
-    protected function getApplication($appKey): array | bool
+    protected function getApplication($appKey): array|bool
     {
         $redis = ApplicationContext::getContainer()
             ->get(RedisFactory::class)

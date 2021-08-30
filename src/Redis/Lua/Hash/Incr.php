@@ -29,7 +29,7 @@ LUA;
         return 1;
     }
 
-    public function format($data): int | string | null
+    public function format($data): int|string|null
     {
         if (is_numeric($data)) {
             return $data;

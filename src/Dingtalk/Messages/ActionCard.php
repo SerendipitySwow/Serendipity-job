@@ -53,7 +53,7 @@ class ActionCard extends Message
         return $this;
     }
 
-    public function send(): bool | ResponseInterface
+    public function send(): bool|ResponseInterface
     {
         $this->service->setMessage($this);
 

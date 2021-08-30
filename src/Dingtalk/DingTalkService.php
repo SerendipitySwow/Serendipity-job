@@ -113,7 +113,7 @@ class DingTalkService
      *
      * @return ActionCard|Message
      */
-    public function setActionCardMessage($title, $markdown, int $hideAvatar = 0, int $btnOrientation = 0): ActionCard | Message
+    public function setActionCardMessage($title, $markdown, int $hideAvatar = 0, int $btnOrientation = 0): ActionCard|Message
     {
         $this->message = new ActionCard($this, $title, $markdown, $hideAvatar, $btnOrientation);
         $this->message->sendAt($this->mobiles, $this->atAll);
@@ -124,7 +124,7 @@ class DingTalkService
     /**
      * @return FeedCard|Message
      */
-    public function setFeedCardMessage(): FeedCard | Message
+    public function setFeedCardMessage(): FeedCard|Message
     {
         $this->message = new FeedCard($this);
         $this->message->sendAt($this->mobiles, $this->atAll);
@@ -135,7 +135,7 @@ class DingTalkService
     /**
      * @return false|ResponseInterface
      */
-    public function send(): bool | ResponseInterface
+    public function send(): bool|ResponseInterface
     {
         if (!$this->config['enabled']) {
             return false;

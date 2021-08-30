@@ -60,7 +60,7 @@ final class Application extends SymfonyApplication
         $this->container->make(YamlLoader::class);
     }
 
-    public function getContainer(): ContainerInterface | Container
+    public function getContainer(): ContainerInterface|Container
     {
         return $this->container;
     }

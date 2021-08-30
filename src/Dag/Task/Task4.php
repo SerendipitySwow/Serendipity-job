@@ -36,7 +36,7 @@ class Task4 implements DagInterface
         return $this->next;
     }
 
-    public function getIdentity(): int | string
+    public function getIdentity(): int|string
     {
         return 3;
     }

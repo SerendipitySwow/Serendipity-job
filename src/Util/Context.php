@@ -94,7 +94,7 @@ class Context
         return self::get($id);
     }
 
-    public static function getContainer(): ArrayObject | array | null
+    public static function getContainer(): ArrayObject|array|null
     {
         if (Coroutine::inCoroutine()) {
             return Co::getContextFor();

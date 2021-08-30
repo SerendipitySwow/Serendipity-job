@@ -46,7 +46,7 @@ interface JobInterface
      *
      * @return int|string
      */
-    public function getIdentity(): int | string;
+    public function getIdentity(): int|string;
 
     /**
      * Get job action time

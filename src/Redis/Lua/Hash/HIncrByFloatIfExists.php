@@ -27,7 +27,7 @@ LUA;
      *
      * @return null|float|int|string
      */
-    public function format($data): float | int | string | null
+    public function format($data): float|int|string|null
     {
         if (is_numeric($data)) {
             return $data;

@@ -25,7 +25,7 @@ class Task2 implements DagInterface
     /**
      * {@inheritDoc}
      */
-    public function run(array $results): int | bool
+    public function run(array $results): int|bool
     {
         if ($results['taskNo2'] === true) {
             echo "Task2::run()\n";
@@ -40,7 +40,7 @@ class Task2 implements DagInterface
         return $this->next;
     }
 
-    public function getIdentity(): int | string
+    public function getIdentity(): int|string
     {
         return 2;
     }

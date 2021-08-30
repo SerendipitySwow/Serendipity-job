@@ -262,7 +262,7 @@ final class ManageJobCommand extends Command
                         $connection->close();
                     }
                 });
-            } catch (SocketException | CoroutineException $exception) {
+            } catch (SocketException|CoroutineException $exception) {
                 if (in_array($exception->getCode(), [EMFILE, ENFILE, ENOMEM], true)) {
                     sleep(1);
                 } else {

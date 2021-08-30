@@ -111,7 +111,7 @@ class Signature
     /**
      * @Notes: 获取验证时间戳
      */
-    public function getSignatureApiTime(string $signatureAppKey): int | string
+    public function getSignatureApiTime(string $signatureAppKey): int|string
     {
         if (!$this->checkSignatureApiInfo($signatureAppKey)) {
             return '';

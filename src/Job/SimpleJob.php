@@ -58,7 +58,7 @@ class SimpleJob implements JobInterface
         return [JobMiddleware::class];
     }
 
-    public function getIdentity(): int | string
+    public function getIdentity(): int|string
     {
         return $this->identity;
     }

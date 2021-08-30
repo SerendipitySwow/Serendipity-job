@@ -110,7 +110,7 @@ class Arr
      *
      * @param array|string $keys
      */
-    public static function except(array $array, array | string $keys): array
+    public static function except(array $array, array|string $keys): array
     {
         static::forget($array, $keys);
 
@@ -123,7 +123,7 @@ class Arr
      * @param array|\ArrayAccess $array
      * @param int|string $key
      */
-    public static function exists(ArrayAccess | array $array, int | string $key): bool
+    public static function exists(ArrayAccess|array $array, int|string $key): bool
     {
         if ($array instanceof ArrayAccess) {
             return $array->offsetExists($key);
@@ -171,7 +171,7 @@ class Arr
      *
      * @param float|int $depth
      */
-    public static function flatten(array $array, float | int $depth): array
+    public static function flatten(array $array, float|int $depth): array
     {
         $result = [];
         foreach ($array as $item) {
@@ -193,7 +193,7 @@ class Arr
      *
      * @param array|string $keys
      */
-    public static function forget(array &$array, array | string $keys): void
+    public static function forget(array &$array, array|string $keys): void
     {
         $original = &$array;
         $keys = (array) $keys;
@@ -227,7 +227,7 @@ class Arr
      * @param array|\ArrayAccess $array
      * @param null|int|string $key
      */
-    public static function get(ArrayAccess | array $array, int | string $key = null, mixed $default = null): mixed
+    public static function get(ArrayAccess|array $array, int|string $key = null, mixed $default = null): mixed
     {
         if (!static::accessible($array)) {
             return value($default);
@@ -258,7 +258,7 @@ class Arr
      * @param array|\ArrayAccess $array
      * @param null|array|string $keys
      */
-    public static function has(ArrayAccess | array $array, array | string | null $keys): bool
+    public static function has(ArrayAccess|array $array, array|string|null $keys): bool
     {
         if (is_null($keys)) {
             return false;
@@ -303,7 +303,7 @@ class Arr
      *
      * @param array|string $keys
      */
-    public static function only(array $array, array | string $keys): array
+    public static function only(array $array, array|string $keys): array
     {
         return array_intersect_key($array, array_flip((array) $keys));
     }
@@ -314,7 +314,7 @@ class Arr
      * @param array|string $value
      * @param null|array|string $key
      */
-    public static function pluck(array $array, array | string $value, array | string $key = null): array
+    public static function pluck(array $array, array|string $value, array|string $key = null): array
     {
         $results = [];
         [ $value, $key ] = static::explodePluckParameters($value, $key);
@@ -395,7 +395,7 @@ class Arr
      *
      * @param null|int|string $key
      */
-    public static function set(array &$array, int | string | null $key, mixed $value): array
+    public static function set(array &$array, int|string|null $key, mixed $value): array
     {
         if (is_null($key)) {
             return $array = $value;
@@ -443,7 +443,7 @@ class Arr
      *
      * @param null|callable|string $callback
      */
-    public static function sort(array $array, callable | string $callback = null): array
+    public static function sort(array $array, callable|string $callback = null): array
     {
         return Collection::make($array)
             ->sortBy($callback)
@@ -549,7 +549,7 @@ class Arr
      * @param array|string $value
      * @param null|array|string $key
      */
-    protected static function explodePluckParameters(array | string $value, array | string | null $key): array
+    protected static function explodePluckParameters(array|string $value, array|string|null $key): array
     {
         $value = is_string($value) ? explode('.', $value) : $value;
         $key = is_null($key) || is_array($key) ? $key : explode('.', $key);

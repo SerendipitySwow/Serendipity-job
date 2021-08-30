@@ -22,10 +22,11 @@ class Task1 implements DagInterface
     /**
      * {@inheritDoc}
      */
-    public function run(array $results): int | bool
+    public function run(array $results): int|bool
     {
         echo "Task1::run()\n";
         sleep(20);
+
         return true;
     }
 
@@ -34,7 +35,7 @@ class Task1 implements DagInterface
         return true;
     }
 
-    public function getIdentity(): int | string
+    public function getIdentity(): int|string
     {
         return 1;
     }

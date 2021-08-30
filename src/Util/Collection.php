@@ -89,7 +89,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      *
      * @throws \JsonException
      */
-    public function __construct(null | array $items = [])
+    public function __construct(null|array $items = [])
     {
         $this->items = $this->getArrayableItems($items);
     }
@@ -130,7 +130,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      * @throws \JsonException
      * @return \Serendipity\Job\Util\Collection
      */
-    public function fill(null | array $items = []): Collection
+    public function fill(null|array $items = []): Collection
     {
         $this->items = $this->getArrayableItems($items);
 
@@ -142,7 +142,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      *
      * @param null|array $items
      */
-    public static function make(null | array $items = []): self
+    public static function make(null|array $items = []): self
     {
         return new static($items);
     }
@@ -165,7 +165,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      */
     #[Pure]
     public static function unwrap(
-        Collection | array $value
+        Collection|array $value
     ): array {
         return $value instanceof self ? $value->all() : $value;
     }
@@ -198,7 +198,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      *
      * @param null|callable|string $callback
      */
-    public function avg(callable | string $callback = null): float | int
+    public function avg(callable|string $callback = null): float|int
     {
         $callback = $this->valueRetriever($callback);
         $items = $this->map(function ($value) use ($callback) {
@@ -217,7 +217,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      *
      * @param null|callable|string $callback
      */
-    public function average(callable | string $callback = null): float | int
+    public function average(callable|string $callback = null): float|int
     {
         return $this->avg($callback);
     }
@@ -443,7 +443,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      *
      * @param callable|string $key
      */
-    public function every(callable | string $key, mixed $operator = null, mixed $value = null): bool
+    public function every(callable|string $key, mixed $operator = null, mixed $value = null): bool
     {
         if (func_num_args() === 1) {
             $callback = $this->valueRetriever($key);
@@ -609,7 +609,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function flatten(float | int $depth): self
+    public function flatten(float|int $depth): self
     {
         return new static(Arr::flatten($this->items, $depth));
     }
@@ -629,7 +629,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function forget(array | string $keys): self
+    public function forget(array|string $keys): self
     {
         foreach ((array) $keys as $key) {
             $this->offsetUnset($key);
@@ -657,7 +657,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function groupBy(callable | string $groupBy, bool $preserveKeys = false): self
+    public function groupBy(callable|string $groupBy, bool $preserveKeys = false): self
     {
         if (is_array($groupBy)) {
             $nextGroups = $groupBy;
@@ -693,7 +693,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function keyBy(callable | string $keyBy): self
+    public function keyBy(callable|string $keyBy): self
     {
         $keyBy = $this->valueRetriever($keyBy);
         $results = [];
@@ -803,7 +803,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function pluck(array | string $value, ?string $key = null): self
+    public function pluck(array|string $value, ?string $key = null): self
     {
         return new static(Arr::pluck($this->items, $value, $key));
     }
@@ -903,7 +903,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      *
      * @param null|callable|string $callback
      */
-    public function max(callable | string $callback = null)
+    public function max(callable|string $callback = null)
     {
         $callback = $this->valueRetriever($callback);
 
@@ -950,7 +950,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      *
      * @param null|callable|string $callback
      */
-    public function min(callable | string $callback = null)
+    public function min(callable|string $callback = null)
     {
         $callback = $this->valueRetriever($callback);
 
@@ -1017,7 +1017,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function partition(callable | string $key, mixed $operator = null, mixed $value = null): self
+    public function partition(callable|string $key, mixed $operator = null, mixed $value = null): self
     {
         $partitions = [new static(), new static()];
         $callback = func_num_args() === 1 ? $this->valueRetriever($key) : $this->operatorForWhere(...func_get_args());
@@ -1075,7 +1075,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function concat(Traversable | array $source): self
+    public function concat(Traversable|array $source): self
     {
         $result = new static($this);
         foreach ($source as $item) {
@@ -1111,7 +1111,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      *
      * @return null|self
      */
-    public function random(int $number = null): null | static
+    public function random(int $number = null): null|static
     {
         if (is_null($number)) {
             return Arr::random($this->items);
@@ -1159,7 +1159,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      *
      * @return bool|int|string
      */
-    public function search(mixed $value, bool $strict = false): bool | int | string
+    public function search(mixed $value, bool $strict = false): bool|int|string
     {
         if (!$this->useAsCallable($value)) {
             return array_search($value, $this->items, $strict);
@@ -1257,7 +1257,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function sortBy(callable | string $callback, int $options = SORT_REGULAR, bool $descending = false): self
+    public function sortBy(callable|string $callback, int $options = SORT_REGULAR, bool $descending = false): self
     {
         $results = [];
         $callback = $this->valueRetriever($callback);
@@ -1285,7 +1285,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function sortByDesc(callable | string $callback, int $options = SORT_REGULAR): self
+    public function sortByDesc(callable|string $callback, int $options = SORT_REGULAR): self
     {
         return $this->sortBy($callback, $options, true);
     }
@@ -1316,7 +1316,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      *
      * @return \Serendipity\Job\Util\Collection
      */
-    public function splice(int $offset, int $length = null, null | array $replacement = []): self
+    public function splice(int $offset, int $length = null, null|array $replacement = []): self
     {
         if (func_num_args() === 1) {
             return new static(array_splice($this->items, $offset));
@@ -1330,7 +1330,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      *
      * @param null|callable|string $callback
      */
-    public function sum(callable | string $callback = null)
+    public function sum(callable|string $callback = null)
     {
         if (is_null($callback)) {
             return array_sum($this->items);
@@ -1380,7 +1380,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      *
      * @param null|callable|string $key
      */
-    public function unique(callable | string $key = null, bool $strict = false): self
+    public function unique(callable|string $key = null, bool $strict = false): self
     {
         $callback = $this->valueRetriever($key);
         $exists = [];
@@ -1398,7 +1398,7 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
      *
      * @param null|callable|string $key
      */
-    public function uniqueStrict(callable | string $key = null): self
+    public function uniqueStrict(callable|string $key = null): self
     {
         return $this->unique($key, true);
     }

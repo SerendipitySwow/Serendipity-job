@@ -35,7 +35,7 @@ class ServerFactory
             ->get('server');
     }
 
-    public function start(): Socket | \Swow\Http\Server
+    public function start(): Socket|\Swow\Http\Server
     {
         return $this->getServer()
             ->start();
