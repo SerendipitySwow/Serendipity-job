@@ -35,9 +35,9 @@ class RedisLock
      * @param string $name 锁名字
      * @param int $expire 锁有效期
      * @param int $retryTimes 重试次数
-     * @param int $sleep 重试休息微秒
+     * @param int $usleep 重试休息微秒
      */
-    public function lock(string $name, int $expire = 5, int $retryTimes = 5, int $sleep = 10000): bool
+    public function lock(string $name, int $expire = 5, int $retryTimes = 5, int $usleep = 10000): bool
     {
         $lock = false;
         $retryTimes = max($retryTimes, 1);
@@ -49,7 +49,7 @@ class RedisLock
                 $this->lockedNames[$key] = $kVal;
                 break;
             }
-            usleep($sleep);
+            usleep($usleep);
         }
 
         return $lock;
@@ -103,13 +103,6 @@ LUA;
         return false;
     }
 
-    /**
-     * 获取锁
-     *
-     * @param $key
-     * @param $expire
-     * @param $value
-     */
     private function getLock($key, $expire, $value): mixed
     {
         $script = <<<'LUA'
@@ -132,12 +125,12 @@ LUA;
     /**
      * 执行lua脚本.
      */
-    private function execLuaScript(string $script, array $params, int $keyNum = 1): mixed
+    private function execLuaScript(string $script, array $params): mixed
     {
         $redis = ApplicationContext::getContainer()->get(RedisFactory::class)
             ->get($this->name);
         $hash = $redis->script('load', $script);
 
-        return $redis->evalSha($hash, $params, $keyNum);
+        return $redis->evalSha($hash, $params, 1);
     }
 }

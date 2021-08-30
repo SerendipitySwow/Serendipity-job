@@ -10,9 +10,6 @@ namespace Serendipity\Job\Kernel\Traits;
 
 trait Singleton
 {
-    /**
-     * @var null|Singleton
-     */
     private static ?self $instance = null;
 
     public static function create(string $module = null): static

@@ -73,9 +73,7 @@ class ConcurrentMySQLPattern
             $once = true;
             SerendipitySwowCo::create(function () {
                 CoordinatorManager::until(Constants::COMMADN_EXIT)->yield();
-                if ($this->chan) {
-                    $this->chan->close();
-                }
+                $this->chan?->close();
             });
         }
     }

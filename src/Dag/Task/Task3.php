@@ -13,16 +13,22 @@ use Serendipity\Job\Kernel\Concurrent\ConcurrentMySQLPattern;
 
 class Task3 implements DagInterface
 {
-    /**
-     * @var bool
-     */
-    public $next;
+    public bool $next;
+
+    public function __construct(string $startDate, string $endDate)
+    {
+        $this->startDate = $startDate;
+        $this->endDate = $endDate;
+    }
 
     /**
      * {@inheritDoc}
      */
-    public function Run(): mixed
+    public function Run(array $results): mixed
     {
+        echo "Task3::run()\n";
+
+        return true;
     }
 
     public function isNext(): bool

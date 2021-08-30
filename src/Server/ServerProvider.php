@@ -87,6 +87,9 @@ class ServerProvider extends AbstractProvider
                             $time = microtime(true);
                             $request = null;
                             try {
+                                /**
+                                 * @var SerendipityRequest $request
+                                 */
                                 $request = $connection->recvHttpRequest(make(SerendipityRequest::class));
                                 $response = $this->dispatcher($request);
                                 $connection->sendHttpResponse($response);
@@ -107,12 +110,12 @@ class ServerProvider extends AbstractProvider
                                 $time = microtime(true) - $time;
                                 $debug = 'URI: ' . $request->getUri()->getPath() . PHP_EOL;
                                 $debug .= 'TIME: ' . $time * 1000 . 'ms' . PHP_EOL;
-                                if ($customData = $this->getCustomData()) {
+                                if ($customData = $request->getCustomData()) {
                                     $debug .= 'DATA: ' . $customData . PHP_EOL;
                                 }
-                                $debug .= 'REQUEST: ' . $this->getRequestString($request) . PHP_EOL;
+                                $debug .= 'REQUEST: ' . $request->getRequestString() . PHP_EOL;
                                 if (isset($response)) {
-                                    $debug .= 'RESPONSE: ' . $this->getResponseString($response) . PHP_EOL;
+                                    $debug .= 'RESPONSE: ' . $request->getResponseString($response) . PHP_EOL;
                                 }
                                 if (isset($exception) && $exception instanceof Throwable) {
                                     $debug .= 'EXCEPTION: ' . $exception->getMessage() . PHP_EOL;
@@ -612,27 +615,5 @@ class ServerProvider extends AbstractProvider
         });
 
         return $channel->pop();
-    }
-
-    protected function getCustomData(): string
-    {
-        return '';
-    }
-
-    protected function getResponseString(Response $response): string
-    {
-        return (string) $response->getBody();
-    }
-
-    protected function getRequestString(SwowRequest $request): string
-    {
-        $data = array_merge(
-            $request->getQueryParams(),
-            Json::decode(
-                $request->getBodyAsString() !== '' ? $request->getBodyAsString() : '{}'
-            )
-        );
-
-        return Json::encode($data);
     }
 }

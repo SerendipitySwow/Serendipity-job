@@ -39,17 +39,17 @@ class DagConsumer extends AbstractConsumer
             return Result::DROP;
         }
 
-        SerendipitySwowCo::create(function ($id, $tasks, $dag) {
+        SerendipitySwowCo::create(function () use ($id, $tasks, $dag) {
             /**
              * @var Dag $dag
              */
             $ids = implode("','", array_column($tasks, 'task_id'));
-            $task = DB::query("select * from task where id in ('{$ids}');");
+            $task = DB::query("select * from task where id in ('$ids');");
             foreach ($task as $value) {
-                $value = (object) $value;
-                $this->vertexes[$value->task_no] = Vertex::make(static function () use ($value) {
+                $object = (object) $value;
+                $this->vertexes[$object->task_no] = Vertex::make(static function ($results) use ($object) {
                     /*
-                   $value->content
+                   $object->content
                      {
                         "class": "Serendipity\\Job\\Dag\\Task\\Task1",
                         "params": {
@@ -58,21 +58,21 @@ class DagConsumer extends AbstractConsumer
                         }
                     }
                     */
-                    $content = Json::decode($value->content);
-                    $class = make($content['class'], $content['_params']);
+                    $content = Json::decode($object->content);
+                    $class = make($content['class'], $content['params']);
                     // 暂不考虑支持协程单例mysql模式.
                     if (!$class instanceof DagInterface) {
                         throw new InvalidArgumentException(sprintf(
                             'unknown class "%s,must be implements DagInterface#.',
-                            $class ?? $value->content
+                            $class ?? $object->content
                         ));
                     }
 
-                    echo $value->task_no . "\n";
+                    echo $object->task_no . "\n";
 
-                    return $class->run();
-                }, $value->timeout, $value->task_no);
-                $dag->addVertex($this->vertexes[$value->task_no]);
+                    return $class->run($results);
+                }, $object->timeout, $object->task_no);
+                $dag->addVertex($this->vertexes[$object->task_no]);
             }
             $source = <<<'SQL'
 select t.task_no,vertex_edge.task_id,vertex_edge.pid from vertex_edge left join task t on vertex_edge.task_id = t.id
@@ -93,7 +93,7 @@ SQL;
                 $this->dingTalk->text(serendipity_format_throwable($throwable));
                 $this->logger->error(sprintf('Workflow Error[%s]#', $throwable->getMessage()));
             }
-        }, $id, $tasks, $dag);
+        });
 
         return Result::ACK;
     }

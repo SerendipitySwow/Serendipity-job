@@ -24,7 +24,7 @@ interface DagInterface
      */
     public function getTimeout(): int;
 
-    public function run(): mixed;
+    public function run(array $results): mixed;
 
     public function runConcurrentMySQLPattern(ConcurrentMySQLPattern $pattern): mixed;
 

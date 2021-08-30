@@ -9,10 +9,9 @@ declare(strict_types=1);
 namespace Serendipity\Job\Dag\Task;
 
 use Serendipity\Job\Contract\DagInterface;
-use Serendipity\Job\Dag\Exception\DagException;
 use Serendipity\Job\Kernel\Concurrent\ConcurrentMySQLPattern;
 
-class Task2 implements DagInterface
+class Task4 implements DagInterface
 {
     public bool $next;
 
@@ -25,14 +24,11 @@ class Task2 implements DagInterface
     /**
      * {@inheritDoc}
      */
-    public function run(array $results): int | bool
+    public function Run(array $results): mixed
     {
-        if ($results['taskNo2'] === true) {
-            echo "Task2::run()\n";
+        echo "Task3::run()\n";
 
-            return true;
-        }
-        throw new DagException('never done!');
+        return true;
     }
 
     public function isNext(): bool
@@ -42,7 +38,7 @@ class Task2 implements DagInterface
 
     public function getIdentity(): int | string
     {
-        return 2;
+        return 3;
     }
 
     public function getTimeout(): int

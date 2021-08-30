@@ -2,10 +2,6 @@
 
 🚀 🏆  Task Platform Developed Based On Swow and Php8
 
-# 是否时间久了有的东西久慢慢变味了 😅
-
-# 还是先慢慢提升学习技能吧
-
 ## Features
 
 ```
@@ -70,6 +66,9 @@ Serendipity\Job\Util\Coroutine::create()
 
 ## Usage
 [使用说明](usage.md)
+
+## 任务编排
+[使用说明](dag.md)
 
 1.启动Serendipity-Job Server.
 

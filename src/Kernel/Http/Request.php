@@ -79,4 +79,26 @@ class Request extends SwowRequest
     {
         return $file instanceof SplFileInfo && $file->getPath() !== '';
     }
+
+    public function getCustomData(): string
+    {
+        return '';
+    }
+
+    public function getResponseString(Response $response): string
+    {
+        return (string) $response->getBody();
+    }
+
+    public function getRequestString(): string
+    {
+        $data = array_merge(
+            $this->getQueryParams(),
+            Json::decode(
+                $this->getBodyAsString() !== '' ? $this->getBodyAsString() : '{}'
+            )
+        );
+
+        return Json::encode($data);
+    }
 }
