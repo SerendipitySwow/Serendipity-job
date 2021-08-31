@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Serendipity\Job\Nsq\Consumer;
 
 use Hyperf\Utils\Codec\Json;
+use Serendipity\Job\Constant\Statistical;
 use Serendipity\Job\Constant\Task;
 use Serendipity\Job\Contract\DagInterface;
 use Serendipity\Job\Contract\EventDispatcherInterface;
@@ -17,6 +18,7 @@ use Serendipity\Job\Event\UpdateWorkflowEvent;
 use Serendipity\Job\Kernel\Dag\Dag;
 use Serendipity\Job\Kernel\Dag\Exception\InvalidArgumentException;
 use Serendipity\Job\Kernel\Dag\Vertex;
+use Serendipity\Job\Redis\Lua\Hash\Incr;
 use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
 use SerendipitySwow\Nsq\Message;
 use SerendipitySwow\Nsq\Result;
@@ -45,6 +47,7 @@ class DagConsumer extends AbstractConsumer
              */
             $ids = implode("','", array_column($tasks, 'task_id'));
             $task = DB::query("select * from task where id in ('$ids');");
+
             foreach ($task as $value) {
                 $object = (object) $value;
                 $this->vertexes[$object->task_no] = Vertex::make(static function ($results) use ($object) {
@@ -79,7 +82,8 @@ select t.task_no,vertex_edge.task_id,vertex_edge.pid from vertex_edge left join 
 where workflow_id = ?
 SQL;
             $source = DB::query($source, [$id]);
-            $this->tree($dag, $source);
+            $this->buildInitialDag($dag, $source);
+            $incr = make(Incr::class);
             try {
                 $this->logger->info('Workflow Start #....', ['workflow_id' => $id]);
                 $dag->run();
@@ -89,21 +93,24 @@ SQL;
                         new UpdateWorkflowEvent($id, Task::TASK_SUCCESS),
                         UpdateWorkflowEvent::UPDATE_WORKFLOW
                     );
+                //加入成功执行统计
+                $incr->eval([Statistical::DAG_SUCCESS, $this->config->get('consumer.task_redis_cache_time')]);
             } catch (Throwable $throwable) {
                 $this->dingTalk->text(serendipity_format_throwable($throwable));
                 $this->logger->error(sprintf('Workflow Error[%s]#', $throwable->getMessage()));
+                $incr->eval([Statistical::DAG_FAILURE, $this->config->get('consumer.task_redis_cache_time')]);
             }
         });
 
         return Result::ACK;
     }
 
-    private function tree(Dag $dag, array $source, int $pid = 0): array
+    private function buildInitialDag(Dag $dag, array $source, int $pid = 0): array
     {
         $tree = [];
         foreach ($source as $v) {
             if ($v['pid'] === $pid) {
-                $v['children'] = $this->tree($dag, $source, $v['task_id']);
+                $v['children'] = $this->buildInitialDag($dag, $source, $v['task_id']);
                 if (empty($v['children'])) {
                     unset($v['children']);
                 } else {
