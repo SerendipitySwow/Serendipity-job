@@ -39,6 +39,7 @@ use Serendipity\Job\Util\Arr;
 use Serendipity\Job\Util\Context;
 use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
 use SerendipitySwow\Nsq\Nsq;
+use Spatie\Emoji\Emoji;
 use Swow\Coroutine\Exception as CoroutineException;
 use Swow\Http\Exception as HttpException;
 use Swow\Http\Server;
@@ -76,7 +77,8 @@ class ServerProvider extends AbstractProvider
         $this->logger = $this->container()
             ->get(LoggerFactory::class)
             ->get();
-        $this->stdoutLogger->debug('Serendipity-Job Start Successfully#');
+        $this->stdoutLogger->info(str_repeat(Emoji::flagsForFlagChina() . '  ', 10));
+        $this->stdoutLogger->debug(sprintf('%s Serendipity-Job Start Successfully# %s', Emoji::manSurfing(), Emoji::rocket()));
         $this->makeFastRoute();
         while (true) {
             try {

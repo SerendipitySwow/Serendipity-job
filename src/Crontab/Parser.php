@@ -111,7 +111,7 @@ class Parser
             $start < $min && $start = $min;
             for ($i = $start; $i <= $max;) {
                 $result[] = $i;
-                /** @noinspection PhpWrongStringConcatenationInspection */
+                /* @noinspection PhpWrongStringConcatenationInspection */
                 $i += $exploded[1];
             }
         } elseif (str_contains($string, '-')) {
@@ -132,7 +132,7 @@ class Parser
     }
 
     /**
-     * @param  int|Carbon|null  $startTime
+     * @param null|Carbon|int $startTime
      */
     private function parseStartTime(int|Carbon|null $startTime): int
     {

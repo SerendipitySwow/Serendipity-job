@@ -5,9 +5,10 @@ declare(strict_types=1);
 
 use Psr\Container\ContainerInterface;
 use Serendipity\Job\Application;
+use Spatie\Emoji\Emoji;
 
 if (!extension_loaded('swow')) {
-    exit('Swow extension is required');
+    exit(sprintf('Swow extension is required%s#',Emoji::faceWithTearsOfJoy()));
 }
 define('BASE_PATH', dirname(__DIR__));
 ini_set('display_errors', 'on');

@@ -30,6 +30,7 @@ use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
 use SerendipitySwow\Nsq\Message;
 use SerendipitySwow\Nsq\Nsq;
 use SerendipitySwow\Nsq\Result;
+use Spatie\Emoji\Emoji;
 use Swow\Coroutine as SwowCo;
 use Swow\Coroutine\Exception as CoroutineException;
 use Swow\Http\Exception as HttpException;
@@ -118,7 +119,7 @@ final class ManageJobCommand extends Command
         $this->config = $this->container->get(ConfigInterface::class);
         $this->stdoutLogger = $this->container->get(StdoutLoggerInterface::class);
         $this->bootStrap();
-        $this->stdoutLogger->info('Consumer Task Successfully Processed#');
+        $this->stdoutLogger->info(str_repeat(Emoji::flagsForFlagChina() . '  ', 10));
         $type = $this->input->getOption('type');
         $port = (int) $this->input->getOption('port');
         $host = $this->input->getOption('host');
@@ -126,6 +127,7 @@ final class ManageJobCommand extends Command
             $this->stdoutLogger->error('Invalid task parameters.');
             exit(1);
         }
+        $this->stdoutLogger->info(sprintf('%s Consumer %s Successfully Processed# %s', Emoji::manSurfing(), ucfirst($type), Emoji::rocket()));
         $this->subscribe($type);
         $this->makeServer($host, $port);
 
