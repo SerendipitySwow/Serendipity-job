@@ -66,8 +66,6 @@ abstract class Command extends SymfonyCommand
 
     /**
      * Format input to textual table.
-     *
-     * @param null|string $tableStyle
      */
     public function table(
         array $headers,
@@ -93,6 +91,7 @@ abstract class Command extends SymfonyCommand
      */
     public function line(mixed $string, mixed $style = null, mixed $verbosity = null): void
     {
+        /** @noinspection PhpUnnecessaryCurlyVarSyntaxInspection */
         $styled = $style ? "<{$style}>{$string}</{$style}>" : $string;
         $this->output->writeln($styled, $this->parseVerbosity($verbosity));
     }

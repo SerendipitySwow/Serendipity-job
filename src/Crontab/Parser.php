@@ -131,9 +131,6 @@ class Parser
         return $value >= $min && $value <= $max;
     }
 
-    /**
-     * @param null|Carbon|int $startTime
-     */
     private function parseStartTime(int|Carbon|null $startTime): int
     {
         if ($startTime instanceof Carbon) {
