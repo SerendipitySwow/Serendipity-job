@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Dingtalk\Messages;
 
+use Psr\Http\Message\ResponseInterface;
 use Serendipity\Job\Dingtalk\DingTalkService;
 
 class FeedCard extends Message
@@ -41,7 +42,7 @@ class FeedCard extends Message
         return $this;
     }
 
-    public function send(): bool|\Psr\Http\Message\ResponseInterface
+    public function send(): bool|ResponseInterface
     {
         $this->service->setMessage($this);
 

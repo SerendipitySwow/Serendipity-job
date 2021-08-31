@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Serendipity\Job\Dingtalk;
 
 use Psr\Http\Message\ResponseInterface;
+use Throwable;
 
 interface ClientInterface
 {
@@ -20,7 +21,7 @@ interface ClientInterface
      *
      * @param array $params Request parameters
      *
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function send(array $params = []): ResponseInterface;
 }

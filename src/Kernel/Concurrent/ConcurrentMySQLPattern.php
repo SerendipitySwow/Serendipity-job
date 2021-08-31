@@ -72,7 +72,7 @@ class ConcurrentMySQLPattern
         if (!isset($once)) {
             $once = true;
             SerendipitySwowCo::create(function () {
-                CoordinatorManager::until(Constants::COMMADN_EXIT)->yield();
+                CoordinatorManager::until(Constants::COMMAND_EXIT)->yield();
                 $this->chan?->close();
             });
         }
@@ -86,6 +86,7 @@ class ConcurrentMySQLPattern
         if (!$this->chan) {
             $this->loop();
         }
+        $this->transaction = true;
 
         return $this->PDO->beginTransaction();
     }

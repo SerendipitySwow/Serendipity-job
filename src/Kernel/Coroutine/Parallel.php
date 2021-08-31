@@ -39,6 +39,7 @@ class Parallel
         }
     }
 
+    /** @noinspection DisconnectedForeachInstructionInspection */
     public function wait(bool $throw = true): array
     {
         $result = $throwables = [];

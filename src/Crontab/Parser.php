@@ -30,8 +30,9 @@ class Parser
      *                              +------------- sec (0-59)
      * @param null|Carbon|int $startTime
      *
-     *@throws InvalidArgumentException
-     * @return Carbon[]
+     *@return Carbon[]
+     * @noinspection TypeUnsafeArraySearchInspection*@throws InvalidArgumentException
+     * @noinspection TypeUnsafeArraySearchInspection
      */
     public function parse(string $crontabString, int|Carbon $startTime = null): array
     {
@@ -57,6 +58,9 @@ class Parser
         return [];
     }
 
+    /** @noinspection NotOptimalRegularExpressionsInspection
+     * @noinspection RegExpRedundantEscape
+     */
     public function isValid(string $crontabString): bool
     {
         return !(!preg_match(
@@ -70,7 +74,8 @@ class Parser
 
     /**
      * Parse each segment of crontab string.
-     */
+     *
+     * @noinspection NotOptimalIfConditionsInspection*/
     protected function parseSegment(string $string, int $min, int $max, int $start = null): array
     {
         if ($start === null || $start < $min) {
@@ -85,11 +90,12 @@ class Parser
             $exploded = explode(',', $string);
             foreach ($exploded as $value) {
                 if (str_contains($value, '/') || str_contains($string, '-')) {
+                    /** @noinspection SlowArrayOperationsInLoopInspection */
                     $result = array_merge($result, $this->parseSegment($value, $min, $max, $start));
                     continue;
                 }
 
-                if (!$this->between((int) $value, (int) ($min > $start ? $min : $start), (int) $max)) {
+                if (!$this->between((int) $value, ($min > $start ? $min : $start), $max)) {
                     continue;
                 }
                 $result[] = (int) $value;
@@ -105,6 +111,7 @@ class Parser
             $start < $min && $start = $min;
             for ($i = $start; $i <= $max;) {
                 $result[] = $i;
+                /** @noinspection PhpWrongStringConcatenationInspection */
                 $i += $exploded[1];
             }
         } elseif (str_contains($string, '-')) {
@@ -117,7 +124,7 @@ class Parser
     }
 
     /**
-     * Determire if the $value is between in $min and $max ?
+     * Determine if the $value is between in $min and $max ?
      */
     private function between(int $value, int $min, int $max): bool
     {
@@ -125,9 +132,9 @@ class Parser
     }
 
     /**
-     * @param null|Carbon|int $startTime
+     * @param  int|Carbon|null  $startTime
      */
-    private function parseStartTime($startTime): int
+    private function parseStartTime(int|Carbon|null $startTime): int
     {
         if ($startTime instanceof Carbon) {
             $startTime = $startTime->getTimestamp();
@@ -135,7 +142,7 @@ class Parser
             $startTime = time();
         }
         if (!is_numeric($startTime)) {
-            throw new InvalidArgumentException("\$startTime have to be a valid unix timestamp ({$startTime} given)");
+            throw new InvalidArgumentException("\$startTime have to be a valid unix timestamp ($startTime given)");
         }
 
         return (int) $startTime;

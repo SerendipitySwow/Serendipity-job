@@ -68,7 +68,7 @@ class Client implements ClientInterface
                 $sign = hash_hmac('sha256', $timestamp . "\n" . $secret, $secret, true);
                 $query['timestamp'] = $timestamp;
                 $query['sign'] = base64_encode($sign);
-            } catch (Exception $e) {
+            } catch (Exception) {
                 //do something
             }
         }

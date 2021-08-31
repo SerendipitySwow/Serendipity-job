@@ -18,5 +18,5 @@ class Constants
     /**
      * Swoole onWorkerExit event.
      */
-    public const COMMADN_EXIT = 'commandExit';
+    public const COMMAND_EXIT = 'commandExit';
 }
