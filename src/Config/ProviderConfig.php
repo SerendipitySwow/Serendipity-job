@@ -27,7 +27,7 @@ class ProviderConfig
 
     /**
      * Load and merge all provider configs from components.
-     * Notice that this method will cached the config result into a static property,
+     * Notice that this method will cache the config result into a static property,
      * call ProviderConfig::clear() method if you want to reset the static property.
      */
     public static function load(): array

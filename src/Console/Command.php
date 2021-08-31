@@ -93,7 +93,7 @@ abstract class Command extends SymfonyCommand
      */
     public function line(mixed $string, mixed $style = null, mixed $verbosity = null): void
     {
-        $styled = $style ? "<{$style}>{$string}</{$style}>" : $string;
+        $styled = $style ? "<$style>$string</$style>" : $string;
         $this->output->writeln($styled, $this->parseVerbosity($verbosity));
     }
 
