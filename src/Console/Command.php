@@ -16,6 +16,7 @@ use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use const Swow\VERSION;
 
 abstract class Command extends SymfonyCommand
 {
@@ -183,15 +184,20 @@ abstract class Command extends SymfonyCommand
 
     protected function showLogo(): void
     {
+        $this->output->table(['APP_NAME', 'PHP_VERSION', 'SWOW_VERSION', 'APP_VERSION'], [
+            [
+                env('APP_NAME'), PHP_VERSION, VERSION, env('APP_VERSION'),
+            ],
+        ]);
         $this->output->writeln(sprintf('<info>%s</info>', Logo::LOGO));
         $this->output->writeln([
-            '<info>Serendipity Job</info>',
-            '<info>===============</info>',
+            '<info>Serendipity Job For SerendipitySwow</info>',
+            '<info>===================================</info>',
             '',
         ]);
         $this->output->writeln([
             '<comment>If You Want To Exit, You Can Press Ctrl + C To Exit#.<comment>',
-            '<info>===============</info>',
+            '<info>====================================================</info>',
         ]);
     }
 }
