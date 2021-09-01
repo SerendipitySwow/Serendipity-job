@@ -15,6 +15,9 @@ use Serendipity\Job\RedisSubscriber\Status as StatusResponse;
 use Swow\Buffer;
 use Swow\Socket;
 
+/**
+ * @link https://cloud.tencent.com/developer/article/1556440 Redis通信协议用php实现
+ */
 class Connection
 {
     protected string $host = '';
