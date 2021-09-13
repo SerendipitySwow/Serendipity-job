@@ -41,12 +41,9 @@ Serendipity\Job\Util\Coroutine::create()
 ```
 
 ## 接口文档
-
 见API.md
 
 ## TODO
-* 计划开发后台
-* 完善文档
 * 环境
 * 考虑优化项目结构
 ## Come on!
