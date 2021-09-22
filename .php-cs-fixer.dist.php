@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 $header = <<<'EOF'
 This file is part of Serendipity Job
-@license  https://github.com/serendipitySwow/Serendipity-job/blob/main/LICENSE
+@license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
 EOF;
 
 return (new PhpCsFixer\Config())
