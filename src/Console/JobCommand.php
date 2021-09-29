@@ -48,7 +48,6 @@ class JobCommand extends Command
 
     protected const COMMAND_PROVIDER_NAME = 'Job';
 
-    public const TOPIC_PREFIX = 'serendipity-job-';
 
     protected ?ConfigInterface $config = null;
 
@@ -61,15 +60,8 @@ class JobCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setDescription('Start Manage Job')
+            ->setDescription('Start Job')
             ->setDefinition([
-                new InputOption(
-                    'type',
-                    't',
-                    InputOption::VALUE_REQUIRED,
-                    'Select the type of task to be performed (dag, task),',
-                    'task'
-                ),
                 new InputOption(
                     'host',
                     'host',
@@ -91,8 +83,6 @@ class JobCommand extends Command
 
                         <info>php %command.full_name%</info>
                         
-                    Use the --type option Select the type of task to be performed (dag, task),If you choose dag, limit is best configured to 1:
-                        <info>php %command.full_name% --type=task</info>
                     Use the --host Configure HttpServer host:
                         <info>php %command.full_name% --host=127.0.0.1</info>
                     Use the --type Configure HttpServer port numbers:
@@ -113,15 +103,10 @@ class JobCommand extends Command
         $this->stdoutLogger = $this->container->get(StdoutLoggerInterface::class);
         $this->bootStrap();
         $this->stdoutLogger->info(str_repeat(Emoji::flagsForFlagChina() . '  ', 10));
-        $type = $this->input->getOption('type');
         $port = (int) $this->input->getOption('port');
         $host = $this->input->getOption('host');
-        if (!in_array($type, self::TASK_TYPE, true)) {
-            $this->stdoutLogger->error('Invalid task parameters.');
-            exit(1);
-        }
-        $this->stdoutLogger->info(sprintf('%s Consumer %s Successfully Processed# %s', Emoji::manSurfing(), ucfirst($type), Emoji::rocket()));
-        $this->subscribe($type);
+        $this->stdoutLogger->info(sprintf('%s JobConsumer Successfully Processed# %s', Emoji::manSurfing(), Emoji::rocket()));
+        $this->subscribe();
         $this->makeServer($host, $port);
 
         return SymfonyCommand::SUCCESS;
@@ -267,21 +252,18 @@ class JobCommand extends Command
         }
     }
 
-    protected function subscribe(string $type): void
+    protected function subscribe(): void
     {
         SerendipitySwowCo::create(
-            function () use ($type) {
+            function () {
                 $subscriber = make(Nsq::class, [
                     $this->container,
                     $this->config->get(sprintf('nsq.%s', 'default')),
                 ]);
-                $consumer = match ($type) {
-                    'task' => $this->makeConsumer(TaskConsumer::class, self::TOPIC_PREFIX . $type, 'Consumer'),
-                    'dag' => $this->makeConsumer(DagConsumer::class, self::TOPIC_PREFIX . $type, 'Consumer')
-                };
+                $consumer = $this->makeConsumer(TaskConsumer::class, AbstractConsumer::TOPIC_PREFIX , 'JobConsumer');
                 $subscriber->subscribe(
-                    self::TOPIC_PREFIX . $type,
-                    ucfirst($type) . 'Consumer',
+                    AbstractConsumer::TOPIC_PREFIX . 'Job',
+                    'JobConsumer',
                     function (Message $message) use ($consumer) {
                         try {
                             $result = $consumer->consume($message);

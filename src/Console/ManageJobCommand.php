@@ -55,8 +55,6 @@ final class ManageJobCommand extends Command
         'task',
     ];
 
-    public const TOPIC_PREFIX = 'serendipity-job-';
-
     protected ?ConfigInterface $config = null;
 
     protected ?StdoutLoggerInterface $stdoutLogger = null;
@@ -283,11 +281,11 @@ final class ManageJobCommand extends Command
                     $this->config->get(sprintf('nsq.%s', 'default')),
                 ]);
                 $consumer = match ($type) {
-                    'task' => $this->makeConsumer(TaskConsumer::class, self::TOPIC_PREFIX . $type, 'Consumer'),
-                    'dag' => $this->makeConsumer(DagConsumer::class, self::TOPIC_PREFIX . $type, 'Consumer')
+                    'task' => $this->makeConsumer(TaskConsumer::class, AbstractConsumer::TOPIC_PREFIX . $type, 'Consumer'),
+                    'dag' => $this->makeConsumer(DagConsumer::class, AbstractConsumer::TOPIC_PREFIX . $type, 'Consumer')
                 };
                 $subscriber->subscribe(
-                    self::TOPIC_PREFIX . $type,
+                    AbstractConsumer::TOPIC_PREFIX . $type,
                     ucfirst($type) . 'Consumer',
                     function (Message $message) use ($consumer) {
                         try {

@@ -33,6 +33,7 @@ use Serendipity\Job\Kernel\Signature;
 use Serendipity\Job\Kernel\Swow\ServerFactory;
 use Serendipity\Job\Logger\LoggerFactory;
 use Serendipity\Job\Middleware\AuthMiddleware;
+use Serendipity\Job\Nsq\Consumer\AbstractConsumer;
 use Serendipity\Job\Redis\Lua\Hash\Incr;
 use Serendipity\Job\Serializer\SymfonySerializer;
 use Serendipity\Job\Util\Arr;
@@ -333,7 +334,7 @@ class ServerProvider extends AbstractProvider
                         $incr = make(Incr::class);
                         $incr->eval([Statistical::TASK_DELAY, 24 * 60 * 60]);
                     }
-                    $bool = $nsq->publish(ManageJobCommand::TOPIC_PREFIX . 'task', $json, $delay > 0 ? $delay : 0.0);
+                    $bool = $nsq->publish(AbstractConsumer::TOPIC_PREFIX . 'task', $json, $delay > 0 ? $delay : 0.0);
 
                     return $response->json($bool ? [
                         'code' => 0,
@@ -372,7 +373,7 @@ class ServerProvider extends AbstractProvider
                      */
                     $nsq = make(Nsq::class, [$this->container(), $config]);
                     $bool = $nsq->publish(
-                        ManageJobCommand::TOPIC_PREFIX . 'dag',
+                        AbstractConsumer::TOPIC_PREFIX . 'dag',
                         Json::encode([$params['workflow_id']])
                     );
 
@@ -480,7 +481,7 @@ class ServerProvider extends AbstractProvider
                                 $json
                             ),
                         ], ['class' => $serializerObject::class]));
-                        $bool = $nsq->publish(ManageJobCommand::TOPIC_PREFIX . 'task', $json, $delay);
+                        $bool = $nsq->publish(AbstractConsumer::TOPIC_PREFIX . 'task', $json, $delay);
                         if ($delay > 0) {
                             /**
                              * 加入延迟任务统计

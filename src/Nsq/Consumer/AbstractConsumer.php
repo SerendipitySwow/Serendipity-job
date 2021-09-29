@@ -24,6 +24,8 @@ use SerendipitySwow\Nsq\Message;
 
 abstract class AbstractConsumer
 {
+    public const TOPIC_PREFIX = 'serendipity-job-';
+
     protected string $topic = '';
 
     protected string $channel = '';
