@@ -44,6 +44,9 @@ use const Swow\Errno\EMFILE;
 use const Swow\Errno\ENFILE;
 use const Swow\Errno\ENOMEM;
 
+/**
+ * @deprecated
+ */
 final class ManageJobCommand extends Command
 {
     public static $defaultName = 'manage-job:start';

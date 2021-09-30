@@ -17,7 +17,8 @@ use Hyperf\Utils\Codec\Json;
 use Hyperf\Utils\Str;
 use PDO;
 use Psr\Http\Message\RequestInterface;
-use Serendipity\Job\Console\ManageJobCommand;
+use Serendipity\Job\Console\DagJobCommand;
+use Serendipity\Job\Console\JobCommand;
 use Serendipity\Job\Constant\Statistical;
 use Serendipity\Job\Constant\Task;
 use Serendipity\Job\Contract\ConfigInterface;
@@ -373,7 +374,7 @@ class ServerProvider extends AbstractProvider
                      */
                     $nsq = make(Nsq::class, [$this->container(), $config]);
                     $bool = $nsq->publish(
-                        AbstractConsumer::TOPIC_PREFIX . 'dag',
+                        AbstractConsumer::TOPIC_PREFIX . DagJobCommand::TOPIC_SUFFIX,
                         Json::encode([$params['workflow_id']])
                     );
 
@@ -481,7 +482,7 @@ class ServerProvider extends AbstractProvider
                                 $json
                             ),
                         ], ['class' => $serializerObject::class]));
-                        $bool = $nsq->publish(AbstractConsumer::TOPIC_PREFIX . 'task', $json, $delay);
+                        $bool = $nsq->publish(AbstractConsumer::TOPIC_PREFIX . JobCommand::TOPIC_SUFFIX, $json, $delay);
                         if ($delay > 0) {
                             /**
                              * 加入延迟任务统计

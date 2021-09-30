@@ -12,7 +12,8 @@ use Dotenv\Dotenv;
 use Hyperf\Di\Container;
 use Psr\Container\ContainerInterface;
 use Serendipity\Job\Config\Loader\YamlLoader;
-use Serendipity\Job\Console\ManageJobCommand;
+use Serendipity\Job\Console\DagJobCommand;
+use Serendipity\Job\Console\JobCommand;
 use Serendipity\Job\Console\SerendipityJobCommand;
 use Swow\Debug\Debugger;
 use Symfony\Component\Config\FileLocator;
@@ -36,7 +37,8 @@ final class Application extends SymfonyApplication
         $this->debug();
         $this->addCommands([
             new SerendipityJobCommand(),
-            new ManageJobCommand($container),
+            new JobCommand($container),
+            new DagJobCommand($container),
         ]);
     }
 

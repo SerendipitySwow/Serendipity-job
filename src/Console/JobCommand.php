@@ -1,6 +1,11 @@
 <?php
+/**
+ * This file is part of Serendipity Job
+ * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
+ */
 
-declare(strict_types = 1);
+declare(strict_types=1);
+
 namespace Serendipity\Job\Console;
 
 use Carbon\Carbon;
@@ -18,7 +23,6 @@ use Serendipity\Job\Event\CrontabEvent;
 use Serendipity\Job\Kernel\Http\Response;
 use Serendipity\Job\Kernel\Provider\KernelProvider;
 use Serendipity\Job\Nsq\Consumer\AbstractConsumer;
-use Serendipity\Job\Nsq\Consumer\DagConsumer;
 use Serendipity\Job\Nsq\Consumer\TaskConsumer;
 use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
 use SerendipitySwow\Nsq\Message;
@@ -33,21 +37,17 @@ use Swow\Http\Status as HttpStatus;
 use Swow\Socket\Exception as SocketException;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Input\InputOption;
-
 use const Swow\Errno\EMFILE;
 use const Swow\Errno\ENFILE;
 use const Swow\Errno\ENOMEM;
 
-/**
- * @TODO
- */
-class JobCommand extends Command
+final class JobCommand extends Command
 {
-
     public static $defaultName = 'job:start';
 
     protected const COMMAND_PROVIDER_NAME = 'Job';
 
+    public const TOPIC_SUFFIX = 'task';
 
     protected ?ConfigInterface $config = null;
 
@@ -60,7 +60,7 @@ class JobCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setDescription('Start Job')
+            ->setDescription('Start Job,Support view cancel tasks.')
             ->setDefinition([
                 new InputOption(
                     'host',
@@ -116,7 +116,7 @@ class JobCommand extends Command
     {
         $server = new HttpServer();
         $server->bind($host, $port)
-               ->listen();
+            ->listen();
         while (true) {
             try {
                 $connection = $server->acceptConnection();
@@ -161,7 +161,7 @@ class JobCommand extends Command
                                     case '/cancel':
                                         $params = Json::decode(
                                             $request->getBody()
-                                                    ->getContents()
+                                                ->getContents()
                                         );
                                         $coroutine = SwowCo::get((int) $params['coroutine_id']);
                                         $response = new Response();
@@ -202,7 +202,7 @@ class JobCommand extends Command
                                                     '客户度IP:%s取消了任务,请求时间:%s.',
                                                     $connection->getPeerAddress(),
                                                     Carbon::now()
-                                                          ->toDateTimeString()
+                                                        ->toDateTimeString()
                                                 ),
                                                 $params['coroutine_id'],
                                                 Task::TASK_ING,
@@ -260,9 +260,9 @@ class JobCommand extends Command
                     $this->container,
                     $this->config->get(sprintf('nsq.%s', 'default')),
                 ]);
-                $consumer = $this->makeConsumer(TaskConsumer::class, AbstractConsumer::TOPIC_PREFIX , 'JobConsumer');
+                $consumer = $this->makeConsumer(TaskConsumer::class, AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX, 'JobConsumer');
                 $subscriber->subscribe(
-                    AbstractConsumer::TOPIC_PREFIX . 'Job',
+                    AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX,
                     'JobConsumer',
                     function (Message $message) use ($consumer) {
                         try {
@@ -298,7 +298,7 @@ class JobCommand extends Command
          * @var AbstractConsumer $consumer
          */
         $consumer = ApplicationContext::getContainer()
-                                      ->get($class);
+            ->get($class);
         $consumer->setTopic($topic);
         $consumer->setChannel($channel);
         $consumer->setRedisPool($redisPool);
@@ -310,7 +310,7 @@ class JobCommand extends Command
     {
         $this->showLogo();
         KernelProvider::create(self::COMMAND_PROVIDER_NAME)
-                      ->bootApp();
+            ->bootApp();
         SerendipitySwowCo::create(fn () => $this->dispatchCrontab());
     }
 
@@ -318,13 +318,12 @@ class JobCommand extends Command
     {
         if ($this->config->get('crontab.enable')) {
             $this->container->get(EventDispatcherInterface::class)
-                            ->dispatch(
-                                new CrontabEvent(),
-                                CrontabEvent::CRONTAB_REGISTER
-                            );
+                ->dispatch(
+                    new CrontabEvent(),
+                    CrontabEvent::CRONTAB_REGISTER
+                );
             $this->container->get(CrontabDispatcher::class)
-                            ->handle();
+                ->handle();
         }
     }
 }
-
