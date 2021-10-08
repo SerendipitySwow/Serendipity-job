@@ -107,8 +107,6 @@ class Arr
 
     /**
      * Get all of the given array except for a specified array of keys.
-     *
-     * @param array|string $keys
      */
     public static function except(array $array, array|string $keys): array
     {
@@ -119,9 +117,6 @@ class Arr
 
     /**
      * Determine if the given key exists in the provided array.
-     *
-     * @param array|\ArrayAccess $array
-     * @param int|string $key
      */
     public static function exists(ArrayAccess|array $array, int|string $key): bool
     {
@@ -168,8 +163,6 @@ class Arr
 
     /**
      * Flatten a multi-dimensional array into a single level.
-     *
-     * @param float|int $depth
      */
     public static function flatten(array $array, float|int $depth): array
     {
@@ -190,8 +183,6 @@ class Arr
 
     /**
      * Remove one or many array items from a given array using "dot" notation.
-     *
-     * @param array|string $keys
      */
     public static function forget(array &$array, array|string $keys): void
     {
@@ -223,9 +214,6 @@ class Arr
 
     /**
      * Get an item from an array using "dot" notation.
-     *
-     * @param array|\ArrayAccess $array
-     * @param null|int|string $key
      */
     public static function get(ArrayAccess|array $array, int|string $key = null, mixed $default = null): mixed
     {
@@ -254,9 +242,6 @@ class Arr
 
     /**
      * Check if an item or items exist in an array using "dot" notation.
-     *
-     * @param array|\ArrayAccess $array
-     * @param null|array|string $keys
      */
     public static function has(ArrayAccess|array $array, array|string|null $keys): bool
     {
@@ -300,8 +285,6 @@ class Arr
 
     /**
      * Get a subset of the items from the given array.
-     *
-     * @param array|string $keys
      */
     public static function only(array $array, array|string $keys): array
     {
@@ -310,9 +293,6 @@ class Arr
 
     /**
      * Pluck an array of values from an array.
-     *
-     * @param array|string $value
-     * @param null|array|string $key
      */
     public static function pluck(array $array, array|string $value, array|string $key = null): array
     {
@@ -392,8 +372,6 @@ class Arr
     /**
      * Set an array item to a given value using "dot" notation.
      * If no key is given to the method, the entire array will be replaced.
-     *
-     * @param null|int|string $key
      */
     public static function set(array &$array, int|string|null $key, mixed $value): array
     {
@@ -440,8 +418,6 @@ class Arr
 
     /**
      * Sort the array using the given callback or "dot" notation.
-     *
-     * @param null|callable|string $callback
      */
     public static function sort(array $array, callable|string $callback = null): array
     {
@@ -545,9 +521,6 @@ class Arr
 
     /**
      * Explode the "value" and "key" arguments passed to "pluck".
-     *
-     * @param array|string $value
-     * @param null|array|string $key
      */
     protected static function explodePluckParameters(array|string $value, array|string|null $key): array
     {

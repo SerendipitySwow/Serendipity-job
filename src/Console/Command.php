@@ -22,8 +22,6 @@ abstract class Command extends SymfonyCommand
 {
     /**
      * The name of the command.
-     *
-     * @var null|string
      */
     protected string|null $name = null;
 

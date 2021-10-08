@@ -28,7 +28,6 @@ class Parser
      *                              |    |    +--------- hour (0 - 23)
      *                              |    +----------- min (0 - 59)
      *                              +------------- sec (0-59)
-     * @param null|Carbon|int $startTime
      *
      *@return Carbon[]
      * @noinspection TypeUnsafeArraySearchInspection*@throws InvalidArgumentException

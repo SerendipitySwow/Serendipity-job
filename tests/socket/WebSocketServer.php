@@ -84,14 +84,14 @@ class WebsocketServer
                 throw new Exception(socket_strerror(socket_last_error($client_socket_handle)));
             }
             //解析消息的长度
-                $payload_length = ord($buffer[1]) & 0x7f; //第二个字符的低7位
+                $payload_length = ord($buffer[1]) & 0x7F; //第二个字符的低7位
                 if ($payload_length >= 0 && $payload_length < 125) {
                     $this->current_message_length = $payload_length;
                     $payload_type = 1;
                     echo $payload_length . "\n";
                 } elseif ($payload_length == 126) {
                     $payload_type = 2;
-                    $this->current_message_length = ((ord($buffer[2]) & 0xff) << 8) | (ord($buffer[3]) & 0xff);
+                    $this->current_message_length = ((ord($buffer[2]) & 0xFF) << 8) | (ord($buffer[3]) & 0xFF);
                     echo $this->current_message_length;
                 } else {
                     $payload_type = 3;
@@ -140,7 +140,7 @@ class WebsocketServer
             $char_seq .= chr(($b_2 | $len));
         } elseif ($len <= 65535) {
             $char_seq .= chr(($b_2 | 126));
-            $char_seq .= (chr($len >> 8) . chr($len & 0xff));
+            $char_seq .= (chr($len >> 8) . chr($len & 0xFF));
         } else {
             $char_seq .= chr(($b_2 | 127));
             $char_seq .=

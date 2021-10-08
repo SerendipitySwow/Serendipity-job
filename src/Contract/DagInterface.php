@@ -14,8 +14,6 @@ interface DagInterface
 {
     /**
      * Get dag Token
-     *
-     * @return int|string
      */
     public function getIdentity(): int|string;
 

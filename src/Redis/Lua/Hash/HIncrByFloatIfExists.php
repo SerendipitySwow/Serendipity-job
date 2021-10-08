@@ -24,8 +24,6 @@ LUA;
 
     /**
      * @param null|float $data
-     *
-     * @return null|float|int|string
      */
     public function format($data): float|int|string|null
     {
