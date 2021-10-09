@@ -45,7 +45,7 @@ use const Swow\Errno\ENFILE;
 use const Swow\Errno\ENOMEM;
 
 /**
- * @deprecated
+ * @deprecated 2.0
  */
 final class ManageJobCommand extends Command
 {
