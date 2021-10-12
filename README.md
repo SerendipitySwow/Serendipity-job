@@ -1,5 +1,5 @@
 <p align="center">
-<a href="https://github.com/SerendipitySwow/Serendipity-job"><img src="./img/logo.png" width="270px" height="230px" alt=""/>
+<a href="https://github.com/SerendipitySwow/Serendipity-job"><img src="/img/logo.png" width="300px" height="250px" alt=""/>
 </a>
 </p>
 <p align="center">
