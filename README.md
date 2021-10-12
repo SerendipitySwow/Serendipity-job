@@ -1,3 +1,21 @@
+
+<h1 align="center"><i>Serendipity-Job</i></h1>
+
+<div align="center">
+
+🚀 🏆 Task Platform Developed Based On Swow and Php8
+
+
+[![PHP Version][php-icon]][php-href]
+[![Latest Version on Packagist][version-icon]][version-href]
+[![Total Downloads][downloads-icon]][downloads-href]
+[![License][license-icon]][license-href]
+
+[![Open in Visual Studio Code][vscode-icon]][vscode-href]
+[![Star][github-icon]][github-href]
+
+</div>
+
 <p align="center">
 <a href="https://github.com/SerendipitySwow/Serendipity-job"><img src="/img/logo.png" width="300px" height="250px" alt=""/>
 </a>
@@ -104,3 +122,18 @@ php bin/serendipity-job job:start --host=127.0.0.1 --port=9764
 ```php
  (new Serendipity\Job\Crontab\Crontab())->setName('Foo')->setRule('*/5 * * * *')->setCallback([EchoCrontab::class, 'execute'])->setMemo('这是一个示例的定时任务'),
 ```
+
+
+[php-icon]: https://img.shields.io/badge/php->=8.0-yellow?style=flat&logo=php
+[version-icon]: https://img.shields.io/packagist/v/serendipity-swow/serendipity-job.svg?style=flat&logo=packagist
+[downloads-icon]: https://img.shields.io/packagist/dt/serendipity-swow/serendipity-job.svg?style=flat&logo=packagist
+[license-icon]: https://img.shields.io/badge/license-MIT-red.svg?style=flat&logo=github
+[vscode-icon]: https://open.vscode.dev/badges/open-in-vscode.svg
+[github-icon]: https://img.shields.io/github/stars/SerendipitySwow/Serendipity-job.svg?style=social&label=Star
+
+[php-href]: https://github.com/MarwanAlsoltany/blend/search?l=php
+[version-href]: https://packagist.org/packages/serendipity-swow/serendipity-job
+[downloads-href]: https://packagist.org/packages/serendipity-swow/serendipity-job/stats
+[license-href]: ./LICENSE
+[vscode-href]: https://open.vscode.dev/MarwanAlsoltany/blend
+[github-href]: https://GitHub.com/serendipity-swow/serendipity-job/stargazers
