@@ -46,7 +46,7 @@ class DagConsumer extends AbstractConsumer
              * @var Dag $dag
              */
             $ids = implode("','", array_column($tasks, 'task_id'));
-            $task = DB::query("select * from task where id in ('$ids');");
+            $task = DB::query("select * from task where id in ('{$ids}');");
 
             foreach ($task as $value) {
                 $object = (object) $value;

@@ -7,16 +7,18 @@ use Psr\Container\ContainerInterface;
 use Serendipity\Job\Application;
 use Spatie\Emoji\Emoji;
 
-require_once BASE_PATH . '/vendor/autoload.php';
-
-if (!extension_loaded('swow')) {
-    exit(sprintf('Swow extension is required%s#',Emoji::faceWithTearsOfJoy()));
-}
 define('BASE_PATH', dirname(__DIR__));
 ini_set('display_errors', 'on');
 ini_set('display_startup_errors', 'on');
 error_reporting(E_ALL);
 date_default_timezone_set('Asia/Shanghai');
+require_once BASE_PATH . '/vendor/autoload.php';
+
+if (!extension_loaded('swow')) {
+    exit(sprintf('Swow extension is required%s#',Emoji::faceWithTearsOfJoy()));
+}
+
+
 
 (static function () {
     Hyperf\Di\ClassLoader::init();
