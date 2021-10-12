@@ -23,6 +23,9 @@ use SerendipitySwow\Nsq\Result;
 use Spatie\Emoji\Emoji;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 
+/**
+ * @command php bin/serendipity-job dag:start
+ */
 final class DagJobCommand extends Command
 {
     public static $defaultName = 'dag:start';

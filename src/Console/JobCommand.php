@@ -41,6 +41,9 @@ use const Swow\Errno\EMFILE;
 use const Swow\Errno\ENFILE;
 use const Swow\Errno\ENOMEM;
 
+/**
+ * @command php bin/serendipity-job job:start --host=127.0.0.1 --port=9764
+ */
 final class JobCommand extends Command
 {
     public static $defaultName = 'job:start';

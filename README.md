@@ -1,6 +1,16 @@
+<p align="center">
+<a href="https://github.com/SerendipitySwow/Serendipity-job"><img src="./img/logo.png" width="270px" height="230px" alt=""/>
+</a>
+</p>
+<p align="center">
+  <a aria-label="License" href="https://github.com/SerendipitySwow/Serendipity-job/blob/main/LICENSE">
+    <img alt="" src="https://img.shields.io/npm/l/blitz.svg?style=for-the-badge&labelColor=000000&color=blue">
+  </a>
+</p>
+
 # 🚀Serendipity-Job  For 🏆Swow 任务平台
 
-🚀 🏆  Task Platform Developed Based On Swow and Php8
+🚀 🏆 Task Platform Developed Based On Swow and Php8
 
 ## Features
 
@@ -41,11 +51,14 @@ Serendipity\Job\Util\Coroutine::create()
 ```
 
 ## 接口文档
+
 见API.md
 
 ## TODO
+
 * 环境
 * 考虑优化项目结构
+
 ## Come on!
 
 ## Thanks Hyperf.Swow!
@@ -61,9 +74,11 @@ Serendipity\Job\Util\Coroutine::create()
 ````
 
 ## Usage
+
 [使用说明](usage.md)
 
 ## 任务编排
+
 [使用说明](dag.md)
 
 1.启动Serendipity-Job Server.
@@ -75,12 +90,14 @@ Serendipity\Job\Util\Coroutine::create()
 2.启动Job 进行任务消费
 
 ```bash
-php bin/serendipity-job manage-job:start --type=task  --host=127.0.0.1 --port=9764
+php bin/serendipity-job job:start --host=127.0.0.1 --port=9764
 ```
+
 #### 参数详解
-1. type 任务类型task或者dag
-2. host server host监听地址,用于取消任务或者查卡任务详情
-3. port server port监听端口号
+
+1.host server host监听地址,用于取消任务或者查卡任务详情
+
+2.port server port监听端口号
 
 3.配置Crontab
 

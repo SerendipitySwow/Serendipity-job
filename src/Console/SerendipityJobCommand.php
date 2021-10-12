@@ -12,6 +12,9 @@ use Serendipity\Job\Kernel\Provider\KernelProvider;
 use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 
+/**
+ * @command php bin/serendipity-job serendipity-job:start
+ */
 final class SerendipityJobCommand extends Command
 {
     protected static $defaultName = 'serendipity-job:start';
