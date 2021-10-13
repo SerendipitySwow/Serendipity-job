@@ -41,6 +41,7 @@
         "hyperf/engine-swow": "^1.2",
         "hyperf/pool": "2.2.*",
         "hyperf/utils": "2.2.*",
+        "marwanalsoltany/blend": "^1.0",
         "monolog/monolog": "^2.2",
         "multiplex/multiplex": "^0.3.1",
         "nesbot/carbon": "^2.49",

@@ -1,0 +1,12 @@
+#!/usr/bin/env php
+<?php
+
+define('BASE_PATH', dirname(__DIR__));
+
+require_once BASE_PATH . '/vendor/marwanalsoltany/blend/src/TaskRunner.php';
+
+$blend = new MAKS\Blend\TaskRunner();
+//TODO
+$blend->addCallbackTask();
+var_dump($blend);
+
