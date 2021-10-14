@@ -100,6 +100,20 @@ Serendipity\Job\Util\Coroutine::create()
 
 [使用说明](dag.md)
 
+## 生产快速启动
+1. 启动server
+```bash
+php bin/blend server:start
+````
+2. 停止server
+```bash
+php bin/blend server:stop
+```
+3. 重新启动
+```bash
+php bin/blend server:restart
+````
+## 开发环境启动
 1.启动Serendipity-Job Server.
 
 ````bash
