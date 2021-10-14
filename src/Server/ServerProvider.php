@@ -32,6 +32,7 @@ use Serendipity\Job\Kernel\Provider\AbstractProvider;
 use Serendipity\Job\Kernel\Router\RouteCollector;
 use Serendipity\Job\Kernel\Signature;
 use Serendipity\Job\Kernel\Swow\ServerFactory;
+use Serendipity\Job\Kernel\Xhprof\Xhprof;
 use Serendipity\Job\Logger\LoggerFactory;
 use Serendipity\Job\Middleware\AuthMiddleware;
 use Serendipity\Job\Nsq\Consumer\AbstractConsumer;
@@ -91,6 +92,7 @@ class ServerProvider extends AbstractProvider
                             $time = microtime(true);
                             $request = null;
                             try {
+                                Xhprof::startPoint();
                                 /**
                                  * @var SerendipityRequest $request
                                  */
@@ -130,6 +132,7 @@ class ServerProvider extends AbstractProvider
                                 } else {
                                     $logger->info($debug);
                                 }
+                                Xhprof::endPoint($request);
                             }
                             if (!$request->getKeepAlive()) {
                                 break;
