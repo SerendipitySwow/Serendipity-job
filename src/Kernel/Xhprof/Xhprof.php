@@ -17,11 +17,17 @@ class Xhprof
 {
     public static function startPoint(): void
     {
+        if (!extension_loaded('tideways_xhprof')) {
+            return;
+        }
         tideways_xhprof_enable(TIDEWAYS_XHPROF_FLAGS_MEMORY | TIDEWAYS_XHPROF_FLAGS_MEMORY_MU | TIDEWAYS_XHPROF_FLAGS_MEMORY_PMU | TIDEWAYS_XHPROF_FLAGS_CPU);
     }
 
     public static function endPoint(Connection $connection, Request $request, bool $insert = true): void
     {
+        if (!extension_loaded('tideways_xhprof')) {
+            return;
+        }
         $profile = tideways_xhprof_disable();
         $requestTimeFloat = explode(' ', microtime());
         $requestTsMicro = ['sec' => $requestTimeFloat[1], 'usec' => $requestTimeFloat[0] * 1000000];

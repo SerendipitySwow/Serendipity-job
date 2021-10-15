@@ -7,6 +7,7 @@
 declare(strict_types=1);
 
 use Serendipity\Job\Subscriber\CrontabRegisterSubscriber;
+use Serendipity\Job\Subscriber\DbQueryExecutedSubscriber;
 use Serendipity\Job\Subscriber\UpdateJobSubscriber;
 use Serendipity\Job\Subscriber\UpdateWorkflowSubscriber;
 
@@ -14,4 +15,5 @@ return [
     UpdateWorkflowSubscriber::class,
     UpdateJobSubscriber::class,
     CrontabRegisterSubscriber::class,
+    DbQueryExecutedSubscriber::class,
 ];

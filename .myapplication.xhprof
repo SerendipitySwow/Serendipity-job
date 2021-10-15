@@ -1,1 +1,0 @@
-a:6:{s:15:"main()==>fwrite";a:2:{s:2:"ct";i:4;s:2:"wt";i:5959;}s:15:"main()==>getcwd";a:2:{s:2:"ct";i:1;s:2:"wt";i:98;}s:14:"main()==>fopen";a:2:{s:2:"ct";i:2;s:2:"wt";i:50;}s:15:"main()==>fclose";a:2:{s:2:"ct";i:2;s:2:"wt";i:333;}s:6:"main()";a:2:{s:2:"ct";i:1;s:2:"wt";i:6706;}s:32:"main()==>tideways_xhprof_disable";a:2:{s:2:"ct";i:1;s:2:"wt";i:108;}}

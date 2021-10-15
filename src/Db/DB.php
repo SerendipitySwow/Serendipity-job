@@ -10,7 +10,9 @@ namespace Serendipity\Job\Db;
 
 use Closure;
 use Hyperf\Utils\ApplicationContext;
+use Serendipity\Job\Contract\EventDispatcherInterface;
 use Serendipity\Job\Db\Pool\PoolFactory;
+use Serendipity\Job\Event\QueryExecuted;
 use Serendipity\Job\Util\Context;
 use Throwable;
 
@@ -60,6 +62,7 @@ class DB
                     $connection->release();
                 }
             }
+            $this->logQuery($arguments[0], $arguments[1] ?? [], null, $result);
         }
 
         return $result;
@@ -119,5 +122,28 @@ class DB
     private function getContextKey(): string
     {
         return sprintf('db.connection.%s', $this->poolName);
+    }
+
+    public function logQuery(mixed $query, array $bindings = [], ?float $time = null, $result = null): void
+    {
+        if ($query instanceof Closure) {
+            $ref = new \ReflectionFunction($query);
+            $static = $ref->getStaticVariables();
+            if (array_key_exists('command', $static)) {
+                /**
+                 * @var \Serendipity\Job\Db\Command $command
+                 */
+                $command = $static['command'];
+                $query = $command->getSql();
+                $bindings = $command->getParams();
+            }
+        }
+        if (is_string($query)) {
+            ApplicationContext::getContainer()->get(EventDispatcherInterface::class)
+                ->dispatch(
+                    new QueryExecuted($query, $bindings, $time, $result),
+                    QueryExecuted::QUERY_EXECUTED
+                );
+        }
     }
 }
