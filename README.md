@@ -82,6 +82,7 @@ Serendipity\Job\Util\Coroutine::create()
 * 环境
 * 考虑优化项目结构
 * codecov代码覆盖率
+* 静下来想想思考项目的规划,架构
 
 ## Come on!
 
