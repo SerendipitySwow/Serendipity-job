@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Serendipity\Job\Server;
 
 use Carbon\Carbon;
+use DeviceDetector\DeviceDetector;
 use FastRoute\Dispatcher;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
@@ -127,6 +128,14 @@ class ServerProvider extends AbstractProvider
                                     $debug .= 'EXCEPTION: ' . $exception->getMessage() . PHP_EOL;
                                 }
 
+                                $dd = new DeviceDetector(current($request->getHeader('User-Agent')));
+                                $dd->parse();
+                                /* @noinspection PhpStatementHasEmptyBodyInspection */
+                                if ($dd->isBot()) {
+                                    //do something
+                                } else {
+                                    $debug .= 'DEVICE: ' . $dd->getDeviceName() . '| BRAND_NAME: ' . $dd->getBrandName() . '| OS:' . $dd->getOs('version') . '| CLIENT:' . Json::encode($dd->getClient()) . PHP_EOL;
+                                }
                                 if ($time > 1) {
                                     $logger->error($debug);
                                 } else {
