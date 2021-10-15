@@ -26,6 +26,10 @@
   </a>
 </p>
 
+
+![home](./img/monitor-dashboard.jpg)
+![home](./img/info.jpg)
+
 # 🚀Serendipity-Job  For 🏆Swow 任务平台
 
 🚀 🏆 Task Platform Developed Based On Swow and Php8
@@ -45,6 +49,7 @@
 10.支持任务取消(完成)
 11.签名验证(完成)
 12.支持刷新应用签名(完成)
+13.支持系统监控基于xhprof(不支持sql)
 ```
 
 ## 基于Vue、Vditor，所构建的在线 Markdown 编辑器，支持流程图、甘特图、时序图、任务列表、HTML 自动转换为 Markdown 等功能；🎉新增「所见即所得」编辑模式。

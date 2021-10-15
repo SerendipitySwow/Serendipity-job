@@ -11,6 +11,7 @@ namespace Serendipity\Job\Kernel\Xhprof;
 use Serendipity\Job\Db\Command;
 use Serendipity\Job\Db\DB;
 use Serendipity\Job\Kernel\Http\Request;
+use Swow\Http\Server\Connection;
 
 class Xhprof
 {
@@ -19,19 +20,18 @@ class Xhprof
         tideways_xhprof_enable(TIDEWAYS_XHPROF_FLAGS_MEMORY | TIDEWAYS_XHPROF_FLAGS_MEMORY_MU | TIDEWAYS_XHPROF_FLAGS_MEMORY_PMU | TIDEWAYS_XHPROF_FLAGS_CPU);
     }
 
-    public static function endPoint(Request $request, bool $insert = true): void
+    public static function endPoint(Connection $connection, Request $request, bool $insert = true): void
     {
         $profile = tideways_xhprof_disable();
         $requestTimeFloat = explode(' ', microtime());
         $requestTsMicro = ['sec' => $requestTimeFloat[1], 'usec' => $requestTimeFloat[0] * 1000000];
-        //TODO 参数待优化
         $meta = [
             'url' => $request->getUriAsString(),
             'server_name' => env('SERVER_NAME'),
             'get' => json_encode($request->getQueryParams(), JSON_THROW_ON_ERROR),
             'server' => json_encode($_SERVER ?? [], JSON_THROW_ON_ERROR),
             'type' => $request->getMethod(),
-            'ip' => $request->getUri()->getHost(),
+            'ip' => $connection->getPeerAddress(),
             'request_time' => $requestTsMicro['sec'],
             'request_time_micro' => $requestTsMicro['usec'],
             'profile' => json_encode(['profile' => $profile], JSON_THROW_ON_ERROR),

@@ -132,7 +132,7 @@ class ServerProvider extends AbstractProvider
                                 } else {
                                     $logger->info($debug);
                                 }
-                                Xhprof::endPoint($request);
+                                Xhprof::endPoint($connection, $request);
                             }
                             if (!$request->getKeepAlive()) {
                                 break;
