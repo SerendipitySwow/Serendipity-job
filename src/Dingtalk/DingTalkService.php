@@ -110,8 +110,6 @@ class DingTalkService
     /**
      * @param $title
      * @param $markdown
-     *
-     * @return ActionCard|Message
      */
     public function setActionCardMessage($title, $markdown, int $hideAvatar = 0, int $btnOrientation = 0): ActionCard|Message
     {
@@ -121,9 +119,6 @@ class DingTalkService
         return $this->message;
     }
 
-    /**
-     * @return FeedCard|Message
-     */
     public function setFeedCardMessage(): FeedCard|Message
     {
         $this->message = new FeedCard($this);

@@ -16,20 +16,21 @@ use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Termage\Termage;
 use const Swow\VERSION;
 
 abstract class Command extends SymfonyCommand
 {
     /**
      * The name of the command.
-     *
-     * @var null|string
      */
     protected string|null $name = null;
 
     protected InputInterface $input;
 
     protected SymfonyStyle $output;
+
+    protected Termage $termage;
 
     /**
      * The default verbosity of output commands.
@@ -61,6 +62,7 @@ abstract class Command extends SymfonyCommand
     public function run(InputInterface $input, OutputInterface $output): int
     {
         $this->output = new SymfonyStyle($input, $output);
+        $this->termage = \termage($output);
 
         return parent::run($this->input = $input, $this->output);
     }

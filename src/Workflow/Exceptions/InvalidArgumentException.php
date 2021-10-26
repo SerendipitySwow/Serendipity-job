@@ -6,8 +6,8 @@
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\RedisSubscriber;
+namespace Serendipity\Job\Workflow\Exceptions;
 
-interface ResponseInterface
+class InvalidArgumentException extends \InvalidArgumentException
 {
 }

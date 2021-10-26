@@ -41,6 +41,8 @@
         "hyperf/engine-swow": "^1.2",
         "hyperf/pool": "2.2.*",
         "hyperf/utils": "2.2.*",
+        "marwanalsoltany/blend": "^1.0",
+        "matomo/device-detector": "^4.3",
         "monolog/monolog": "^2.2",
         "multiplex/multiplex": "^0.3.1",
         "nesbot/carbon": "^2.49",
@@ -49,19 +51,21 @@
         "serendipity-swow/archer": "^0.2.0",
         "serendipity-swow/nsq": "0.8",
         "serendipity-swow/sockets": "0.8",
-        "spatie/emoji": "^2.3",
+        "spatie/emoji": "3.0",
         "swow/swow": "dev-develop",
         "symfony/config": "^5.3",
         "symfony/console": "^5.2",
         "symfony/serializer": "^5.2",
         "symfony/serializer-pack": "^1.0",
+        "symfony/workflow": "^5.3",
         "symfony/yaml": "^5.2",
+        "termage/termage": "^0.6.0",
         "vlucas/phpdotenv": "^5.3"
     },
     "require-dev": {
-        "roave/security-advisories": "dev-latest",
-        "phpunit/phpunit": "^9.5",
         "friendsofphp/php-cs-fixer": "^3.0",
+        "phpunit/phpunit": "^9.5",
+        "roave/security-advisories": "dev-latest",
         "symfony/var-dumper": "^5.2"
     },
     "minimum-stability": "dev",
@@ -77,8 +81,5 @@
         "test": "phpunit --prepend tests/bootstrap.php -c phpunit.xml --colors=always",
         "cs-fix": [ "@php vendor/bin/php-cs-fixer fix" ],
         "analyse": "phpstan analyse --memory-limit 300M -l 0 -c phpstan.neon ./app ./config"
-    },
-    "bin": [
-        "bin/serendipity-job"
-    ]
+    }
 }

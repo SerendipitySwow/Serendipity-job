@@ -80,12 +80,11 @@ php bin/serendipity-job serendipity-job:start
 ```
 ## 启动Job
 ```bash
-php bin/serendipity-job manage-job:start --type=task  --host=127.0.0.1 --port=9764
+php bin/serendipity-job job:start  --host=127.0.0.1 --port=9764
 ```
  #### 参数详解
-   1. type 任务类型task或者dag
-   2. host server host监听地址,用于取消任务或者查卡任务详情
-   3. port server port监听端口号
+   1. host server host监听地址,用于取消任务或者查卡任务详情
+   2. port server port监听端口号
 ## 接口
 [接口文档](API.md)
 

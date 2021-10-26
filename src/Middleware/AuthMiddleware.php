@@ -43,8 +43,6 @@ class AuthMiddleware
 
     /**
      * @param $appKey
-     *
-     * @return array|bool
      */
     protected function getApplication($appKey): array|bool
     {

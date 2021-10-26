@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Serendipity\Job\Server;
 
 use Carbon\Carbon;
+use DeviceDetector\DeviceDetector;
 use FastRoute\Dispatcher;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
@@ -17,7 +18,8 @@ use Hyperf\Utils\Codec\Json;
 use Hyperf\Utils\Str;
 use PDO;
 use Psr\Http\Message\RequestInterface;
-use Serendipity\Job\Console\ManageJobCommand;
+use Serendipity\Job\Console\DagJobCommand;
+use Serendipity\Job\Console\JobCommand;
 use Serendipity\Job\Constant\Statistical;
 use Serendipity\Job\Constant\Task;
 use Serendipity\Job\Contract\ConfigInterface;
@@ -31,8 +33,10 @@ use Serendipity\Job\Kernel\Provider\AbstractProvider;
 use Serendipity\Job\Kernel\Router\RouteCollector;
 use Serendipity\Job\Kernel\Signature;
 use Serendipity\Job\Kernel\Swow\ServerFactory;
+use Serendipity\Job\Kernel\Xhprof\Xhprof;
 use Serendipity\Job\Logger\LoggerFactory;
 use Serendipity\Job\Middleware\AuthMiddleware;
+use Serendipity\Job\Nsq\Consumer\AbstractConsumer;
 use Serendipity\Job\Redis\Lua\Hash\Incr;
 use Serendipity\Job\Serializer\SymfonySerializer;
 use Serendipity\Job\Util\Arr;
@@ -89,6 +93,7 @@ class ServerProvider extends AbstractProvider
                             $time = microtime(true);
                             $request = null;
                             try {
+                                Xhprof::startPoint();
                                 /**
                                  * @var SerendipityRequest $request
                                  */
@@ -123,11 +128,20 @@ class ServerProvider extends AbstractProvider
                                     $debug .= 'EXCEPTION: ' . $exception->getMessage() . PHP_EOL;
                                 }
 
+                                $dd = new DeviceDetector(current($request->getHeader('User-Agent')));
+                                $dd->parse();
+                                /* @noinspection PhpStatementHasEmptyBodyInspection */
+                                if ($dd->isBot()) {
+                                    //do something
+                                } else {
+                                    $debug .= 'DEVICE: ' . $dd->getDeviceName() . '| BRAND_NAME: ' . $dd->getBrandName() . '| OS:' . $dd->getOs('version') . '| CLIENT:' . Json::encode($dd->getClient()) . PHP_EOL;
+                                }
                                 if ($time > 1) {
                                     $logger->error($debug);
                                 } else {
                                     $logger->info($debug);
                                 }
+                                Xhprof::endPoint($connection, $request);
                             }
                             if (!$request->getKeepAlive()) {
                                 break;
@@ -333,7 +347,7 @@ class ServerProvider extends AbstractProvider
                         $incr = make(Incr::class);
                         $incr->eval([Statistical::TASK_DELAY, 24 * 60 * 60]);
                     }
-                    $bool = $nsq->publish(ManageJobCommand::TOPIC_PREFIX . 'task', $json, $delay > 0 ? $delay : 0.0);
+                    $bool = $nsq->publish(AbstractConsumer::TOPIC_PREFIX . 'task', $json, $delay > 0 ? $delay : 0.0);
 
                     return $response->json($bool ? [
                         'code' => 0,
@@ -372,7 +386,7 @@ class ServerProvider extends AbstractProvider
                      */
                     $nsq = make(Nsq::class, [$this->container(), $config]);
                     $bool = $nsq->publish(
-                        ManageJobCommand::TOPIC_PREFIX . 'dag',
+                        AbstractConsumer::TOPIC_PREFIX . DagJobCommand::TOPIC_SUFFIX,
                         Json::encode([$params['workflow_id']])
                     );
 
@@ -480,7 +494,7 @@ class ServerProvider extends AbstractProvider
                                 $json
                             ),
                         ], ['class' => $serializerObject::class]));
-                        $bool = $nsq->publish(ManageJobCommand::TOPIC_PREFIX . 'task', $json, $delay);
+                        $bool = $nsq->publish(AbstractConsumer::TOPIC_PREFIX . JobCommand::TOPIC_SUFFIX, $json, $delay);
                         if ($delay > 0) {
                             /**
                              * 加入延迟任务统计

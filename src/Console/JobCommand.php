@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace Serendipity\Job\Console;
 
 use Carbon\Carbon;
-use Exception;
 use Hyperf\Utils\ApplicationContext;
 use Hyperf\Utils\Codec\Json;
 use Psr\Container\ContainerInterface;
@@ -24,7 +23,6 @@ use Serendipity\Job\Event\CrontabEvent;
 use Serendipity\Job\Kernel\Http\Response;
 use Serendipity\Job\Kernel\Provider\KernelProvider;
 use Serendipity\Job\Nsq\Consumer\AbstractConsumer;
-use Serendipity\Job\Nsq\Consumer\DagConsumer;
 use Serendipity\Job\Nsq\Consumer\TaskConsumer;
 use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
 use SerendipitySwow\Nsq\Message;
@@ -39,23 +37,20 @@ use Swow\Http\Status as HttpStatus;
 use Swow\Socket\Exception as SocketException;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Input\InputOption;
-use Throwable;
 use const Swow\Errno\EMFILE;
 use const Swow\Errno\ENFILE;
 use const Swow\Errno\ENOMEM;
 
-final class ManageJobCommand extends Command
+/**
+ * @command php bin/serendipity-job job:start --host=127.0.0.1 --port=9764
+ */
+final class JobCommand extends Command
 {
-    public static $defaultName = 'manage-job:start';
+    public static $defaultName = 'job:start';
 
-    protected const COMMAND_PROVIDER_NAME = 'Manage-Job';
+    protected const COMMAND_PROVIDER_NAME = 'Job';
 
-    protected const TASK_TYPE = [
-        'dag',
-        'task',
-    ];
-
-    public const TOPIC_PREFIX = 'serendipity-job-';
+    public const TOPIC_SUFFIX = 'task';
 
     protected ?ConfigInterface $config = null;
 
@@ -68,15 +63,8 @@ final class ManageJobCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setDescription('Start Manage Job')
+            ->setDescription('Start Job,Support view cancel tasks.')
             ->setDefinition([
-                new InputOption(
-                    'type',
-                    't',
-                    InputOption::VALUE_REQUIRED,
-                    'Select the type of task to be performed (dag, task),',
-                    'task'
-                ),
                 new InputOption(
                     'host',
                     'host',
@@ -98,8 +86,6 @@ final class ManageJobCommand extends Command
 
                         <info>php %command.full_name%</info>
                         
-                    Use the --type option Select the type of task to be performed (dag, task),If you choose dag, limit is best configured to 1:
-                        <info>php %command.full_name% --type=task</info>
                     Use the --host Configure HttpServer host:
                         <info>php %command.full_name% --host=127.0.0.1</info>
                     Use the --type Configure HttpServer port numbers:
@@ -120,15 +106,10 @@ final class ManageJobCommand extends Command
         $this->stdoutLogger = $this->container->get(StdoutLoggerInterface::class);
         $this->bootStrap();
         $this->stdoutLogger->info(str_repeat(Emoji::flagsForFlagChina() . '  ', 10));
-        $type = $this->input->getOption('type');
         $port = (int) $this->input->getOption('port');
         $host = $this->input->getOption('host');
-        if (!in_array($type, self::TASK_TYPE, true)) {
-            $this->stdoutLogger->error('Invalid task parameters.');
-            exit(1);
-        }
-        $this->stdoutLogger->info(sprintf('%s Consumer %s Successfully Processed# %s', Emoji::manSurfing(), ucfirst($type), Emoji::rocket()));
-        $this->subscribe($type);
+        $this->stdoutLogger->info(sprintf('%s JobConsumer Successfully Processed# %s', Emoji::manSurfing(), Emoji::rocket()));
+        $this->subscribe();
         $this->makeServer($host, $port);
 
         return SymfonyCommand::SUCCESS;
@@ -274,21 +255,18 @@ final class ManageJobCommand extends Command
         }
     }
 
-    protected function subscribe(string $type): void
+    protected function subscribe(): void
     {
         SerendipitySwowCo::create(
-            function () use ($type) {
+            function () {
                 $subscriber = make(Nsq::class, [
                     $this->container,
                     $this->config->get(sprintf('nsq.%s', 'default')),
                 ]);
-                $consumer = match ($type) {
-                    'task' => $this->makeConsumer(TaskConsumer::class, self::TOPIC_PREFIX . $type, 'Consumer'),
-                    'dag' => $this->makeConsumer(DagConsumer::class, self::TOPIC_PREFIX . $type, 'Consumer')
-                };
+                $consumer = $this->makeConsumer(TaskConsumer::class, AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX, 'JobConsumer');
                 $subscriber->subscribe(
-                    self::TOPIC_PREFIX . $type,
-                    ucfirst($type) . 'Consumer',
+                    AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX,
+                    'JobConsumer',
                     function (Message $message) use ($consumer) {
                         try {
                             $result = $consumer->consume($message);

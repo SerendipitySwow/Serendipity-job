@@ -23,8 +23,6 @@ class Coordinator
      * Yield the current coroutine for a given timeout,
      * unless the coordinator is woke up from outside.
      *
-     * @param float|int $timeout
-     *
      * @return bool returns true if the coordinator has been woken up
      */
     public function yield(float|int $timeout = -1): bool

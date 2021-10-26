@@ -1,0 +1,99 @@
+#!/usr/bin/env php
+<?php
+
+use MAKS\Blend\TaskRunner as Blend;
+
+define('BASE_PATH', dirname(__DIR__));
+
+require_once BASE_PATH . '/vendor/marwanalsoltany/blend/src/TaskRunner.php';
+
+$blend = new Blend();
+
+$cwd = getcwd();
+
+$blend->addCallbackTask(
+    'server:start',
+    'Starts a Job Server in CWD',
+    function ($cwd) {
+        /** @var Blend $this */
+        if (file_exists("$cwd/.pid.server")) {
+            $this->say('An already started Job Server has been found.');
+
+            return Blend::FAILURE;
+        }
+
+        $pid = $this->exec('php bin/serendipity-job serendipity-job:start ', true); // passing true runs the command asynchronously
+        // you can use $this->getExecResult() method to get all additional info about the executed command.
+        $this->say("Started a Job Server in the background with PID: [{$pid}]");
+
+        file_put_contents("$cwd/.pid.server", $pid);
+
+        return Blend::SUCCESS;
+    },
+    [$cwd] // passing arguments to tasks callback
+);
+
+$blend->addCallbackTask(
+    'server:stop',
+    'Stops a started Job Server in CWD',
+    function ($cwd) {
+        /** @var Blend $this */
+        if (!file_exists("$cwd/.pid.server")) {
+            $this->say('No started Job Server has been found.');
+
+            return Blend::FAILURE;
+        }
+
+        $pid = trim(file_get_contents("$cwd/.pid.server"));
+
+        $this->exec(PHP_OS === 'WINNT' ? "tskill {$pid}" : "kill -15 {$pid}");
+        $this->say("Stopped Job Server with PID: [{$pid}]");
+
+        unlink("$cwd/.pid.server");
+
+        return Blend::SUCCESS;
+    },
+    [$cwd]
+);
+
+$blend->addCallbackTask(
+    'server:restart',
+    'Restarts the started Job Server in CWD',
+    function () {
+        /** @var Blend $this */
+        $this->say('Restarting the Job Server');
+
+        $this
+            ->setQuiet(true) // disable output temporarily
+            ->run('server:stop')
+            ->run('server:start')
+            ->setQuiet(false); // enable output again
+
+        // use the runTask() method instead to get the return value of the called task
+        // return $this->runTask('server:stop') & $this->runTask('server:start');
+    }
+);
+
+$blend->addCallbackTask(
+    'server:cleanup',
+    'Removes ".pid.server" file from CWD if available',
+    function ($cwd) {
+        /** @var Blend $this */
+        if (file_exists($file = "$cwd/.pid.server")) {
+            if (unlink($file)) {
+                $this->say('Removed ".pid.server" file successfully.');
+            } else {
+                $this->say('Failed to remove ".pid.server" file!');
+
+                return Blend::FAILURE;
+            }
+        } else {
+            $this->say('Nothing to clean up!');
+        }
+
+        return Blend::SUCCESS;
+    },
+    [$cwd]
+);
+
+$blend->start();

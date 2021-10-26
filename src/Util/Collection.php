@@ -85,8 +85,6 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Create a new collection.
      *
-     * @param null|array $items
-     *
      * @throws \JsonException
      */
     public function __construct(null|array $items = [])
@@ -125,8 +123,6 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     }
 
     /**
-     * @param null|array $items
-     *
      * @throws \JsonException
      * @return \Serendipity\Job\Util\Collection
      */
@@ -139,8 +135,6 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
 
     /**
      * Create a new collection instance if the value isn't one already.
-     *
-     * @param null|array $items
      */
     public static function make(null|array $items = []): self
     {
@@ -195,8 +189,6 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
 
     /**
      * Get the average value of a given key.
-     *
-     * @param null|callable|string $callback
      */
     public function avg(callable|string $callback = null): float|int
     {
@@ -214,8 +206,6 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
 
     /**
      * Alias for the "avg" method.
-     *
-     * @param null|callable|string $callback
      */
     public function average(callable|string $callback = null): float|int
     {
@@ -440,8 +430,6 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
 
     /**
      * Determine if all items in the collection pass the given test.
-     *
-     * @param callable|string $key
      */
     public function every(callable|string $key, mixed $operator = null, mixed $value = null): bool
     {
@@ -605,8 +593,6 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get a flattened array of the items in the collection.
      *
-     * @param float|int $depth
-     *
      * @return \Serendipity\Job\Util\Collection
      */
     public function flatten(float|int $depth): self
@@ -624,8 +610,6 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
 
     /**
      * Remove an item from the collection by key.
-     *
-     * @param array|string $keys
      *
      * @return \Serendipity\Job\Util\Collection
      */
@@ -652,8 +636,6 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
 
     /**
      * Group an associative array by a field or using a callback.
-     *
-     * @param callable|string $groupBy
      *
      * @return \Serendipity\Job\Util\Collection
      */
@@ -688,8 +670,6 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
 
     /**
      * Key an associative array by a field or using a callback.
-     *
-     * @param callable|string $keyBy
      *
      * @return \Serendipity\Job\Util\Collection
      */
@@ -799,8 +779,6 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Get the values of a given key.
      *
-     * @param array|string $value
-     *
      * @return \Serendipity\Job\Util\Collection
      */
     public function pluck(array|string $value, ?string $key = null): self
@@ -900,8 +878,6 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
 
     /**
      * Get the max value of a given key.
-     *
-     * @param null|callable|string $callback
      */
     public function max(callable|string $callback = null)
     {
@@ -947,8 +923,6 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
 
     /**
      * Get the min value of a given key.
-     *
-     * @param null|callable|string $callback
      */
     public function min(callable|string $callback = null)
     {
@@ -1013,8 +987,6 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Partition the collection into two arrays using the given callback or key.
      *
-     * @param callable|string $key
-     *
      * @return \Serendipity\Job\Util\Collection
      */
     public function partition(callable|string $key, mixed $operator = null, mixed $value = null): self
@@ -1070,8 +1042,6 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
 
     /**
      * Push all of the given items onto the collection.
-     *
-     * @param array|\Traversable $source
      *
      * @return \Serendipity\Job\Util\Collection
      */
@@ -1156,8 +1126,6 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
 
     /**
      * Search the collection for a given value and return the corresponding key if successful.
-     *
-     * @return bool|int|string
      */
     public function search(mixed $value, bool $strict = false): bool|int|string
     {
@@ -1253,8 +1221,6 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Sort the collection using the given callback.
      *
-     * @param callable|string $callback
-     *
      * @return \Serendipity\Job\Util\Collection
      */
     public function sortBy(callable|string $callback, int $options = SORT_REGULAR, bool $descending = false): self
@@ -1280,8 +1246,6 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
 
     /**
      * Sort the collection in descending order using the given callback.
-     *
-     * @param callable|string $callback
      *
      * @return \Serendipity\Job\Util\Collection
      */
@@ -1312,8 +1276,6 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
     /**
      * Splice a portion of the underlying collection array.
      *
-     * @param null|array $replacement
-     *
      * @return \Serendipity\Job\Util\Collection
      */
     public function splice(int $offset, int $length = null, null|array $replacement = []): self
@@ -1327,8 +1289,6 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
 
     /**
      * Get the sum of the given values.
-     *
-     * @param null|callable|string $callback
      */
     public function sum(callable|string $callback = null)
     {
@@ -1377,8 +1337,6 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
 
     /**
      * Return only unique items from the collection array.
-     *
-     * @param null|callable|string $key
      */
     public function unique(callable|string $key = null, bool $strict = false): self
     {
@@ -1395,8 +1353,6 @@ class Collection implements ArrayAccess, Arrayable, Countable, IteratorAggregate
 
     /**
      * Return only unique items from the collection array using strict comparison.
-     *
-     * @param null|callable|string $key
      */
     public function uniqueStrict(callable|string $key = null): self
     {

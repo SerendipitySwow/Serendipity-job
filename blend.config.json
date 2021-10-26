@@ -1,0 +1,34 @@
+{
+    "autoload": null,
+    "merge": true,
+    "executables": {
+        "php": [
+            "./bin/*"
+        ]
+    },
+    "translations": {
+        "abc": "xyz"
+    },
+    "ansi": true,
+    "quiet": false,
+    "tasks": {
+        "ls": {
+            "name": "ls",
+            "description": "Lists content of CWD or the passed one (example task).",
+            "executor": "shell",
+            "executable": "ls",
+            "arguments": "-lash",
+            "hidden": false,
+            "disabled": false
+        },
+        "pwd": {
+            "name": "pwd",
+            "description": "Lists content of CWD or the passed one (example task).",
+            "executor": "shell",
+            "executable": "pwd",
+            "arguments": "",
+            "hidden": false,
+            "disabled": false
+        }
+    }
+}

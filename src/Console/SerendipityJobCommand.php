@@ -8,10 +8,16 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Console;
 
+use Hyperf\Utils\ApplicationContext;
+use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Serendipity\Job\Kernel\Provider\KernelProvider;
 use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
+use Swow\Coroutine;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 
+/**
+ * @command php bin/serendipity-job serendipity-job:start
+ */
 final class SerendipityJobCommand extends Command
 {
     protected static $defaultName = 'serendipity-job:start';
@@ -33,6 +39,15 @@ final class SerendipityJobCommand extends Command
         });
 
         return SymfonyCommand::SUCCESS;
+    }
+
+    protected function checkProcess(string $cwd): void
+    {
+        if (file_exists("{$cwd}/.pid.server")) {
+            ApplicationContext::getContainer()->get(StdoutLoggerInterface::class)->error('An already started Job development server has been found.');
+            Coroutine::killAll();
+            exit(255);
+        }
     }
 
     protected function bootStrap(): void

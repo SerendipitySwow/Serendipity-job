@@ -43,8 +43,6 @@ interface JobInterface
 
     /**
      * Get job Token
-     *
-     * @return int|string
      */
     public function getIdentity(): int|string;
 

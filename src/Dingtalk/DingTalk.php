@@ -65,8 +65,6 @@ class DingTalk
     /**
      * @param $title
      * @param $text
-     *
-     * @return ActionCard|Message
      */
     public function action($title, $text): ActionCard|Message
     {
@@ -115,8 +113,6 @@ class DingTalk
     /**
      * @param $title
      * @param $markdown
-     *
-     * @return ActionCard|Message
      */
     public function actionCard($title, $markdown, int $hideAvatar = 0, int $btnOrientation = 0): ActionCard|Message
     {
@@ -124,9 +120,6 @@ class DingTalk
             ->setActionCardMessage($title, $markdown, $hideAvatar, $btnOrientation);
     }
 
-    /**
-     * @return FeedCard|Message
-     */
     public function feed(): FeedCard|Message
     {
         return $this->dingTalkService
