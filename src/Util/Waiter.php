@@ -13,7 +13,6 @@ use Exception;
 use Hyperf\Utils\Exception\ExceptionThrower;
 use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
 use Swow\Channel;
-use Swow\Coroutine as SwowCo;
 use Throwable;
 
 class Waiter
@@ -51,19 +50,14 @@ class Waiter
             }
         });
 
-        try {
-            $result = $channel->pop($timeout);
-            if ($result === false && $channel->isAvailable()) {
-                throw new Exception(sprintf('Channel wait failed, reason: Timed out for %s s', $timeout));
-            }
-            if ($result instanceof ExceptionThrower) {
-                throw $result->getThrowable();
-            }
-
-            return $result;
-        } catch (Throwable $e) {
-            SwowCo::get($this->coroutineId)?->throw($e);
-            throw $e;
+        $result = $channel->pop($timeout);
+        if ($result === false && $channel->isAvailable()) {
+            throw new Exception(sprintf('Channel wait failed, reason: Timed out for %s s', $timeout));
         }
+        if ($result instanceof ExceptionThrower) {
+            throw $result->getThrowable();
+        }
+
+        return $result;
     }
 }
