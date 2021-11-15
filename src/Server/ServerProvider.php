@@ -109,38 +109,41 @@ class ServerProvider extends AbstractProvider
                                 if ($request === null) {
                                     return;
                                 }
-                                /*@var LoggerInterface $logger */
-                                $logger = $this->container()
-                                    ->get(LoggerFactory::class)
-                                    ->get('request');
-                                // 日志
-                                $time = microtime(true) - $time;
-                                $debug = 'URI: ' . $request->getUri()->getPath() . PHP_EOL;
-                                $debug .= 'TIME: ' . $time * 1000 . 'ms' . PHP_EOL;
-                                if ($customData = $request->getCustomData()) {
-                                    $debug .= 'DATA: ' . $customData . PHP_EOL;
-                                }
-                                $debug .= 'REQUEST: ' . $request->getRequestString() . PHP_EOL;
-                                if (isset($response)) {
-                                    $debug .= 'RESPONSE: ' . $request->getResponseString($response) . PHP_EOL;
-                                }
-                                if (isset($exception) && $exception instanceof Throwable) {
-                                    $debug .= 'EXCEPTION: ' . $exception->getMessage() . PHP_EOL;
+                                if (env('DEBUG')) {
+                                    /*@var LoggerInterface $logger */
+                                    $logger = $this->container()
+                                        ->get(LoggerFactory::class)
+                                        ->get('request');
+                                    // 日志
+                                    $time = microtime(true) - $time;
+                                    $debug = 'URI: ' . $request->getUri()->getPath() . PHP_EOL;
+                                    $debug .= 'TIME: ' . $time * 1000 . 'ms' . PHP_EOL;
+                                    if ($customData = $request->getCustomData()) {
+                                        $debug .= 'DATA: ' . $customData . PHP_EOL;
+                                    }
+                                    $debug .= 'REQUEST: ' . $request->getRequestString() . PHP_EOL;
+                                    if (isset($response)) {
+                                        $debug .= 'RESPONSE: ' . $request->getResponseString($response) . PHP_EOL;
+                                    }
+                                    if (isset($exception) && $exception instanceof Throwable) {
+                                        $debug .= 'EXCEPTION: ' . $exception->getMessage() . PHP_EOL;
+                                    }
+
+                                    $dd = new DeviceDetector(current($request->getHeader('User-Agent')));
+                                    $dd->parse();
+                                    /* @noinspection PhpStatementHasEmptyBodyInspection */
+                                    if ($dd->isBot()) {
+                                        //do something
+                                    } else {
+                                        $debug .= 'DEVICE: ' . $dd->getDeviceName() . '| BRAND_NAME: ' . $dd->getBrandName() . '| OS:' . $dd->getOs('version') . '| CLIENT:' . Json::encode($dd->getClient()) . PHP_EOL;
+                                    }
+                                    if ($time > 1) {
+                                        $logger->error($debug);
+                                    } else {
+                                        $logger->info($debug);
+                                    }
                                 }
 
-                                $dd = new DeviceDetector(current($request->getHeader('User-Agent')));
-                                $dd->parse();
-                                /* @noinspection PhpStatementHasEmptyBodyInspection */
-                                if ($dd->isBot()) {
-                                    //do something
-                                } else {
-                                    $debug .= 'DEVICE: ' . $dd->getDeviceName() . '| BRAND_NAME: ' . $dd->getBrandName() . '| OS:' . $dd->getOs('version') . '| CLIENT:' . Json::encode($dd->getClient()) . PHP_EOL;
-                                }
-                                if ($time > 1) {
-                                    $logger->error($debug);
-                                } else {
-                                    $logger->info($debug);
-                                }
                                 Xhprof::endPoint($connection, $request);
                             }
                             if (!$request->getKeepAlive()) {
