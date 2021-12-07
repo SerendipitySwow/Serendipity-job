@@ -16,7 +16,6 @@ use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Serendipity\Job\Kernel\Provider\KernelProvider;
 use Serendipity\Job\Nsq\Consumer\AbstractConsumer;
 use Serendipity\Job\Nsq\Consumer\DagConsumer;
-use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
 use SerendipitySwow\Nsq\Message;
 use SerendipitySwow\Nsq\Nsq;
 use SerendipitySwow\Nsq\Result;
@@ -68,17 +67,15 @@ final class DagJobCommand extends Command
 
     protected function subscribe(): void
     {
-        SerendipitySwowCo::create(
-            function () {
-                $subscriber = make(Nsq::class, [
-                    $this->container,
-                    $this->config->get(sprintf('nsq.%s', 'default')),
-                ]);
-                $consumer = $this->makeConsumer(DagConsumer::class, AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX, 'DagConsumer');
-                $subscriber->subscribe(
-                    AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX,
-                    'DagConsumer',
-                    function (Message $message) use ($consumer) {
+        $subscriber = make(Nsq::class, [
+            $this->container,
+            $this->config->get(sprintf('nsq.%s', 'default')),
+        ]);
+        $consumer = $this->makeConsumer(DagConsumer::class, AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX, 'DagConsumer');
+        $subscriber->subscribe(
+            AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX,
+            'DagConsumer',
+            function (Message $message) use ($consumer) {
                         try {
                             $result = $consumer->consume($message);
                         } catch (Throwable $error) {
@@ -97,8 +94,6 @@ final class DagJobCommand extends Command
 
                         return $result;
                     }
-                );
-            }
         );
     }
 
