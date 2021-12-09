@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Logger;
 
+use Hyperf\Contract\ConfigInterface;
 use JetBrains\PhpStorm\ArrayShape;
 use Monolog\Formatter\FormatterInterface;
 use Monolog\Formatter\LineFormatter;
@@ -17,7 +18,6 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Logger as MonologLogger;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
-use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\Logger\Exception\InvalidConfigException;
 use Serendipity\Job\Util\Arr;
 

@@ -8,8 +8,8 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Kernel;
 
+use Hyperf\Contract\ConfigInterface;
 use Hyperf\Utils\Str;
-use Serendipity\Job\Contract\ConfigInterface;
 
 class Signature
 {

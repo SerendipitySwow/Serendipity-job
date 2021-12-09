@@ -8,9 +8,9 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Console;
 
+use Hyperf\Contract\ConfigInterface;
 use Hyperf\Utils\ApplicationContext;
 use Psr\Container\ContainerInterface;
-use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\Contract\SerializerInterface;
 use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Serendipity\Job\Kernel\Provider\KernelProvider;
@@ -82,12 +82,12 @@ final class DagJobCommand extends Command
                     //Segmentation fault
                     $this->stdoutLogger->error(
                         sprintf(
-                                    'Consumer failed to consume %s,reason: %s,file: %s,line: %s',
-                                    'Consumer',
-                                    $error->getMessage(),
-                                    $error->getFile(),
-                                    $error->getLine()
-                                )
+                            'Consumer failed to consume %s,reason: %s,file: %s,line: %s',
+                            'Consumer',
+                            $error->getMessage(),
+                            $error->getFile(),
+                            $error->getLine()
+                        )
                     );
                     $result = Result::DROP;
                 }

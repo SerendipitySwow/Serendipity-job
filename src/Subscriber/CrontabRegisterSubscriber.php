@@ -8,8 +8,8 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Subscriber;
 
+use Hyperf\Contract\ConfigInterface;
 use JetBrains\PhpStorm\ArrayShape;
-use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Serendipity\Job\Crontab\Crontab;
 use Serendipity\Job\Crontab\CrontabManager;

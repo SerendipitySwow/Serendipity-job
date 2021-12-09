@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Event;
 
-use Serendipity\Job\Contract\ConfigInterface;
+use Hyperf\Contract\ConfigInterface;
 use Serendipity\Job\Contract\EventDispatcherInterface;
 use Serendipity\Job\Kernel\Provider\AbstractProvider;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;

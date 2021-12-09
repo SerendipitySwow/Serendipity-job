@@ -8,8 +8,8 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Kernel\Swow;
 
+use Hyperf\Contract\ConfigInterface;
 use Psr\Container\ContainerInterface;
-use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\Contract\EventDispatcherInterface;
 use Serendipity\Job\Contract\ServerInterface;
 use Serendipity\Job\Contract\StdoutLoggerInterface;

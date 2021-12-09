@@ -9,11 +9,11 @@ declare(strict_types=1);
 namespace Serendipity\Job\Console;
 
 use Carbon\Carbon;
+use Hyperf\Contract\ConfigInterface;
 use Hyperf\Utils\ApplicationContext;
 use Hyperf\Utils\Codec\Json;
 use Psr\Container\ContainerInterface;
 use Serendipity\Job\Constant\Task;
-use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\Contract\EventDispatcherInterface;
 use Serendipity\Job\Contract\SerializerInterface;
 use Serendipity\Job\Contract\StdoutLoggerInterface;
