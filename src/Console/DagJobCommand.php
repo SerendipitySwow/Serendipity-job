@@ -76,24 +76,24 @@ final class DagJobCommand extends Command
             AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX,
             'DagConsumer',
             function (Message $message) use ($consumer) {
-                        try {
-                            $result = $consumer->consume($message);
-                        } catch (Throwable $error) {
-                            //Segmentation fault
-                            $this->stdoutLogger->error(
-                                sprintf(
+                try {
+                    $result = $consumer->consume($message);
+                } catch (Throwable $error) {
+                    //Segmentation fault
+                    $this->stdoutLogger->error(
+                        sprintf(
                                     'Consumer failed to consume %s,reason: %s,file: %s,line: %s',
                                     'Consumer',
                                     $error->getMessage(),
                                     $error->getFile(),
                                     $error->getLine()
                                 )
-                            );
-                            $result = Result::DROP;
-                        }
+                    );
+                    $result = Result::DROP;
+                }
 
-                        return $result;
-                    }
+                return $result;
+            }
         );
     }
 

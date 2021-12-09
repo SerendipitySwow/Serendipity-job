@@ -87,13 +87,13 @@ require_once(dirname(__DIR__)) . '/../vendor/autoload.php';
 \Swow\Debug\Debugger::runOnTTY();
 try {
     for ($j = 0; $j < 10; $j++) {
-        $client = new \Serendipity\Job\RedisSubscriber\Connection('127.0.0.1', 6379, -1);
+        $client = new \SwowCloud\RedisSubscriber\Connection('127.0.0.1', 6379, -1);
         $client->sendCommand(['PUBLISH', 'second', 'Hello']);
         var_dump($msg = $client->read());
     }
     for ($i = 0; $i < 10; $i++) {
         \Swow\Coroutine::run(function () {
-            $client = new \Serendipity\Job\RedisSubscriber\Connection('127.0.0.1', 6379, -1);
+            $client = new \SwowCloud\RedisSubscriber\Connection('127.0.0.1', 6379, -1);
             //            $client->sendCommand(['sadd', "listA", (string)mt_rand(10000,9999999)]);
             $client->sendCommand(['SUBSCRIBE', 'second', 'hello']);
             //            var_dump($msg = $client->read());

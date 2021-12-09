@@ -10,7 +10,7 @@ use Serendipity\Job\Config\ConfigFactory;
 use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Serendipity\Job\Kernel\Logger\StdoutLogger;
-use Serendipity\Job\Redis\Redis;
+use SwowCloud\Redis\Redis;
 
 return [
     ConfigInterface::class => ConfigFactory::class,

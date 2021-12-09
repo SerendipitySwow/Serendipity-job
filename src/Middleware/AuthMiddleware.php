@@ -14,9 +14,9 @@ use InvalidArgumentException;
 use Psr\Http\Message\RequestInterface;
 use Serendipity\Job\Db\DB;
 use Serendipity\Job\Kernel\Signature;
-use Serendipity\Job\Redis\RedisFactory;
 use Serendipity\Job\Util\Context;
 use Swow\Http\Server\Request;
+use SwowCloud\Redis\RedisFactory;
 
 class AuthMiddleware
 {

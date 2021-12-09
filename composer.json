@@ -52,6 +52,7 @@
         "serendipity-swow/nsq": "0.8",
         "serendipity-swow/sockets": "0.8",
         "spatie/emoji": "3.0",
+        "swow-cloud/redis": "3.0.x-dev",
         "swow/swow": "dev-develop",
         "symfony/config": "^5.3",
         "symfony/console": "^5.2",
