@@ -84,6 +84,9 @@ Serendipity\Job\Util\Coroutine::create()
 * 考虑优化项目结构
 * codecov代码覆盖率
 * 静下来想想思考项目的规划,架构
+* 考虑支持分布式
+* 考虑使用swow-cloud/redis-subscriber订阅消息
+* 考虑使用swow-cloud/redis-lock上锁
 * [FORM](https://github.com/BoBoooooo/Element-Pro-Crud)
 * [后台](https://github.com/kanyxmo/MineAdmin)
 
