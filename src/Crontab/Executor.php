@@ -12,7 +12,7 @@ use Carbon\Carbon;
 use Closure;
 use Hyperf\Engine\Coroutine;
 use Psr\Container\ContainerInterface;
-use Serendipity\Job\Contract\LoggerInterface;
+use SwowCloud\Contract\LoggerInterface;
 use SwowCloud\Contract\StdoutLoggerInterface;
 use Throwable;
 

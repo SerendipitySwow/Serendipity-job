@@ -11,7 +11,7 @@ namespace Serendipity\Job\Nsq\Consumer;
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\Utils\Pipeline;
 use Psr\Container\ContainerInterface;
-use Serendipity\Job\Contract\LoggerInterface;
+use SwowCloud\Contract\LoggerInterface;
 use Serendipity\Job\Contract\SerializerInterface;
 use Serendipity\Job\Dingtalk\DingTalk;
 use Serendipity\Job\Logger\LoggerFactory;

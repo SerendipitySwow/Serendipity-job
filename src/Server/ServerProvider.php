@@ -23,7 +23,7 @@ use Serendipity\Job\Console\DagJobCommand;
 use Serendipity\Job\Console\JobCommand;
 use Serendipity\Job\Constant\Statistical;
 use Serendipity\Job\Constant\Task;
-use Serendipity\Job\Contract\LoggerInterface;
+use SwowCloud\Contract\LoggerInterface;
 use Serendipity\Job\Db\Command;
 use Serendipity\Job\Db\DB;
 use Serendipity\Job\Kernel\Http\Request as SerendipityRequest;
