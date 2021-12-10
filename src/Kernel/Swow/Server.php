@@ -11,8 +11,8 @@ namespace Serendipity\Job\Kernel\Swow;
 use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Serendipity\Job\Contract\ServerInterface;
-use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Swow\Socket;
+use SwowCloud\Contract\StdoutLoggerInterface;
 
 class Server implements ServerInterface
 {

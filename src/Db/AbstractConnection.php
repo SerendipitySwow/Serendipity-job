@@ -10,7 +10,7 @@ namespace Serendipity\Job\Db;
 
 use Hyperf\Pool\Connection;
 use Hyperf\Pool\Exception\ConnectionException;
-use Serendipity\Job\Contract\StdoutLoggerInterface;
+use SwowCloud\Contract\StdoutLoggerInterface;
 
 abstract class AbstractConnection extends Connection implements ConnectionInterface
 {

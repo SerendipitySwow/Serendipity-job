@@ -12,7 +12,6 @@ use Hyperf\Contract\ConfigInterface;
 use Hyperf\Utils\ApplicationContext;
 use Psr\Container\ContainerInterface;
 use Serendipity\Job\Contract\SerializerInterface;
-use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Serendipity\Job\Kernel\Provider\KernelProvider;
 use Serendipity\Job\Nsq\Consumer\AbstractConsumer;
 use Serendipity\Job\Nsq\Consumer\DagConsumer;
@@ -20,6 +19,7 @@ use SerendipitySwow\Nsq\Message;
 use SerendipitySwow\Nsq\Nsq;
 use SerendipitySwow\Nsq\Result;
 use Spatie\Emoji\Emoji;
+use SwowCloud\Contract\StdoutLoggerInterface;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 
 /**

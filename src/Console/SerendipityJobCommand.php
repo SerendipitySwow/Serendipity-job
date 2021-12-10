@@ -9,9 +9,9 @@ declare(strict_types=1);
 namespace Serendipity\Job\Console;
 
 use Hyperf\Utils\ApplicationContext;
-use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Serendipity\Job\Kernel\Provider\KernelProvider;
 use Swow\Coroutine;
+use SwowCloud\Contract\StdoutLoggerInterface;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 
 /**

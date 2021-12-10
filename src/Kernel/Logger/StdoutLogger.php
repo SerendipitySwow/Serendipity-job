@@ -10,7 +10,7 @@ namespace Serendipity\Job\Kernel\Logger;
 
 use Hyperf\Contract\ConfigInterface;
 use Psr\Log\LogLevel;
-use Serendipity\Job\Contract\StdoutLoggerInterface;
+use SwowCloud\Contract\StdoutLoggerInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use function sprintf;

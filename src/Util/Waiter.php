@@ -9,8 +9,8 @@ declare(strict_types=1);
 namespace Serendipity\Job\Util;
 
 use Closure;
-use Exception;
 use Hyperf\Utils\Exception\ExceptionThrower;
+use RuntimeException;
 use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
 use Swow\Channel;
 use Throwable;
@@ -52,7 +52,7 @@ class Waiter
 
         $result = $channel->pop($timeout);
         if ($result === false && $channel->isAvailable()) {
-            throw new Exception(sprintf('Channel wait failed, reason: Timed out for %s s', $timeout));
+            throw new RuntimeException(sprintf('Channel wait failed, reason: Timed out for %s s', $timeout));
         }
         if ($result instanceof ExceptionThrower) {
             throw $result->getThrowable();

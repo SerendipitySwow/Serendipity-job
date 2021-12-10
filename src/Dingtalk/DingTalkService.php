@@ -11,7 +11,6 @@ namespace Serendipity\Job\Dingtalk;
 use Hyperf\Utils\ApplicationContext;
 use JetBrains\PhpStorm\Pure;
 use Psr\Http\Message\ResponseInterface;
-use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Serendipity\Job\Dingtalk\Http\Client;
 use Serendipity\Job\Dingtalk\Messages\ActionCard;
 use Serendipity\Job\Dingtalk\Messages\FeedCard;
@@ -19,6 +18,7 @@ use Serendipity\Job\Dingtalk\Messages\Link;
 use Serendipity\Job\Dingtalk\Messages\Markdown;
 use Serendipity\Job\Dingtalk\Messages\Message;
 use Serendipity\Job\Dingtalk\Messages\Text;
+use SwowCloud\Contract\StdoutLoggerInterface;
 use Throwable;
 use function Serendipity\Job\Kernel\serendipity_format_throwable;
 

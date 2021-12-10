@@ -12,8 +12,8 @@ use Hyperf\Contract\ConfigInterface;
 use Psr\Container\ContainerInterface;
 use Serendipity\Job\Contract\EventDispatcherInterface;
 use Serendipity\Job\Contract\ServerInterface;
-use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Swow\Socket;
+use SwowCloud\Contract\StdoutLoggerInterface;
 
 class ServerFactory
 {

@@ -10,8 +10,8 @@ namespace Serendipity\Job\Util;
 
 use Hyperf\Engine\Channel;
 use Hyperf\Utils\ApplicationContext;
-use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
+use SwowCloud\Contract\StdoutLoggerInterface;
 
 /**
  * @method bool isFull()

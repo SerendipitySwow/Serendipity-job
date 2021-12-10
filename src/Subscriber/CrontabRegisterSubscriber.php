@@ -10,10 +10,10 @@ namespace Serendipity\Job\Subscriber;
 
 use Hyperf\Contract\ConfigInterface;
 use JetBrains\PhpStorm\ArrayShape;
-use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Serendipity\Job\Crontab\Crontab;
 use Serendipity\Job\Crontab\CrontabManager;
 use Serendipity\Job\Event\CrontabEvent;
+use SwowCloud\Contract\StdoutLoggerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class CrontabRegisterSubscriber implements EventSubscriberInterface
