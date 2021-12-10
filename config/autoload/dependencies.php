@@ -14,5 +14,5 @@ use Serendipity\Job\Kernel\Logger\StdoutLogger;
 return [
     ConfigInterface::class => ConfigFactory::class,
     StdoutLoggerInterface::class => StdoutLogger::class,
-    \Redis::class => Redis::class,
+    Redis::class => SwowCloud\Redis\Redis::class,
 ];

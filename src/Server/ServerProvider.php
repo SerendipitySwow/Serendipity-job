@@ -349,7 +349,7 @@ class ServerProvider extends AbstractProvider
                         $incr = make(Incr::class);
                         $incr->eval([Statistical::TASK_DELAY, 24 * 60 * 60]);
                     }
-                    $bool = $nsq->publish(AbstractConsumer::TOPIC_PREFIX . 'task', $json, $delay > 0 ? $delay : 0.0);
+                    $bool = $nsq->publish(AbstractConsumer::TOPIC_PREFIX . JobCommand::TOPIC_SUFFIX, $json, $delay > 0 ? $delay : 0.0);
 
                     return $response->json($bool ? [
                         'code' => 0,
