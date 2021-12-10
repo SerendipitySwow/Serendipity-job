@@ -29,6 +29,7 @@
 
 ![home](./img/monitor-dashboard.jpg)
 ![home](./img/info.jpg)
+![home](./img/stat.png)
 
 # 🚀Serendipity-Job  For 🏆Swow 任务平台
 
@@ -45,7 +46,7 @@
 6.支持API查看任务消息
 7.支持后台配置任务.
 8.支持定时任务Crontab.(完成)
-9.支持任务图表(成功,失败,重试,超时,终止.)(未完成)
+9.支持任务图表(成功,失败,重试,超时,终止.)(开发中)
 10.支持任务取消(完成)
 11.签名验证(完成)
 12.支持刷新应用签名(完成)
@@ -87,6 +88,8 @@ Serendipity\Job\Util\Coroutine::create()
 * 考虑支持分布式
 * 考虑使用swow-cloud/redis-subscriber订阅消息
 * 考虑使用swow-cloud/redis-lock上锁
+* 支持任务图表
+* 支持后台创建任务
 * [FORM](https://github.com/BoBoooooo/Element-Pro-Crud)
 * [后台](https://github.com/kanyxmo/MineAdmin)
 
