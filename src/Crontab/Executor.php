@@ -12,8 +12,8 @@ use Carbon\Carbon;
 use Closure;
 use Hyperf\Engine\Coroutine;
 use Psr\Container\ContainerInterface;
-use Serendipity\Job\Contract\LoggerInterface;
-use Serendipity\Job\Contract\StdoutLoggerInterface;
+use SwowCloud\Contract\LoggerInterface;
+use SwowCloud\Contract\StdoutLoggerInterface;
 use Throwable;
 
 class Executor

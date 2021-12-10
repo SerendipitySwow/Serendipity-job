@@ -6,14 +6,13 @@
 
 declare(strict_types=1);
 
+use Hyperf\Contract\ConfigInterface;
 use Serendipity\Job\Config\ConfigFactory;
-use Serendipity\Job\Contract\ConfigInterface;
-use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Serendipity\Job\Kernel\Logger\StdoutLogger;
-use Serendipity\Job\Redis\Redis;
+use SwowCloud\Contract\StdoutLoggerInterface;
 
 return [
     ConfigInterface::class => ConfigFactory::class,
     StdoutLoggerInterface::class => StdoutLogger::class,
-    \Redis::class => Redis::class,
+    Redis::class => SwowCloud\Redis\Redis::class,
 ];

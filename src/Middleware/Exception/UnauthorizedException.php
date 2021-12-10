@@ -6,10 +6,10 @@
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Contract;
+namespace Serendipity\Job\Middleware\Exception;
 
-use Psr\Log\LoggerInterface as PsrLoggerInterface;
+use Exception;
 
-interface LoggerInterface extends PsrLoggerInterface
+class UnauthorizedException extends Exception
 {
 }

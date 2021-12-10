@@ -8,9 +8,9 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Crontab;
 
+use Hyperf\Contract\ConfigInterface;
 use Psr\Container\ContainerInterface;
-use Serendipity\Job\Contract\ConfigInterface;
-use Serendipity\Job\Contract\StdoutLoggerInterface;
+use SwowCloud\Contract\StdoutLoggerInterface;
 
 class CrontabDispatcher
 {

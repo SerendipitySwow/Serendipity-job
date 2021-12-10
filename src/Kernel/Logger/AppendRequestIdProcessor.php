@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Serendipity\Job\Kernel\Logger;
 
 use Monolog\Processor\MemoryProcessor;
+use Ramsey\Uuid\Uuid;
 use Serendipity\Job\Util\Context;
 
 class AppendRequestIdProcessor extends MemoryProcessor
@@ -24,7 +25,7 @@ class AppendRequestIdProcessor extends MemoryProcessor
         }
 
         $record['extra']['memory_usage'] = $usage;
-        $record['context']['trace_id'] = Context::getOrSet(self::TRACE_ID, uniqid(md5(self::TRACE_ID), false));
+        $record['context']['trace_id'] = Context::getOrSet(self::TRACE_ID, Uuid::uuid4()->toString());
 
         return $record;
     }

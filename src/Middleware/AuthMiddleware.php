@@ -10,13 +10,13 @@ namespace Serendipity\Job\Middleware;
 
 use Hyperf\Utils\ApplicationContext;
 use Hyperf\Utils\Codec\Json;
-use InvalidArgumentException;
 use Psr\Http\Message\RequestInterface;
 use Serendipity\Job\Db\DB;
 use Serendipity\Job\Kernel\Signature;
-use Serendipity\Job\Redis\RedisFactory;
+use Serendipity\Job\Middleware\Exception\UnauthorizedException;
 use Serendipity\Job\Util\Context;
 use Swow\Http\Server\Request;
+use SwowCloud\Redis\RedisFactory;
 
 class AuthMiddleware
 {
@@ -35,7 +35,7 @@ class AuthMiddleware
                 'signatureSecret' => $application['secret_key'] ?? '',
                 'signatureAppKey' => $appKey,
             ],
-        ]) : throw new InvalidArgumentException('Unknown AppKey#');
+        ]) : throw new UnauthorizedException('Unknown AppKey#');
         $this->initRequest($application);
 
         return $this->signature->verifySignature($timestamp, $nonce, $payload, $appKey, $signature);
@@ -50,10 +50,15 @@ class AuthMiddleware
             ->get(RedisFactory::class)
             ->get('default');
         if (!$application = $redis->get(sprintf('APP_KEY:%s', $appKey))) {
-            $application = DB::fetch(sprintf(
-                "SELECT * FROM application WHERE app_key = '%s' AND status = '1' AND is_deleted = '0'",
-                $appKey
-            ));
+            $application = DB::fetch(
+                sprintf(
+                    "SELECT * FROM application WHERE app_key = '%s' AND status = '1' AND is_deleted = '0'",
+                    $appKey
+                )
+            );
+            if (!$application) {
+                throw new UnauthorizedException('Unknown AppKey#');
+            }
             $redis->set(sprintf('APP_KEY:%s', $appKey), Json::encode($application), 24 * 60 * 60);
         }
 

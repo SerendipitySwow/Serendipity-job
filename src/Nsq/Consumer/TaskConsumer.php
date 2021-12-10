@@ -17,12 +17,12 @@ use Serendipity\Job\Contract\EventDispatcherInterface;
 use Serendipity\Job\Contract\JobInterface;
 use Serendipity\Job\Db\DB;
 use Serendipity\Job\Event\UpdateJobEvent;
-use Serendipity\Job\Redis\Lua\Hash\Incr;
 use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
 use SerendipitySwow\Nsq\Message;
 use SerendipitySwow\Nsq\Nsq;
 use SerendipitySwow\Nsq\Result;
 use Swow\Coroutine as SwowCo;
+use SwowCloud\Redis\Lua\Hash\Incr;
 use Throwable;
 
 class TaskConsumer extends AbstractConsumer

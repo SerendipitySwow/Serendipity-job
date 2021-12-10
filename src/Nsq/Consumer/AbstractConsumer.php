@@ -8,19 +8,19 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Nsq\Consumer;
 
+use Hyperf\Contract\ConfigInterface;
 use Hyperf\Utils\Pipeline;
 use Psr\Container\ContainerInterface;
-use Serendipity\Job\Contract\ConfigInterface;
-use Serendipity\Job\Contract\LoggerInterface;
+use SwowCloud\Contract\LoggerInterface;
 use Serendipity\Job\Contract\SerializerInterface;
 use Serendipity\Job\Dingtalk\DingTalk;
 use Serendipity\Job\Logger\LoggerFactory;
-use Serendipity\Job\Redis\Redis;
-use Serendipity\Job\Redis\RedisFactory;
-use Serendipity\Job\Redis\RedisProxy;
 use Serendipity\Job\Serializer\SymfonySerializer;
 use Serendipity\Job\Util\Waiter;
 use SerendipitySwow\Nsq\Message;
+use SwowCloud\Redis\Redis;
+use SwowCloud\Redis\RedisFactory;
+use SwowCloud\Redis\RedisProxy;
 
 abstract class AbstractConsumer
 {

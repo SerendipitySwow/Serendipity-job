@@ -13,6 +13,7 @@ use DeviceDetector\DeviceDetector;
 use FastRoute\Dispatcher;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
+use Hyperf\Contract\ConfigInterface;
 use Hyperf\Engine\Channel;
 use Hyperf\Utils\Codec\Json;
 use Hyperf\Utils\Str;
@@ -22,9 +23,7 @@ use Serendipity\Job\Console\DagJobCommand;
 use Serendipity\Job\Console\JobCommand;
 use Serendipity\Job\Constant\Statistical;
 use Serendipity\Job\Constant\Task;
-use Serendipity\Job\Contract\ConfigInterface;
-use Serendipity\Job\Contract\LoggerInterface;
-use Serendipity\Job\Contract\StdoutLoggerInterface;
+use SwowCloud\Contract\LoggerInterface;
 use Serendipity\Job\Db\Command;
 use Serendipity\Job\Db\DB;
 use Serendipity\Job\Kernel\Http\Request as SerendipityRequest;
@@ -36,8 +35,8 @@ use Serendipity\Job\Kernel\Swow\ServerFactory;
 use Serendipity\Job\Kernel\Xhprof\Xhprof;
 use Serendipity\Job\Logger\LoggerFactory;
 use Serendipity\Job\Middleware\AuthMiddleware;
+use Serendipity\Job\Middleware\Exception\UnauthorizedException;
 use Serendipity\Job\Nsq\Consumer\AbstractConsumer;
-use Serendipity\Job\Redis\Lua\Hash\Incr;
 use Serendipity\Job\Serializer\SymfonySerializer;
 use Serendipity\Job\Util\Arr;
 use Serendipity\Job\Util\Context;
@@ -50,6 +49,8 @@ use Swow\Http\Server;
 use Swow\Http\Server\Request as SwowRequest;
 use Swow\Http\Status;
 use Swow\Socket\Exception as SocketException;
+use SwowCloud\Contract\StdoutLoggerInterface;
+use SwowCloud\Redis\Lua\Hash\Incr;
 use Throwable;
 use function FastRoute\simpleDispatcher;
 use function Serendipity\Job\Kernel\serendipity_format_throwable;
@@ -152,8 +153,6 @@ class ServerProvider extends AbstractProvider
                         }
                     } catch (Throwable $throwable) {
                         $this->logger->error(serendipity_format_throwable($throwable));
-                        throw $throwable;
-                        // you can log error here
                     } finally {
                         ## close session
                         $connection->close();
@@ -350,7 +349,7 @@ class ServerProvider extends AbstractProvider
                         $incr = make(Incr::class);
                         $incr->eval([Statistical::TASK_DELAY, 24 * 60 * 60]);
                     }
-                    $bool = $nsq->publish(AbstractConsumer::TOPIC_PREFIX . 'task', $json, $delay > 0 ? $delay : 0.0);
+                    $bool = $nsq->publish(AbstractConsumer::TOPIC_PREFIX . JobCommand::TOPIC_SUFFIX, $json, $delay > 0 ? $delay : 0.0);
 
                     return $response->json($bool ? [
                         'code' => 0,
@@ -596,7 +595,7 @@ class ServerProvider extends AbstractProvider
             switch ($routeInfo[0]) {
                 case Dispatcher::NOT_FOUND:
                     $response = new Response();
-                    $response->text(file_get_contents(BASE_PATH . '/storage/404.php'));
+                    $response->error(Status::NOT_FOUND, 'Not Found');
                     break;
                 case Dispatcher::METHOD_NOT_ALLOWED:
                     $response = new Response();
@@ -621,8 +620,12 @@ class ServerProvider extends AbstractProvider
                             $response = call($handler[0], $vars);
                             break;
                         } catch (Throwable $exception) {
-                            $this->logger->error(serendipity_format_throwable($exception));
                             $response = new Response();
+                            if ($exception instanceof UnauthorizedException) {
+                                $response->error(Status::UNAUTHORIZED, 'UNAUTHORIZED');
+                                break;
+                            }
+                            $this->logger->error(serendipity_format_throwable($exception));
                             $response->error(Status::INTERNAL_SERVER_ERROR);
                             break;
                         }

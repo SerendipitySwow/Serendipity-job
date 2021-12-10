@@ -8,19 +8,18 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Console;
 
+use Hyperf\Contract\ConfigInterface;
 use Hyperf\Utils\ApplicationContext;
 use Psr\Container\ContainerInterface;
-use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\Contract\SerializerInterface;
-use Serendipity\Job\Contract\StdoutLoggerInterface;
 use Serendipity\Job\Kernel\Provider\KernelProvider;
 use Serendipity\Job\Nsq\Consumer\AbstractConsumer;
 use Serendipity\Job\Nsq\Consumer\DagConsumer;
-use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
 use SerendipitySwow\Nsq\Message;
 use SerendipitySwow\Nsq\Nsq;
 use SerendipitySwow\Nsq\Result;
 use Spatie\Emoji\Emoji;
+use SwowCloud\Contract\StdoutLoggerInterface;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 
 /**
@@ -68,36 +67,32 @@ final class DagJobCommand extends Command
 
     protected function subscribe(): void
     {
-        SerendipitySwowCo::create(
-            function () {
-                $subscriber = make(Nsq::class, [
-                    $this->container,
-                    $this->config->get(sprintf('nsq.%s', 'default')),
-                ]);
-                $consumer = $this->makeConsumer(DagConsumer::class, AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX, 'DagConsumer');
-                $subscriber->subscribe(
-                    AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX,
-                    'DagConsumer',
-                    function (Message $message) use ($consumer) {
-                        try {
-                            $result = $consumer->consume($message);
-                        } catch (Throwable $error) {
-                            //Segmentation fault
-                            $this->stdoutLogger->error(
-                                sprintf(
-                                    'Consumer failed to consume %s,reason: %s,file: %s,line: %s',
-                                    'Consumer',
-                                    $error->getMessage(),
-                                    $error->getFile(),
-                                    $error->getLine()
-                                )
-                            );
-                            $result = Result::DROP;
-                        }
+        $subscriber = make(Nsq::class, [
+            $this->container,
+            $this->config->get(sprintf('nsq.%s', 'default')),
+        ]);
+        $consumer = $this->makeConsumer(DagConsumer::class, AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX, 'DagConsumer');
+        $subscriber->subscribe(
+            AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX,
+            'DagConsumer',
+            function (Message $message) use ($consumer) {
+                try {
+                    $result = $consumer->consume($message);
+                } catch (Throwable $error) {
+                    //Segmentation fault
+                    $this->stdoutLogger->error(
+                        sprintf(
+                            'Consumer failed to consume %s,reason: %s,file: %s,line: %s',
+                            'Consumer',
+                            $error->getMessage(),
+                            $error->getFile(),
+                            $error->getLine()
+                        )
+                    );
+                    $result = Result::DROP;
+                }
 
-                        return $result;
-                    }
-                );
+                return $result;
             }
         );
     }

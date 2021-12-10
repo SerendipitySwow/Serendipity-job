@@ -13,7 +13,7 @@ use Hyperf\Engine\Exception\CoroutineDestroyedException;
 use Hyperf\Engine\Exception\RunningInNonCoroutineException;
 use Hyperf\Utils\ApplicationContext;
 use Psr\Log\LoggerInterface;
-use Serendipity\Job\Contract\StdoutLoggerInterface;
+use SwowCloud\Contract\StdoutLoggerInterface;
 use Throwable;
 
 class Coroutine

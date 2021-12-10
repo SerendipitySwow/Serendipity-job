@@ -8,8 +8,8 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Db\Pool;
 
+use Hyperf\Contract\ConfigInterface;
 use Psr\Container\ContainerInterface;
-use Serendipity\Job\Contract\ConfigInterface;
 use Serendipity\Job\DB\Exception\DriverNotFoundException;
 use Serendipity\Job\DB\Exception\InvalidDriverException;
 

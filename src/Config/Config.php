@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Config;
 
-use Serendipity\Job\Contract\ConfigInterface;
+use Hyperf\Contract\ConfigInterface;
 use Serendipity\Job\Util\Arr;
 
 class Config implements ConfigInterface
