@@ -187,15 +187,6 @@ final class JobCommand extends Command
                                             );
                                             break;
                                         }
-                                        if ($coroutine->getState() === $coroutine::STATE_LOCKED) {
-                                            $response->json([
-                                                'code' => 1,
-                                                'msg' => 'coroutine block object locked	!',
-                                                'data' => [],
-                                            ]);
-                                            $connection->sendHttpResponse($response);
-                                            break;
-                                        }
                                         $coroutine->kill();
                                         DB::execute(
                                             sprintf(
