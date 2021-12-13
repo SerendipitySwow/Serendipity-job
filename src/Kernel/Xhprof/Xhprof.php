@@ -20,6 +20,8 @@ class Xhprof
         if (!extension_loaded('tideways_xhprof')) {
             return;
         }
+        /* @noinspection PhpUndefinedConstantInspection */
+        /* @noinspection PhpUndefinedFunctionInspection */
         tideways_xhprof_enable(TIDEWAYS_XHPROF_FLAGS_MEMORY | TIDEWAYS_XHPROF_FLAGS_MEMORY_MU | TIDEWAYS_XHPROF_FLAGS_MEMORY_PMU | TIDEWAYS_XHPROF_FLAGS_CPU);
     }
 
@@ -28,6 +30,7 @@ class Xhprof
         if (!extension_loaded('tideways_xhprof')) {
             return;
         }
+        /** @noinspection PhpUndefinedFunctionInspection */
         $profile = tideways_xhprof_disable();
         $requestTimeFloat = explode(' ', microtime());
         $requestTsMicro = ['sec' => $requestTimeFloat[1], 'usec' => $requestTimeFloat[0] * 1000000];
