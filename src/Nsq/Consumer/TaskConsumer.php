@@ -29,6 +29,9 @@ class TaskConsumer extends AbstractConsumer
 {
     protected const TASK_CONSUMER_REDIS_PREFIX = 'TaskIDEntity#%s-%s';
 
+    /**
+     * @throws \Throwable
+     */
     public function consume(Message $message): ?string
     {
         $redis = $this->redis();
