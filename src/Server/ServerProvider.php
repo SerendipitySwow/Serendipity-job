@@ -54,6 +54,7 @@ use SwowCloud\Redis\Lua\Hash\Incr;
 use Throwable;
 use function FastRoute\simpleDispatcher;
 use function Serendipity\Job\Kernel\serendipity_format_throwable;
+use function Serendipity\Job\Kernel\serendipity_json_decode;
 use const Swow\Errno\EMFILE;
 use const Swow\Errno\ENFILE;
 use const Swow\Errno\ENOMEM;
@@ -325,7 +326,7 @@ class ServerProvider extends AbstractProvider
 
                         return $response;
                     }
-                    $content = Json::decode($ret['content']);
+                    $content = serendipity_json_decode($ret['content']);
                     $serializerObject = make($content['class'], [
                         'identity' => $ret['id'],
                         'timeout' => $ret['timeout'],
@@ -335,7 +336,7 @@ class ServerProvider extends AbstractProvider
                     ]);
                     $json = $serializer->serialize($serializerObject);
                     $json = Json::encode(array_merge([
-                        'body' => Json::decode(
+                        'body' => serendipity_json_decode(
                             $json
                         ),
                     ], ['class' => $serializerObject::class]));
@@ -482,7 +483,7 @@ class ServerProvider extends AbstractProvider
                         $serializer = $this->container()
                             ->get(SymfonySerializer::class);
 
-                        $content = Json::decode(Arr::get($data, 'content'));
+                        $content = serendipity_json_decode(Arr::get($data, 'content'));
                         $serializerObject = make($content['class'], [
                             'identity' => $id,
                             'timeout' => Arr::get($data, 'timeout'),
@@ -492,7 +493,7 @@ class ServerProvider extends AbstractProvider
                         ]);
                         $json = $serializer->serialize($serializerObject);
                         $json = Json::encode(array_merge([
-                            'body' => Json::decode(
+                            'body' => serendipity_json_decode(
                                 $json
                             ),
                         ], ['class' => $serializerObject::class]));
@@ -540,7 +541,7 @@ class ServerProvider extends AbstractProvider
                         ]
                     );
 
-                    return $swowResponse->json(Json::decode($response->getBody()
+                    return $swowResponse->json(serendipity_json_decode($response->getBody()
                         ->getContents()));
                 });
                 /*
@@ -567,7 +568,7 @@ class ServerProvider extends AbstractProvider
                         ]
                     );
 
-                    return $swowResponse->json(Json::decode($response->getBody()
+                    return $swowResponse->json(serendipity_json_decode($response->getBody()
                         ->getContents()));
                 });
             });

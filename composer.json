@@ -35,6 +35,7 @@
         "ext-pdo": "*",
         "ext-redis": ">=5.3",
         "ext-sockets": "*",
+        "ext-simdjson": "*",
         "guzzlehttp/guzzle": "^7.3",
         "hyperf/contract": "2.2.*",
         "hyperf/di": "2.2.*",

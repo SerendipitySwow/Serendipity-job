@@ -37,6 +37,8 @@ use Swow\Socket\Exception as SocketException;
 use SwowCloud\Contract\StdoutLoggerInterface;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Input\InputOption;
+use Throwable;
+use function Serendipity\Job\Kernel\serendipity_json_decode;
 use const Swow\Errno\EMFILE;
 use const Swow\Errno\ENFILE;
 use const Swow\Errno\ENOMEM;
@@ -59,6 +61,8 @@ final class JobCommand extends Command
     protected ?SerializerInterface $serializer = null;
 
     protected ?Nsq $subscriber = null;
+
+    private ContainerInterface $container;
 
     protected function configure(): void
     {
@@ -123,7 +127,7 @@ final class JobCommand extends Command
         while (true) {
             try {
                 $connection = $server->acceptConnection();
-                SerendipitySwowCo::create(function () use ($connection) {
+                SerendipitySwowCo::create(static function () use ($connection) {
                     try {
                         while (true) {
                             $request = null;
@@ -162,7 +166,7 @@ final class JobCommand extends Command
                                         break;
                                     }
                                     case '/cancel':
-                                        $params = Json::decode(
+                                        $params = serendipity_json_decode(
                                             $request->getBody()
                                                 ->getContents()
                                         );

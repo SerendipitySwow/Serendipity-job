@@ -12,7 +12,7 @@ use Serendipity\Job\Contract\JobInterface;
 
 class SimpleJob implements JobInterface
 {
-    public int $identity;
+    public int|string $identity;
 
     public int $timeout;
 
@@ -22,7 +22,7 @@ class SimpleJob implements JobInterface
 
     public int $step;
 
-    public function __construct(int $identity, int $timeout, int $retryTimes, string $name, int $step)
+    public function __construct(int|string $identity, int $timeout, int $retryTimes, string $name, int $step)
     {
         $this->identity = $identity;
         $this->timeout = $timeout;

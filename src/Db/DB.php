@@ -124,11 +124,10 @@ class DB
     }
 
     /**
-     * @param null|mixed $result
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    public function logQuery(mixed $query, array $bindings = [], ?float $time = null, $result = null): void
+    public function logQuery(mixed $query, array $bindings = [], ?float $time = null, mixed $result = null): void
     {
         if ($query instanceof Closure) {
             try {

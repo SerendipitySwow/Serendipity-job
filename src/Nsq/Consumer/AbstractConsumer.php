@@ -48,6 +48,8 @@ abstract class AbstractConsumer
 
     protected ?DingTalk $dingTalk = null;
 
+    private int $nums;
+
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;

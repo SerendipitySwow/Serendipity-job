@@ -17,6 +17,7 @@ use Serendipity\Job\Middleware\Exception\UnauthorizedException;
 use Serendipity\Job\Util\Context;
 use Swow\Http\Server\Request;
 use SwowCloud\Redis\RedisFactory;
+use function Serendipity\Job\Kernel\serendipity_json_decode;
 
 class AuthMiddleware
 {
@@ -43,6 +44,10 @@ class AuthMiddleware
 
     /**
      * @param $appKey
+     *
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws \Serendipity\Job\Middleware\Exception\UnauthorizedException
      */
     protected function getApplication($appKey): array|bool
     {
@@ -62,7 +67,7 @@ class AuthMiddleware
             $redis->set(sprintf('APP_KEY:%s', $appKey), Json::encode($application), 24 * 60 * 60);
         }
 
-        return is_string($application) && $application[0] === '{' ? Json::decode(
+        return is_string($application) && $application[0] === '{' ? serendipity_json_decode(
             $application
         ) : $application ?? false;
     }
