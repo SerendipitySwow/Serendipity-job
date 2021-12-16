@@ -25,6 +25,7 @@ use Swow\Coroutine as SwowCo;
 use SwowCloud\Redis\Lua\Hash\Incr;
 use Throwable;
 use function Serendipity\Job\Kernel\serendipity_json_decode;
+use function Serendipity\Job\Kernel\server_ip;
 
 class TaskConsumer extends AbstractConsumer
 {
@@ -40,17 +41,14 @@ class TaskConsumer extends AbstractConsumer
             $job = $this->deserializeMessage($message);
             if (!$job && !$job instanceof JobInterface) {
                 $this->logger->error('Invalid task#' . $message->getBody());
-                $this->chan->push(Result::DROP);
 
-                return $this->chan->pop();
+                return Result::DROP;
             }
             //判断消息是否被重复消费.
             if ($redis->get(sprintf(static::TASK_CONSUMER_REDIS_PREFIX, $job->getIdentity(), $job->getCounter())) >= 1) {
                 $this->logger->error(sprintf('Message %s has been consumed#', $job->getIdentity()));
 
-                $this->chan->push(Result::DROP);
-
-                return $this->chan->pop();
+                return Result::DROP;
             }
 
             $incr = make(Incr::class);
@@ -60,11 +58,12 @@ class TaskConsumer extends AbstractConsumer
                     //修改当前那个协程在执行此任务,用于取消任务
                     DB::execute(
                         sprintf(
-                            'update task set coroutine_id = %s,status = %s where id = %s;',
+                            'update task set coroutine_id = %s,status = %s,server_ip = %s  where id = %s;',
                             SwowCo::getCurrent()
                                 ->getId(),
                             Task::TASK_ING,
                             $job->getIdentity(),
+                            server_ip()
                         )
                     );
                     $this->handle($job);
@@ -103,11 +102,11 @@ class TaskConsumer extends AbstractConsumer
                     $result = Result::DROP;
                 }
 
-                $this->chan->push($result);
+                return $result;
             }, $job->getTimeout());
         });
 
-        return $this->chan->pop();
+        return Result::DROP;
     }
 
     /**

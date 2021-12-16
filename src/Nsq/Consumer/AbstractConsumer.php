@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace Serendipity\Job\Nsq\Consumer;
 
 use Hyperf\Contract\ConfigInterface;
-use Hyperf\Engine\Channel;
 use Hyperf\Utils\Pipeline;
 use Psr\Container\ContainerInterface;
 use Serendipity\Job\Contract\SerializerInterface;
@@ -51,8 +50,6 @@ abstract class AbstractConsumer
 
     private int $nums;
 
-    protected Channel $chan;
-
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
@@ -63,7 +60,6 @@ abstract class AbstractConsumer
         $this->pipeline = $this->container->get(Pipeline::class);
         $this->config = $this->container->get(ConfigInterface::class);
         $this->dingTalk = $this->container->get(DingTalk::class);
-        $this->chan = new Channel();
     }
 
     abstract public function consume(Message $message): ?string;

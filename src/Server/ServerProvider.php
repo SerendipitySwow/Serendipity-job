@@ -10,6 +10,7 @@ namespace Serendipity\Job\Server;
 
 use Carbon\Carbon;
 use DeviceDetector\DeviceDetector;
+use DeviceDetector\Parser\OperatingSystem;
 use FastRoute\Dispatcher;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
@@ -19,6 +20,7 @@ use Hyperf\Utils\Codec\Json;
 use Hyperf\Utils\Str;
 use PDO;
 use Psr\Http\Message\RequestInterface;
+use Ramsey\Uuid\Uuid;
 use Serendipity\Job\Console\DagJobCommand;
 use Serendipity\Job\Console\JobCommand;
 use Serendipity\Job\Constant\Statistical;
@@ -52,6 +54,7 @@ use SwowCloud\Contract\LoggerInterface;
 use SwowCloud\Contract\StdoutLoggerInterface;
 use SwowCloud\Redis\Lua\Hash\Incr;
 use Throwable;
+use ZxInc\Zxipdb\IPTool;
 use function FastRoute\simpleDispatcher;
 use function Serendipity\Job\Kernel\serendipity_format_throwable;
 use function Serendipity\Job\Kernel\serendipity_json_decode;
@@ -144,6 +147,26 @@ class ServerProvider extends AbstractProvider
                                     } else {
                                         $logger->info($debug);
                                     }
+                                    /**
+                                     * @var Command $command
+                                     */
+                                    $command = make(Command::class);
+                                    $command->insert('request_log', [
+                                        'application_name' => (string) Arr::get($request->getHeader('application'), 'application_name', 'Unknown'),
+                                        'app_key' => current($request->getHeader('app_key')),
+                                        'ip' => $connection->getPeerAddress(),
+                                        'ip_location' => Arr::get(IPTool::query($connection->getPeerAddress()), 'disp'),
+                                        'os' => OperatingSystem::getOsFamily($dd->getOs('name')) ?? 'Unknown',
+                                        'request_info' => $debug,
+                                        'request_time' => Carbon::now()->toDateTimeString(),
+                                    ]);
+                                    DB::run(function (PDO $PDO) use ($command) {
+                                        $statement = $PDO->prepare($command->getSql());
+
+                                        $this->bindValues($statement, $command->getParams());
+
+                                        $statement->execute();
+                                    });
                                 }
 
                                 Xhprof::endPoint($connection, $request);
@@ -182,11 +205,13 @@ class ServerProvider extends AbstractProvider
                 $request = Context::get(RequestInterface::class);
                 $params = $request->post();
                 $response = new Response();
-                if (!$application = DB::fetch(sprintf(
-                    "select * from application where app_key = '%s' and secret_key = '%s'",
-                    $params['app_key'],
-                    $params['secret_key']
-                ))) {
+                if (!$application = DB::fetch(
+                    sprintf(
+                        "select * from application where app_key = '%s' and secret_key = '%s'",
+                        $params['app_key'],
+                        $params['secret_key']
+                    )
+                )) {
                     return $response->json([
                         'code' => 1,
                         'msg' => 'Unknown Application Key#',
@@ -281,23 +306,25 @@ class ServerProvider extends AbstractProvider
                     $payload,
                     $secretKey
                 );
-                $response = new Response();
 
-                return $response->json($id ? [
-                    'code' => 0,
-                    'msg' => 'Ok!',
-                    'data' => [
-                        'nonce' => $nonce, 'timestamps' => $timestamps,
-                        'signature' => $clientSignature,
-                        'appKey' => $appKey,
-                        'payload' => $payload,
-                        'secretKey' => $secretKey,
-                    ],
-                ] : [
-                    'code' => 1,
-                    'msg' => '创建应用失败!',
-                    'data' => [],
-                ]);
+                return (new Response())->json(
+                    $id ? [
+                        'code' => 0,
+                        'msg' => 'Ok!',
+                        'data' => [
+                            'nonce' => $nonce,
+                            'timestamps' => $timestamps,
+                            'signature' => $clientSignature,
+                            'appKey' => $appKey,
+                            'payload' => $payload,
+                            'secretKey' => $secretKey,
+                        ],
+                    ] : [
+                        'code' => 1,
+                        'msg' => '创建应用失败!',
+                        'data' => [],
+                    ]
+                );
             });
             $router->addMiddleware(AuthMiddleware::class, function (RouteCollector $router) {
                 $router->post('/nsq/publish', function (): Response {
@@ -335,11 +362,13 @@ class ServerProvider extends AbstractProvider
                         'retryTimes' => $ret['retry_times'],
                     ]);
                     $json = $serializer->serialize($serializerObject);
-                    $json = Json::encode(array_merge([
-                        'body' => serendipity_json_decode(
-                            $json
-                        ),
-                    ], ['class' => $serializerObject::class]));
+                    $json = Json::encode(
+                        array_merge([
+                            'body' => serendipity_json_decode(
+                                $json
+                            ),
+                        ], ['class' => $serializerObject::class])
+                    );
                     $delay = strtotime($ret['runtime']) - time();
                     if ($delay > 0) {
                         /**
@@ -352,15 +381,17 @@ class ServerProvider extends AbstractProvider
                     }
                     $bool = $nsq->publish(AbstractConsumer::TOPIC_PREFIX . JobCommand::TOPIC_SUFFIX, $json, $delay > 0 ? $delay : 0.0);
 
-                    return $response->json($bool ? [
-                        'code' => 0,
-                        'msg' => 'Ok!',
-                        'data' => [],
-                    ] : [
-                        'code' => 1,
-                        'msg' => '推送nsq失败!',
-                        'data' => [],
-                    ]);
+                    return $response->json(
+                        $bool ? [
+                            'code' => 0,
+                            'msg' => 'Ok!',
+                            'data' => [],
+                        ] : [
+                            'code' => 1,
+                            'msg' => '推送nsq失败!',
+                            'data' => [],
+                        ]
+                    );
                 });
                 /*
                  * 投递dag任务
@@ -418,7 +449,7 @@ class ServerProvider extends AbstractProvider
                     $params = $request->post();
                     $appKey = $request->getHeaderLine('app_key');
                     $application = $request->getHeader('application');
-                    $taskNo = Arr::get($params, 'taskNo');
+                    $taskNo = Arr::get($params, 'taskNo', Uuid::uuid4()->toString());
                     $content = Arr::get($params, 'content');
                     $timeout = Arr::get($params, 'timeout');
                     $name = Arr::get($params, 'name');
@@ -427,11 +458,15 @@ class ServerProvider extends AbstractProvider
                     $runtime = $runtime ? Carbon::parse($runtime)
                         ->toDateTimeString() : Carbon::now()
                         ->toDateTimeString();
-                    if (current(DB::fetch(sprintf(
-                        "select count(*) from task where app_key = '%s' and task_no = '%s'",
-                        $appKey,
-                        $taskNo
-                    ))) > 0) {
+                    if (current(
+                        DB::fetch(
+                            sprintf(
+                                    "select count(*) from task where app_key = '%s' and task_no = '%s'",
+                                    $appKey,
+                                    $taskNo
+                                )
+                        )
+                    ) > 0) {
                         $json = [
                             'code' => 1,
                             'msg' => '请勿重复提交!',
@@ -492,11 +527,13 @@ class ServerProvider extends AbstractProvider
                             'retryTimes' => 1,
                         ]);
                         $json = $serializer->serialize($serializerObject);
-                        $json = Json::encode(array_merge([
-                            'body' => serendipity_json_decode(
-                                $json
-                            ),
-                        ], ['class' => $serializerObject::class]));
+                        $json = Json::encode(
+                            array_merge([
+                                'body' => serendipity_json_decode(
+                                    $json
+                                ),
+                            ], ['class' => $serializerObject::class])
+                        );
                         $bool = $nsq->publish(AbstractConsumer::TOPIC_PREFIX . JobCommand::TOPIC_SUFFIX, $json, $delay);
                         if ($delay > 0) {
                             /**
@@ -541,8 +578,12 @@ class ServerProvider extends AbstractProvider
                         ]
                     );
 
-                    return $swowResponse->json(serendipity_json_decode($response->getBody()
-                        ->getContents()));
+                    return $swowResponse->json(
+                        serendipity_json_decode(
+                            $response->getBody()
+                                ->getContents()
+                        )
+                    );
                 });
                 /*
                  * 取消任务
@@ -568,8 +609,12 @@ class ServerProvider extends AbstractProvider
                         ]
                     );
 
-                    return $swowResponse->json(serendipity_json_decode($response->getBody()
-                        ->getContents()));
+                    return $swowResponse->json(
+                        serendipity_json_decode(
+                            $response->getBody()
+                                ->getContents()
+                        )
+                    );
                 });
             });
         }, [
@@ -581,7 +626,7 @@ class ServerProvider extends AbstractProvider
     {
         $channel = new Channel();
         SerendipitySwowCo::create(function () use ($request, $channel) {
-            SerendipitySwowCo::defer(function () {
+            SerendipitySwowCo::defer(static function () {
                 Context::destroy(RequestInterface::class);
             });
             Context::set(RequestInterface::class, $request);
@@ -603,7 +648,8 @@ class ServerProvider extends AbstractProvider
                     $response->error(Status::NOT_ALLOWED, 'Method Not Allowed');
                     break;
                 case Dispatcher::FOUND:
-                    [ , $handler, $vars ] = $routeInfo;
+                    [, $handler, $vars] = $routeInfo;
+
                     if (is_array($handler) && $handler['middlewares']) {
                         //middleware
                         /**

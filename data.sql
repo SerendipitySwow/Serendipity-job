@@ -44,6 +44,7 @@ create table failed_jobs
 )
     collate = utf8mb4_unicode_ci;
 
+-- auto-generated definition
 create table task
 (
     id           bigint unsigned auto_increment comment '主键ID'
@@ -62,9 +63,12 @@ create table task
     coroutine_id bigint                   default 0                 not null comment '执行当前的任务协程ID,用于取消当前任务',
     memo         longtext                                           null comment '当任务执行出现错误时,记录错误信息',
     result       longtext                                           null comment '执行任务完成的结果',
-    retry_times  int                      default 0                 not null comment '重试次数'
+    retry_times  int                      default 0                 not null comment '重试次数',
+    server_ip    varchar(32)              default '127.0.0.1'       not null comment '运行任务的服务端IP地址',
+    constraint unq_task_no
+        unique (task_no)
 )
-    comment '任务列表' collate = utf8mb4_unicode_ci;
+    comment '任务列表';
 
 create index idx_create_at
     on task (created_at);
@@ -74,6 +78,8 @@ create index idx_is_deleted
 
 create index idx_task_no
     on task (app_key, task_no);
+
+
 
 create table task_abort
 (

@@ -11,6 +11,7 @@ namespace Serendipity\Job\Kernel;
 #-------------------------注意:所有的方法名称均以serendipity_开头避免和其他框架命名冲突 ----------------------------#
 
 use Hyperf\Utils\Codec\Json;
+use Serendipity\Job\Util\Arr;
 use Throwable;
 
 if (!function_exists('serendipity_format_throwable')) {
@@ -32,5 +33,14 @@ if (!function_exists('serendipity_json_decode')) {
     function serendipity_json_decode(string $json): array|object
     {
         return \simdjson_decode($json, true, 512) ?? Json::decode($json);
+    }
+}
+
+if (!function_exists('server_ip')) {
+    function server_ip(): string
+    {
+        $ifaces = net_get_interfaces();
+
+        return Arr::get($ifaces, 'en0.unicast.2.address');
     }
 }
