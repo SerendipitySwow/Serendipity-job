@@ -9,7 +9,6 @@ declare(strict_types=1);
 namespace Serendipity\Job\Nsq\Consumer;
 
 use Carbon\Carbon;
-use Hyperf\Engine\Channel;
 use Hyperf\Utils\Codec\Json;
 use InvalidArgumentException;
 use Serendipity\Job\Constant\Statistical;
@@ -36,25 +35,27 @@ class TaskConsumer extends AbstractConsumer
      */
     public function consume(Message $message): ?string
     {
-        $channel = new Channel(100);
-        SerendipitySwowCo::create(function () use ($message, $channel) {
+        SerendipitySwowCo::create(function () use ($message) {
             $redis = $this->redis();
             $job = $this->deserializeMessage($message);
             if (!$job && !$job instanceof JobInterface) {
                 $this->logger->error('Invalid task#' . $message->getBody());
+                $this->chan->push(Result::DROP);
 
-                return Result::DROP;
+                return $this->chan->pop();
             }
             //判断消息是否被重复消费.
             if ($redis->get(sprintf(static::TASK_CONSUMER_REDIS_PREFIX, $job->getIdentity(), $job->getCounter())) >= 1) {
                 $this->logger->error(sprintf('Message %s has been consumed#', $job->getIdentity()));
 
-                return Result::DROP;
+                $this->chan->push(Result::DROP);
+
+                return $this->chan->pop();
             }
 
             $incr = make(Incr::class);
 
-            return $this->waiter->wait(function () use ($job, $incr, $channel) {
+            return $this->waiter->wait(function () use ($job, $incr) {
                 try {
                     //修改当前那个协程在执行此任务,用于取消任务
                     DB::execute(
@@ -102,11 +103,11 @@ class TaskConsumer extends AbstractConsumer
                     $result = Result::DROP;
                 }
 
-                $channel->push($result);
+                $this->chan->push($result);
             }, $job->getTimeout());
         });
 
-        return $channel->pop();
+        return $this->chan->pop();
     }
 
     /**
