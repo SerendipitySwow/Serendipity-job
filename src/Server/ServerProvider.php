@@ -461,10 +461,10 @@ class ServerProvider extends AbstractProvider
                     if (current(
                         DB::fetch(
                             sprintf(
-                                    "select count(*) from task where app_key = '%s' and task_no = '%s'",
-                                    $appKey,
-                                    $taskNo
-                                )
+                                "select count(*) from task where app_key = '%s' and task_no = '%s'",
+                                $appKey,
+                                $taskNo
+                            )
                         )
                     ) > 0) {
                         $json = [

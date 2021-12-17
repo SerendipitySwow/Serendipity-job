@@ -27,9 +27,7 @@ class ArcherTest extends TestCase
         };
         $task1 = Archer::taskDefer($callback, ['get', 'some_key']);
         $task2 = Archer::taskDefer($callback, ['hget', 'a', 'b']);
-        $task3 = Archer::taskDefer($callback, ['lget', 'k1', 10]);
         var_dump($task1->recv());
         var_dump($task2->recv());
-        var_dump($task3->recv());
     }
 }
