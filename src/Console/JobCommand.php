@@ -22,7 +22,7 @@ use Serendipity\Job\Event\CrontabEvent;
 use Serendipity\Job\Kernel\Http\Response;
 use Serendipity\Job\Kernel\Provider\KernelProvider;
 use Serendipity\Job\Nsq\Consumer\AbstractConsumer;
-use Serendipity\Job\Nsq\Consumer\TaskConsumer;
+use Serendipity\Job\Nsq\Consumer\TaskConsumer2;
 use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
 use SerendipitySwow\Nsq\Message;
 use SerendipitySwow\Nsq\Nsq;
@@ -254,34 +254,69 @@ final class JobCommand extends Command
     {
         SerendipitySwowCo::create(
             function () {
-                $subscriber = make(Nsq::class, [
-                    $this->container,
-                    $this->config->get(sprintf('nsq.%s', 'default')),
-                ]);
-                $consumer = $this->makeConsumer(TaskConsumer::class, AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX, 'JobConsumer');
-                $subscriber->subscribe(
-                    AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX,
-                    'JobConsumer',
-                    function (Message $message) use ($consumer) {
-                        try {
-                            $result = $consumer->consume($message);
-                        } catch (Throwable $error) {
-                            //Segmentation fault
-                            $this->stdoutLogger->error(
-                                sprintf(
-                                    'Consumer failed to consume %s,reason: %s,file: %s,line: %s',
-                                    'Consumer',
-                                    $error->getMessage(),
-                                    $error->getFile(),
-                                    $error->getLine()
-                                )
-                            );
-                            $result = Result::DROP;
-                        }
+                /* 测试多个消费者并发代码 */
+                for ($i = 0; $i < 5; $i++) {
+                    SerendipitySwowCo::create(function () use ($i) {
+                        $subscriber = make(Nsq::class, [
+                            $this->container,
+                            $this->config->get(sprintf('nsq.%s', 'default')),
+                        ]);
+                        $consumer = $this->makeConsumer(TaskConsumer2::class, AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX, 'JobConsumer' . $i);
+                        $subscriber->subscribe(
+                            AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX,
+                            'JobConsumer' . $i,
+                            function (Message $message) use ($consumer) {
+                                try {
+                                    $result = $consumer->consume($message);
+                                } catch (Throwable $error) {
+                                    //Segmentation fault
+                                    $this->stdoutLogger->error(
+                                        sprintf(
+                                            'Consumer failed to consume %s,reason: %s,file: %s,line: %s',
+                                            'Consumer',
+                                            $error->getMessage(),
+                                            $error->getFile(),
+                                            $error->getLine()
+                                        )
+                                    );
+                                    $result = Result::DROP;
+                                }
 
-                        return $result;
-                    }
-                );
+                                return $result;
+                            }
+                        );
+                    });
+                }
+                /*
+                 * $subscriber = make(Nsq::class, [
+                 * $this->container,
+                 * $this->config->get(sprintf('nsq.%s', 'default')),
+                 * ]);
+                 * $consumer = $this->makeConsumer(TaskConsumer::class, AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX, 'JobConsumer');
+                 * $subscriber->subscribe(
+                 * AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX,
+                 * 'JobConsumer',
+                 * function (Message $message) use ($consumer) {
+                 * try {
+                 * $result = $consumer->consume($message);
+                 * } catch (Throwable $error) {
+                 * //Segmentation fault
+                 * $this->stdoutLogger->error(
+                 * sprintf(
+                 * 'Consumer failed to consume %s,reason: %s,file: %s,line: %s',
+                 * 'Consumer',
+                 * $error->getMessage(),
+                 * $error->getFile(),
+                 * $error->getLine()
+                 * )
+                 * );
+                 * $result = Result::DROP;
+                 * }
+                 *
+                 * return $result;
+                 * }
+                 * );
+                 */
             }
         );
     }

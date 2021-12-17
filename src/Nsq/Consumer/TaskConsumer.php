@@ -36,6 +36,7 @@ class TaskConsumer extends AbstractConsumer
      */
     public function consume(Message $message): ?string
     {
+        /* 需要用channel处理返回值的问题 */
         SerendipitySwowCo::create(function () use ($message) {
             $redis = $this->redis();
             $job = $this->deserializeMessage($message);
