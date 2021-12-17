@@ -58,12 +58,12 @@ class TaskConsumer extends AbstractConsumer
                     //修改当前那个协程在执行此任务,用于取消任务
                     DB::execute(
                         sprintf(
-                            'update task set coroutine_id = %s,status = %s,server_ip = %s  where id = %s;',
+                            'update task set coroutine_id = %s,status = %s,server_ip = "%s"  where id = %s;',
                             SwowCo::getCurrent()
                                 ->getId(),
                             Task::TASK_ING,
-                            $job->getIdentity(),
-                            server_ip()
+                            server_ip(),
+                            $job->getIdentity()
                         )
                     );
                     $this->handle($job);
