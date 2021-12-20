@@ -8,12 +8,12 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Subscriber;
 
+use Hyperf\Utils\Arr;
 use Hyperf\Utils\Str;
 use JetBrains\PhpStorm\ArrayShape;
 use Psr\Container\ContainerInterface;
 use Serendipity\Job\Event\QueryExecuted;
 use Serendipity\Job\Logger\LoggerFactory;
-use Serendipity\Job\Util\Arr;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class DbQueryExecutedSubscriber implements EventSubscriberInterface

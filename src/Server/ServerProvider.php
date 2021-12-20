@@ -16,7 +16,10 @@ use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\Engine\Channel;
+use Hyperf\Utils\Arr;
 use Hyperf\Utils\Codec\Json;
+use Hyperf\Utils\Context;
+use Hyperf\Utils\Coroutine as HyperfCo;
 use Hyperf\Utils\Str;
 use PDO;
 use Psr\Http\Message\RequestInterface;
@@ -39,9 +42,6 @@ use Serendipity\Job\Middleware\AuthMiddleware;
 use Serendipity\Job\Middleware\Exception\UnauthorizedException;
 use Serendipity\Job\Nsq\Consumer\AbstractConsumer;
 use Serendipity\Job\Serializer\SymfonySerializer;
-use Serendipity\Job\Util\Arr;
-use Serendipity\Job\Util\Context;
-use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
 use SerendipitySwow\Nsq\Nsq;
 use Spatie\Emoji\Emoji;
 use Swow\Coroutine\Exception as CoroutineException;
@@ -92,7 +92,7 @@ class ServerProvider extends AbstractProvider
         while (true) {
             try {
                 $connection = $server->acceptConnection();
-                SerendipitySwowCo::create(function () use ($connection) {
+                HyperfCo::create(function () use ($connection) {
                     try {
                         while (true) {
                             $time = microtime(true);
@@ -625,8 +625,8 @@ class ServerProvider extends AbstractProvider
     protected function dispatcher(SwowRequest $request): Response
     {
         $channel = new Channel();
-        SerendipitySwowCo::create(function () use ($request, $channel) {
-            SerendipitySwowCo::defer(static function () {
+        HyperfCo::create(function () use ($request, $channel) {
+            HyperfCo::defer(static function () {
                 Context::destroy(RequestInterface::class);
             });
             Context::set(RequestInterface::class, $request);

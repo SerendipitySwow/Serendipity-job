@@ -9,12 +9,12 @@ declare(strict_types=1);
 namespace Serendipity\Job\Kernel\Concurrent;
 
 use Hyperf\Engine\Channel;
+use Hyperf\Utils\Coroutine as HyperfCo;
 use PDO;
 use Psr\Log\LoggerInterface;
 use Serendipity\job\Kernel\Concurrent\Exception\MySQLRuntimeException;
 use Serendipity\Job\Util\Coordinator\Constants;
 use Serendipity\Job\Util\Coordinator\CoordinatorManager;
-use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
 use Throwable;
 
 class ConcurrentMySQLPattern
@@ -52,7 +52,7 @@ class ConcurrentMySQLPattern
     public function loop(): void
     {
         $this->chan = new Channel(1);
-        SerendipitySwowCo::create(function () {
+        HyperfCo::create(function () {
             while (true) {
                 try {
                     $closure = $this->chan->pop();
@@ -71,7 +71,7 @@ class ConcurrentMySQLPattern
         static $once;
         if (!isset($once)) {
             $once = true;
-            SerendipitySwowCo::create(function () {
+            HyperfCo::create(function () {
                 CoordinatorManager::until(Constants::COMMAND_EXIT)->yield();
                 $this->chan?->close();
             });

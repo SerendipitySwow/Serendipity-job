@@ -10,11 +10,11 @@ namespace Serendipity\Job\Middleware;
 
 use Hyperf\Utils\ApplicationContext;
 use Hyperf\Utils\Codec\Json;
+use Hyperf\Utils\Context;
 use Psr\Http\Message\RequestInterface;
 use Serendipity\Job\Db\DB;
 use Serendipity\Job\Kernel\Signature;
 use Serendipity\Job\Middleware\Exception\UnauthorizedException;
-use Serendipity\Job\Util\Context;
 use Swow\Http\Server\Request;
 use SwowCloud\Redis\RedisFactory;
 use function Serendipity\Job\Kernel\serendipity_json_decode;

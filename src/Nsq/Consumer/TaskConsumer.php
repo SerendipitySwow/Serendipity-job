@@ -10,6 +10,7 @@ namespace Serendipity\Job\Nsq\Consumer;
 
 use Carbon\Carbon;
 use Hyperf\Utils\Codec\Json;
+use Hyperf\Utils\Coroutine as HyperfCo;
 use InvalidArgumentException;
 use Serendipity\Job\Constant\Statistical;
 use Serendipity\Job\Constant\Task;
@@ -17,7 +18,6 @@ use Serendipity\Job\Contract\EventDispatcherInterface;
 use Serendipity\Job\Contract\JobInterface;
 use Serendipity\Job\Db\DB;
 use Serendipity\Job\Event\UpdateJobEvent;
-use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
 use SerendipitySwow\Nsq\Message;
 use SerendipitySwow\Nsq\Nsq;
 use SerendipitySwow\Nsq\Result;
@@ -37,7 +37,7 @@ class TaskConsumer extends AbstractConsumer
     public function consume(Message $message): ?string
     {
         /* 需要用channel处理返回值的问题 */
-        SerendipitySwowCo::create(function () use ($message) {
+        HyperfCo::create(function () use ($message) {
             $redis = $this->redis();
             $job = $this->deserializeMessage($message);
             if (!$job && !$job instanceof JobInterface) {
@@ -165,7 +165,7 @@ class TaskConsumer extends AbstractConsumer
                  *          push nsq
                  */
                 $nsq = make(Nsq::class, [$this->container, $config]);
-                SerendipitySwowCo::create(function () use ($nsq, $message, $job) {
+                HyperfCo::create(function () use ($nsq, $message, $job) {
                     $json = Json::encode(
                         array_merge([
                             'body' => serendipity_json_decode(

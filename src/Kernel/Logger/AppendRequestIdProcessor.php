@@ -8,9 +8,9 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Kernel\Logger;
 
+use Hyperf\Utils\Context;
 use Monolog\Processor\MemoryProcessor;
 use Ramsey\Uuid\Uuid;
-use Serendipity\Job\Util\Context;
 
 class AppendRequestIdProcessor extends MemoryProcessor
 {

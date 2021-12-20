@@ -10,8 +10,8 @@ namespace Serendipity\Job\Kernel;
 
 #-------------------------注意:所有的方法名称均以serendipity_开头避免和其他框架命名冲突 ----------------------------#
 
+use Hyperf\Utils\Arr;
 use Hyperf\Utils\Codec\Json;
-use Serendipity\Job\Util\Arr;
 use Throwable;
 
 if (!function_exists('serendipity_format_throwable')) {

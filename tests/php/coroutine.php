@@ -36,7 +36,7 @@ require_once(dirname(__DIR__)) . '/../vendor/autoload.php';
 //    'msg' => 'ok!',
 //    'data' => $data,
 //], JSON_THROW_ON_ERROR);
-$id = \Serendipity\Job\Util\Coroutine::create(function () {
+$id = \ Hyperf\Utils\Coroutine::create(function () {
     echo 1;
     \Hyperf\Engine\Coroutine::getContextFor()->task = 1;
     var_dump(\Hyperf\Engine\Coroutine::getContextFor());

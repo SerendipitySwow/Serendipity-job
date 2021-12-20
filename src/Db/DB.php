@@ -10,10 +10,10 @@ namespace Serendipity\Job\Db;
 
 use Closure;
 use Hyperf\Utils\ApplicationContext;
+use Hyperf\Utils\Context;
 use Serendipity\Job\Contract\EventDispatcherInterface;
 use Serendipity\Job\Db\Pool\PoolFactory;
 use Serendipity\Job\Event\QueryExecuted;
-use Serendipity\Job\Util\Context;
 use Throwable;
 
 /**

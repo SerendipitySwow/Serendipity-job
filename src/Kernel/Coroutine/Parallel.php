@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Kernel\Coroutine;
 
-use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
+use Hyperf\Utils\Coroutine as HyperfCo;
 use Swow\Channel;
 
 class Parallel
@@ -48,7 +48,7 @@ class Parallel
 
         foreach ($this->callbacks as $key => $callback) {
             $this->concurrentChannel && $this->concurrentChannel->push(true);
-            SerendipitySwowCo::create(function () use ($callback, $key, $wg, &$result, &$throwables) {
+            HyperfCo::create(function () use ($callback, $key, $wg, &$result, &$throwables) {
                 try {
                     $result[$key] = call($callback);
                 } catch (\Throwable $throwable) {

@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\Utils\ApplicationContext;
 use Hyperf\Utils\Codec\Json;
+use Hyperf\Utils\Coroutine as HyperfCo;
 use Psr\Container\ContainerInterface;
 use Serendipity\Job\Constant\Task;
 use Serendipity\Job\Contract\EventDispatcherInterface;
@@ -23,7 +24,6 @@ use Serendipity\Job\Kernel\Http\Response;
 use Serendipity\Job\Kernel\Provider\KernelProvider;
 use Serendipity\Job\Nsq\Consumer\AbstractConsumer;
 use Serendipity\Job\Nsq\Consumer\TaskConsumer2;
-use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
 use SerendipitySwow\Nsq\Message;
 use SerendipitySwow\Nsq\Nsq;
 use SerendipitySwow\Nsq\Result;
@@ -127,7 +127,7 @@ final class JobCommand extends Command
         while (true) {
             try {
                 $connection = $server->acceptConnection();
-                SerendipitySwowCo::create(static function () use ($connection) {
+                HyperfCo::create(static function () use ($connection) {
                     try {
                         while (true) {
                             $request = null;
@@ -252,11 +252,11 @@ final class JobCommand extends Command
 
     protected function subscribe(): void
     {
-        SerendipitySwowCo::create(
+        HyperfCo::create(
             function () {
                 /* 测试多个消费者并发代码 */
                 for ($i = 0; $i < 10; $i++) {
-                    SerendipitySwowCo::create(function () use ($i) {
+                    HyperfCo::create(function () use ($i) {
                         $subscriber = make(Nsq::class, [
                             $this->container,
                             $this->config->get(sprintf('nsq.%s', 'default')),
@@ -344,7 +344,7 @@ final class JobCommand extends Command
         $this->showLogo();
         KernelProvider::create(self::COMMAND_PROVIDER_NAME)
             ->bootApp();
-        SerendipitySwowCo::create(fn () => $this->dispatchCrontab());
+        HyperfCo::create(fn () => $this->dispatchCrontab());
     }
 
     protected function dispatchCrontab(): void

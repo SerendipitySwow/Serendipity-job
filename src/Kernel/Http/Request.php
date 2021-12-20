@@ -8,9 +8,9 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Kernel\Http;
 
+use Hyperf\Utils\Arr;
 use Hyperf\Utils\Codec\Json;
 use JetBrains\PhpStorm\Pure;
-use Serendipity\Job\Util\Arr;
 use Swow\Http\Server\Request as SwowRequest;
 use function Serendipity\Job\Kernel\serendipity_json_decode;
 

@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace Serendipity\Job\Nsq\Consumer;
 
+use Hyperf\Utils\Coroutine as HyperfCo;
 use Serendipity\Job\Constant\Statistical;
 use Serendipity\Job\Constant\Task;
 use Serendipity\Job\Contract\DagInterface;
@@ -17,7 +18,6 @@ use Serendipity\Job\Event\UpdateWorkflowEvent;
 use Serendipity\Job\Kernel\Dag\Dag;
 use Serendipity\Job\Kernel\Dag\Exception\InvalidArgumentException;
 use Serendipity\Job\Kernel\Dag\Vertex;
-use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
 use SerendipitySwow\Nsq\Message;
 use SerendipitySwow\Nsq\Result;
 use SwowCloud\Redis\Lua\Hash\Incr;
@@ -41,7 +41,7 @@ class DagConsumer extends AbstractConsumer
             return Result::DROP;
         }
 
-        SerendipitySwowCo::create(function () use ($id, $tasks, $dag) {
+        HyperfCo::create(function () use ($id, $tasks, $dag) {
             /**
              * @var Dag $dag
              */
