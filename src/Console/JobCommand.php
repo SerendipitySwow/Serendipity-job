@@ -255,7 +255,7 @@ final class JobCommand extends Command
         SerendipitySwowCo::create(
             function () {
                 /* 测试多个消费者并发代码 */
-                for ($i = 0; $i < 5; $i++) {
+                for ($i = 0; $i < 10; $i++) {
                     SerendipitySwowCo::create(function () use ($i) {
                         $subscriber = make(Nsq::class, [
                             $this->container,

@@ -41,6 +41,6 @@ if (!function_exists('server_ip')) {
     {
         $ifaces = net_get_interfaces();
 
-        return Arr::get($ifaces, 'en0.unicast.2.address');
+        return Arr::get($ifaces, 'en0.unicast.2.address', '127.0.0.1');
     }
 }
