@@ -40,6 +40,10 @@ final class DagJobCommand extends Command
     protected ?SerializerInterface $serializer = null;
 
     protected ?Nsq $subscriber = null;
+    /**
+     * @var \Psr\Container\ContainerInterface
+     */
+    private ContainerInterface $container;
 
     protected function configure(): void
     {

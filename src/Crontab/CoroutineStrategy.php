@@ -14,9 +14,6 @@ use Psr\Container\ContainerInterface;
 
 class CoroutineStrategy
 {
-    /**
-     * @var \Psr\Container\ContainerInterface
-     */
     private ContainerInterface $container;
 
     public function __construct(ContainerInterface $container)

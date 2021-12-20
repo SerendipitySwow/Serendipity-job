@@ -113,7 +113,7 @@ final class JobCommand extends Command
         $this->stdoutLogger->info(str_repeat(Emoji::flagsForFlagChina() . '  ', 10));
         $port = (int) $this->input->getOption('port');
         $host = $this->input->getOption('host');
-        $this->stdoutLogger->info(sprintf('%s JobConsumer Successfully Processed# %s', Emoji::manSurfing(), Emoji::rocket()));
+        $this->stdoutLogger->info(sprintf('%s JobConsumer Successfully Processed# Host:[%s]  Port:[%s] %s', Emoji::manSurfing(), $host, $port, Emoji::rocket()));
         $this->subscribe();
         $this->makeServer($host, $port);
 
