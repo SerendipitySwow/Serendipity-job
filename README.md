@@ -31,7 +31,7 @@
 ![home](./img/info.jpg)
 ![home](./img/stat.png)
 
-# 🚀Serendipity-Job  For 🏆Swow 任务平台
+# 🚀Serendipity-Job  For 🏆Swow 分布式任务平台
 
 🚀 🏆 Task Platform Developed Based On Swow and Php8
 
@@ -52,6 +52,7 @@
 12.支持刷新应用签名(完成)
 13.支持系统监控基于xhprof(不支持sql)不建议开启
 14.workflow->https://github.com/uuf6429/state-engine-php
+15.支持分布式(Task可以支持分布式)
 ```
 
 ## 基于Vue、Vditor，所构建的在线 Markdown 编辑器，支持流程图、甘特图、时序图、任务列表、HTML 自动转换为 Markdown 等功能；🎉新增「所见即所得」编辑模式。

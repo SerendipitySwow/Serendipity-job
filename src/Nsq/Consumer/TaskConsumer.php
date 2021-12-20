@@ -23,6 +23,7 @@ use SerendipitySwow\Nsq\Nsq;
 use SerendipitySwow\Nsq\Result;
 use Swow\Coroutine as SwowCo;
 use SwowCloud\Redis\Lua\Hash\Incr;
+use SwowCloud\RedisLock\RedisLock;
 use Throwable;
 use function Serendipity\Job\Kernel\serendipity_json_decode;
 use function Serendipity\Job\Kernel\server_ip;
@@ -36,25 +37,22 @@ class TaskConsumer extends AbstractConsumer
      */
     public function consume(Message $message): ?string
     {
-        /* 需要用channel处理返回值的问题 */
+        /* 测试redis-lock 性能*/
         HyperfCo::create(function () use ($message) {
-            $redis = $this->redis();
             $job = $this->deserializeMessage($message);
             if (!$job && !$job instanceof JobInterface) {
                 $this->logger->error('Invalid task#' . $message->getBody());
 
-                return Result::DROP;
+                return $this->chan->push(Result::DROP);
             }
-            //判断消息是否被重复消费.
-            if ($redis->get(sprintf(static::TASK_CONSUMER_REDIS_PREFIX, $job->getIdentity(), $job->getCounter())) >= 1) {
-                $this->logger->error(sprintf('Message %s has been consumed#', $job->getIdentity()));
+            $lock = make(RedisLock::class);
+            if (!$lock->lock((string) $job->getIdentity(), (int) ($job->getTimeout() / 1000))) {
+                $this->logger->error(sprintf('Task:[%s] Processing#', $job->getIdentity()));
 
-                return Result::DROP;
+                return $this->chan->push(Result::DROP);
             }
-
             $incr = make(Incr::class);
-
-            return $this->waiter->wait(function () use ($job, $incr) {
+            $result = $this->waiter->wait(function () use ($job, $incr) {
                 try {
                     //修改当前那个协程在执行此任务,用于取消任务
                     DB::execute(
@@ -104,10 +102,13 @@ class TaskConsumer extends AbstractConsumer
                 }
 
                 return $result;
-            }, $job->getTimeout());
+            });
+            $lock->unLock();
+
+            return $this->chan->push($result);
         });
 
-        return Result::DROP;
+        return $this->chan->pop();
     }
 
     /**
@@ -203,12 +204,13 @@ class TaskConsumer extends AbstractConsumer
         }
     }
 
+    /**
+     * @return JobInterface
+     */
     protected function deserializeMessage(Message $message): mixed
     {
         $body = serendipity_json_decode($message->getBody());
-        /*
-         * @var JobInterface $job
-         */
+
         return $this->serializer->deserialize(
             Json::encode($body['body'] ?? ''),
             $body['class'] ?? throw new InvalidArgumentException('Unknown class.')

@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Serendipity\Job\Console;
 
 use Carbon\Carbon;
+use Exception;
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\Utils\ApplicationContext;
 use Hyperf\Utils\Codec\Json;
@@ -23,7 +24,7 @@ use Serendipity\Job\Event\CrontabEvent;
 use Serendipity\Job\Kernel\Http\Response;
 use Serendipity\Job\Kernel\Provider\KernelProvider;
 use Serendipity\Job\Nsq\Consumer\AbstractConsumer;
-use Serendipity\Job\Nsq\Consumer\TaskConsumer2;
+use Serendipity\Job\Nsq\Consumer\TaskConsumer;
 use SerendipitySwow\Nsq\Message;
 use SerendipitySwow\Nsq\Nsq;
 use SerendipitySwow\Nsq\Result;
@@ -261,7 +262,7 @@ final class JobCommand extends Command
                             $this->container,
                             $this->config->get(sprintf('nsq.%s', 'default')),
                         ]);
-                        $consumer = $this->makeConsumer(TaskConsumer2::class, AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX, 'JobConsumer' . $i);
+                        $consumer = $this->makeConsumer(TaskConsumer::class, AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX, 'JobConsumer' . $i);
                         $subscriber->subscribe(
                             AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX,
                             'JobConsumer' . $i,
@@ -287,36 +288,6 @@ final class JobCommand extends Command
                         );
                     });
                 }
-                /*
-                 * $subscriber = make(Nsq::class, [
-                 * $this->container,
-                 * $this->config->get(sprintf('nsq.%s', 'default')),
-                 * ]);
-                 * $consumer = $this->makeConsumer(TaskConsumer::class, AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX, 'JobConsumer');
-                 * $subscriber->subscribe(
-                 * AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX,
-                 * 'JobConsumer',
-                 * function (Message $message) use ($consumer) {
-                 * try {
-                 * $result = $consumer->consume($message);
-                 * } catch (Throwable $error) {
-                 * //Segmentation fault
-                 * $this->stdoutLogger->error(
-                 * sprintf(
-                 * 'Consumer failed to consume %s,reason: %s,file: %s,line: %s',
-                 * 'Consumer',
-                 * $error->getMessage(),
-                 * $error->getFile(),
-                 * $error->getLine()
-                 * )
-                 * );
-                 * $result = Result::DROP;
-                 * }
-                 *
-                 * return $result;
-                 * }
-                 * );
-                 */
             }
         );
     }
