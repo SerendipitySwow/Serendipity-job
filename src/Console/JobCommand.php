@@ -53,7 +53,7 @@ final class JobCommand extends Command
 
     protected const COMMAND_PROVIDER_NAME = 'Job';
 
-    public const TOPIC_SUFFIX = 'task';
+    public const TOPIC_SUFFIX = 'job';
 
     protected ?ConfigInterface $config = null;
 
