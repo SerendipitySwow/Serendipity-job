@@ -263,7 +263,7 @@ final class JobCommand extends Command
                             $this->config->get(sprintf('nsq.%s', 'default')),
                         ]);
                         $consumer = $this->makeConsumer(TaskConsumer::class, AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX, 'JobConsumer' . $i);
-                        $this->stdoutLogger->debug( 'JobConsumer' . $i.' Started#');
+                        $this->stdoutLogger->debug('JobConsumer' . $i . ' Started#');
                         $subscriber->subscribe(
                             AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX,
                             'JobConsumer' . $i,
