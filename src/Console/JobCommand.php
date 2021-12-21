@@ -32,7 +32,7 @@ use SwowCloud\Job\Event\CrontabEvent;
 use SwowCloud\Job\Kernel\Http\Response;
 use SwowCloud\Job\Kernel\Provider\KernelProvider;
 use SwowCloud\Job\Nsq\Consumer\AbstractConsumer;
-use SwowCloud\Job\Nsq\Consumer\TaskConsumer;
+use SwowCloud\Job\Nsq\Consumer\JobConsumer;
 use SwowCloud\Nsq\Message;
 use SwowCloud\Nsq\Nsq;
 use SwowCloud\Nsq\Result;
@@ -262,7 +262,7 @@ final class JobCommand extends Command
                             $this->container,
                             $this->config->get(sprintf('nsq.%s', 'default')),
                         ]);
-                        $consumer = $this->makeConsumer(TaskConsumer::class, AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX, 'JobConsumer' . $i);
+                        $consumer = $this->makeConsumer(JobConsumer::class, AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX, 'JobConsumer' . $i);
                         $this->stdoutLogger->debug('JobConsumer' . $i . ' Started#');
                         $subscriber->subscribe(
                             AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX,

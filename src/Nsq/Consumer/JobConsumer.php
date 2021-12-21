@@ -28,7 +28,7 @@ use Throwable;
 use function SwowCloud\Job\Kernel\serendipity_json_decode;
 use function SwowCloud\Job\Kernel\server_ip;
 
-class TaskConsumer extends AbstractConsumer
+class JobConsumer extends AbstractConsumer
 {
     protected const TASK_CONSUMER_REDIS_PREFIX = 'TaskIDEntity#%s-%s';
 
