@@ -4,7 +4,7 @@
 declare(strict_types=1);
 
 use Psr\Container\ContainerInterface;
-use Serendipity\Job\Application;
+use SwowCloud\Job\Application;
 use Spatie\Emoji\Emoji;
 
 define('BASE_PATH', dirname(__DIR__));

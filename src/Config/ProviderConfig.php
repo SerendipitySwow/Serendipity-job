@@ -1,15 +1,15 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Config;
+namespace SwowCloud\Job\Config;
 
 use Hyperf\Utils\ApplicationContext;
-use Serendipity\Job\Config\Loader\YamlLoader;
+use SwowCloud\Job\Config\Loader\YamlLoader;
 use function class_exists;
 use function is_string;
 use function method_exists;

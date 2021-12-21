@@ -1,16 +1,16 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Workflow\Implementation\Entities;
+namespace SwowCloud\Job\Workflow\Implementation\Entities;
 
-use Serendipity\Job\Workflow\Interfaces\DescribableInterface;
-use Serendipity\Job\Workflow\Interfaces\StateInterface;
-use Serendipity\Job\Workflow\Interfaces\TransitionInterface;
+use SwowCloud\Job\Workflow\Interfaces\DescribableInterface;
+use SwowCloud\Job\Workflow\Interfaces\StateInterface;
+use SwowCloud\Job\Workflow\Interfaces\TransitionInterface;
 
 class Transition implements TransitionInterface, DescribableInterface
 {

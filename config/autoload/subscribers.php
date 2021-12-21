@@ -1,15 +1,15 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-use Serendipity\Job\Subscriber\CrontabRegisterSubscriber;
-use Serendipity\Job\Subscriber\DbQueryExecutedSubscriber;
-use Serendipity\Job\Subscriber\UpdateJobSubscriber;
-use Serendipity\Job\Subscriber\UpdateWorkflowSubscriber;
+use SwowCloud\Job\Subscriber\CrontabRegisterSubscriber;
+use SwowCloud\Job\Subscriber\DbQueryExecutedSubscriber;
+use SwowCloud\Job\Subscriber\UpdateJobSubscriber;
+use SwowCloud\Job\Subscriber\UpdateWorkflowSubscriber;
 
 return [
     UpdateWorkflowSubscriber::class,

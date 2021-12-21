@@ -1,29 +1,29 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Console;
+namespace SwowCloud\Job\Console;
 
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\Utils\ApplicationContext;
 use Psr\Container\ContainerInterface;
-use Serendipity\Job\Contract\SerializerInterface;
-use Serendipity\Job\Kernel\Provider\KernelProvider;
-use Serendipity\Job\Nsq\Consumer\AbstractConsumer;
-use Serendipity\Job\Nsq\Consumer\DagConsumer;
-use SerendipitySwow\Nsq\Message;
-use SerendipitySwow\Nsq\Nsq;
-use SerendipitySwow\Nsq\Result;
 use Spatie\Emoji\Emoji;
 use SwowCloud\Contract\StdoutLoggerInterface;
+use SwowCloud\Job\Contract\SerializerInterface;
+use SwowCloud\Job\Kernel\Provider\KernelProvider;
+use SwowCloud\Job\Nsq\Consumer\AbstractConsumer;
+use SwowCloud\Job\Nsq\Consumer\DagConsumer;
+use SwowCloud\Nsq\Message;
+use SwowCloud\Nsq\Nsq;
+use SwowCloud\Nsq\Result;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 
 /**
- * @command php bin/serendipity-job dag:start
+ * @command php bin/job dag:start
  */
 final class DagJobCommand extends Command
 {
@@ -40,9 +40,7 @@ final class DagJobCommand extends Command
     protected ?SerializerInterface $serializer = null;
 
     protected ?Nsq $subscriber = null;
-    /**
-     * @var \Psr\Container\ContainerInterface
-     */
+
     private ContainerInterface $container;
 
     protected function configure(): void

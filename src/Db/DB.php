@@ -1,19 +1,19 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Db;
+namespace SwowCloud\Job\Db;
 
 use Closure;
 use Hyperf\Utils\ApplicationContext;
 use Hyperf\Utils\Context;
-use Serendipity\Job\Contract\EventDispatcherInterface;
-use Serendipity\Job\Db\Pool\PoolFactory;
-use Serendipity\Job\Event\QueryExecuted;
+use SwowCloud\Job\Contract\EventDispatcherInterface;
+use SwowCloud\Job\Db\Pool\PoolFactory;
+use SwowCloud\Job\Event\QueryExecuted;
 use Throwable;
 
 /**
@@ -135,7 +135,7 @@ class DB
                 $static = $ref->getStaticVariables();
                 if (array_key_exists('command', $static)) {
                     /**
-                     * @var \Serendipity\Job\Db\Command $command
+                     * @var \SwowCloud\Job\Db\Command $command
                      */
                     $command = $static['command'];
                     $query = $command->getSql();

@@ -1,15 +1,15 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Dingtalk\Messages;
+namespace SwowCloud\Job\Dingtalk\Messages;
 
 use Psr\Http\Message\ResponseInterface;
-use Serendipity\Job\Dingtalk\DingTalkService;
+use SwowCloud\Job\Dingtalk\DingTalkService;
 
 class ActionCard extends Message
 {

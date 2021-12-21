@@ -1,166 +1,167 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Db;
-
-use Throwable;
-
-trait ManagesTransactions
+namespace SwowCloud\Job\Db
 {
-    /**
-     * The number of active transactions.
-     */
-    protected int $transactions = 0;
+    use Throwable;
 
-    /**
-     * Start a new database transaction.
-     * @throws Throwable
-     */
-    public function beginTransaction(): void
+    trait ManagesTransactions
     {
-        $this->createTransaction();
+        /**
+         * The number of active transactions.
+         */
+        protected int $transactions = 0;
 
-        ++$this->transactions;
-    }
+        /**
+         * Start a new database transaction.
+         * @throws Throwable
+         */
+        public function beginTransaction(): void
+        {
+            $this->createTransaction();
 
-    /**
-     * Commit the active database transaction.
-     */
-    public function commit(): void
-    {
-        if ($this->transactions === 1) {
-            $this->call('commit');
+            ++$this->transactions;
         }
 
-        $this->transactions = max(0, $this->transactions - 1);
-    }
-
-    /**
-     * Rollback the active database transaction.
-     *
-     * @throws Throwable
-     */
-    public function rollBack(?int $toLevel = null): void
-    {
-        // We allow developers to rollback to a certain transaction level. We will verify
-        // that this given transaction level is valid before attempting to rollback to
-        // that level. If it's not we will just return out and not attempt anything.
-        $toLevel = is_null($toLevel)
-            ? $this->transactions - 1
-            : $toLevel;
-
-        if ($toLevel < 0 || $toLevel >= $this->transactions) {
-            return;
-        }
-
-        // Next, we will actually perform this rollback within this database and fire the
-        // rollback event. We will also set the current transaction level to the given
-        // level that was passed into this method so it will be right from here out.
-        try {
-            $this->performRollBack($toLevel);
-        } catch (Throwable $e) {
-            $this->handleRollBackException($e);
-        }
-
-        $this->transactions = $toLevel;
-    }
-
-    /**
-     * Get the number of active transactions.
-     */
-    public function transactionLevel(): int
-    {
-        return $this->transactions;
-    }
-
-    /**
-     * Create a transaction within the database.
-     */
-    protected function createTransaction(): void
-    {
-        if ($this->transactions === 0) {
-            try {
-                $this->call('beginTransaction');
-            } catch (Throwable $e) {
-                $this->handleBeginTransactionException($e);
+        /**
+         * Commit the active database transaction.
+         */
+        public function commit(): void
+        {
+            if ($this->transactions === 1) {
+                $this->call('commit');
             }
-        } elseif ($this->transactions >= 1) {
-            $this->createSavepoint();
+
+            $this->transactions = max(0, $this->transactions - 1);
         }
-    }
 
-    /**
-     * Create a save point within the database.
-     */
-    protected function createSavepoint(): void
-    {
-        $this->exec(
-            $this->compileSavepoint('trans' . ($this->transactions + 1))
-        );
-    }
+        /**
+         * Rollback the active database transaction.
+         *
+         * @throws Throwable
+         */
+        public function rollBack(?int $toLevel = null): void
+        {
+            // We allow developers to rollback to a certain transaction level. We will verify
+            // that this given transaction level is valid before attempting to rollback to
+            // that level. If it's not we will just return out and not attempt anything.
+            $toLevel = is_null($toLevel)
+                ? $this->transactions - 1
+                : $toLevel;
 
-    /**
-     * Handle an exception from a transaction beginning.
-     *
-     * @throws Throwable
-     */
-    protected function handleBeginTransactionException(Throwable $e): void
-    {
-        if ($this->causedByLostConnection($e)) {
-            $this->reconnect();
+            if ($toLevel < 0 || $toLevel >= $this->transactions) {
+                return;
+            }
 
-            $this->call('beginTransaction');
-        } else {
-            throw $e;
+            // Next, we will actually perform this rollback within this database and fire the
+            // rollback event. We will also set the current transaction level to the given
+            // level that was passed into this method so it will be right from here out.
+            try {
+                $this->performRollBack($toLevel);
+            } catch (Throwable $e) {
+                $this->handleRollBackException($e);
+            }
+
+            $this->transactions = $toLevel;
         }
-    }
 
-    /**
-     * Perform a rollback within the database.
-     */
-    protected function performRollBack(int $toLevel): void
-    {
-        if ($toLevel === 0) {
-            $this->call('rollBack');
-        } else {
+        /**
+         * Get the number of active transactions.
+         */
+        public function transactionLevel(): int
+        {
+            return $this->transactions;
+        }
+
+        /**
+         * Create a transaction within the database.
+         */
+        protected function createTransaction(): void
+        {
+            if ($this->transactions === 0) {
+                try {
+                    $this->call('beginTransaction');
+                } catch (Throwable $e) {
+                    $this->handleBeginTransactionException($e);
+                }
+            } elseif ($this->transactions >= 1) {
+                $this->createSavepoint();
+            }
+        }
+
+        /**
+         * Create a save point within the database.
+         */
+        protected function createSavepoint(): void
+        {
             $this->exec(
-                $this->compileSavepointRollBack('trans' . ($toLevel + 1))
+                $this->compileSavepoint('trans' . ($this->transactions + 1))
             );
         }
-    }
 
-    /**
-     * Handle an exception from a rollback.
-     *
-     * @throws Throwable
-     */
-    protected function handleRollBackException(Throwable $e): void
-    {
-        if ($this->causedByLostConnection($e)) {
-            $this->transactions = 0;
+        /**
+         * Handle an exception from a transaction beginning.
+         *
+         * @throws Throwable
+         */
+        protected function handleBeginTransactionException(Throwable $e): void
+        {
+            if ($this->causedByLostConnection($e)) {
+                $this->reconnect();
+
+                $this->call('beginTransaction');
+            } else {
+                throw $e;
+            }
         }
 
-        throw $e;
-    }
+        /**
+         * Perform a rollback within the database.
+         */
+        protected function performRollBack(int $toLevel): void
+        {
+            if ($toLevel === 0) {
+                $this->call('rollBack');
+            } else {
+                $this->exec(
+                    $this->compileSavepointRollBack('trans' . ($toLevel + 1))
+                );
+            }
+        }
 
-    /**
-     * Compile the SQL statement to define a savepoint.
-     */
-    protected function compileSavepoint(string $name): string
-    {
-        return 'SAVEPOINT ' . $name;
-    }
+        /**
+         * Handle an exception from a rollback.
+         *
+         * @throws Throwable
+         */
+        protected function handleRollBackException(Throwable $e): void
+        {
+            if ($this->causedByLostConnection($e)) {
+                $this->transactions = 0;
+            }
 
-    /**
-     * Compile the SQL statement to execute a savepoint rollback.
-     */
-    protected function compileSavepointRollBack(string $name): string
-    {
-        return 'ROLLBACK TO SAVEPOINT ' . $name;
+            throw $e;
+        }
+
+        /**
+         * Compile the SQL statement to define a savepoint.
+         */
+        protected function compileSavepoint(string $name): string
+        {
+            return 'SAVEPOINT ' . $name;
+        }
+
+        /**
+         * Compile the SQL statement to execute a savepoint rollback.
+         */
+        protected function compileSavepointRollBack(string $name): string
+        {
+            return 'ROLLBACK TO SAVEPOINT ' . $name;
+        }
     }
 }

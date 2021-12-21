@@ -1,18 +1,18 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Kernel\Http;
+namespace SwowCloud\Job\Kernel\Http;
 
 use Hyperf\Utils\Arr;
 use Hyperf\Utils\Codec\Json;
 use JetBrains\PhpStorm\Pure;
 use Swow\Http\Server\Request as SwowRequest;
-use function Serendipity\Job\Kernel\serendipity_json_decode;
+use function SwowCloud\Job\Kernel\serendipity_json_decode;
 
 class Request extends SwowRequest
 {

@@ -1,23 +1,23 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Middleware;
+namespace SwowCloud\Job\Middleware;
 
 use Hyperf\Utils\ApplicationContext;
 use Hyperf\Utils\Codec\Json;
 use Hyperf\Utils\Context;
 use Psr\Http\Message\RequestInterface;
-use Serendipity\Job\Db\DB;
-use Serendipity\Job\Kernel\Signature;
-use Serendipity\Job\Middleware\Exception\UnauthorizedException;
 use Swow\Http\Server\Request;
+use SwowCloud\Job\Db\DB;
+use SwowCloud\Job\Kernel\Signature;
+use SwowCloud\Job\Middleware\Exception\UnauthorizedException;
 use SwowCloud\Redis\RedisFactory;
-use function Serendipity\Job\Kernel\serendipity_json_decode;
+use function SwowCloud\Job\Kernel\serendipity_json_decode;
 
 class AuthMiddleware
 {
@@ -47,7 +47,7 @@ class AuthMiddleware
      *
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
-     * @throws \Serendipity\Job\Middleware\Exception\UnauthorizedException
+     * @throws \SwowCloud\Job\Middleware\Exception\UnauthorizedException
      */
     protected function getApplication($appKey): array|bool
     {

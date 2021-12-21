@@ -1,17 +1,17 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Kernel\Xhprof;
+namespace SwowCloud\Job\Kernel\Xhprof;
 
-use Serendipity\Job\Db\Command;
-use Serendipity\Job\Db\DB;
-use Serendipity\Job\Kernel\Http\Request;
 use Swow\Http\Server\Connection;
+use SwowCloud\Job\Db\Command;
+use SwowCloud\Job\Db\DB;
+use SwowCloud\Job\Kernel\Http\Request;
 
 class Xhprof
 {

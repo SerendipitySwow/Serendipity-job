@@ -27,10 +27,10 @@ graph TD;
 ```php
 declare(strict_types=1);
 
-namespace Serendipity\Job\Dag\Task;
+namespace SwowCloud\Job\Dag\Task;
 
-use Serendipity\Job\Contract\DagInterface;
-use Serendipity\Job\Kernel\Concurrent\ConcurrentMySQLPattern;
+use SwowCloud\Job\Contract\DagInterface;
+use SwowCloud\Job\Kernel\Concurrent\ConcurrentMySQLPattern;
 
 class Task1 implements DagInterface
 {
@@ -89,7 +89,7 @@ throw new DagException('never done!');
 
 # 启动dag脚本命令
 ```bash
-php bin/serendipity-job manage-job:start --type=dag  --host=127.0.0.1 --port=9764
+php bin/job dag:start --host=127.0.0.1 --port=9764
 ```
 # 投递任务编排见API.md
 

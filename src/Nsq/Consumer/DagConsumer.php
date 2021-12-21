@@ -1,29 +1,29 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Nsq\Consumer;
+namespace SwowCloud\Job\Nsq\Consumer;
 
 use Hyperf\Utils\Coroutine as HyperfCo;
-use Serendipity\Job\Constant\Statistical;
-use Serendipity\Job\Constant\Task;
-use Serendipity\Job\Contract\DagInterface;
-use Serendipity\Job\Contract\EventDispatcherInterface;
-use Serendipity\Job\Db\DB;
-use Serendipity\Job\Event\UpdateWorkflowEvent;
-use Serendipity\Job\Kernel\Dag\Dag;
-use Serendipity\Job\Kernel\Dag\Exception\InvalidArgumentException;
-use Serendipity\Job\Kernel\Dag\Vertex;
-use SerendipitySwow\Nsq\Message;
-use SerendipitySwow\Nsq\Result;
+use SwowCloud\Job\Constant\Statistical;
+use SwowCloud\Job\Constant\Task;
+use SwowCloud\Job\Contract\DagInterface;
+use SwowCloud\Job\Contract\EventDispatcherInterface;
+use SwowCloud\Job\Db\DB;
+use SwowCloud\Job\Event\UpdateWorkflowEvent;
+use SwowCloud\Job\Kernel\Dag\Dag;
+use SwowCloud\Job\Kernel\Dag\Exception\InvalidArgumentException;
+use SwowCloud\Job\Kernel\Dag\Vertex;
+use SwowCloud\Nsq\Message;
+use SwowCloud\Nsq\Result;
 use SwowCloud\Redis\Lua\Hash\Incr;
 use Throwable;
-use function Serendipity\Job\Kernel\serendipity_format_throwable;
-use function Serendipity\Job\Kernel\serendipity_json_decode;
+use function SwowCloud\Job\Kernel\serendipity_format_throwable;
+use function SwowCloud\Job\Kernel\serendipity_json_decode;
 
 class DagConsumer extends AbstractConsumer
 {
@@ -54,7 +54,7 @@ class DagConsumer extends AbstractConsumer
                     /*
                    $object->content
                      {
-                        "class": "Serendipity\\Job\\Dag\\Task\\Task1",
+                        "class": "SwowCloud\\Job\\Dag\\Task\\Task1",
                         "params": {
                             "startDate": "2021-06-09",
                             "endDate": "2021-06-19"

@@ -1,12 +1,12 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Kernel;
+namespace SwowCloud\Job\Kernel;
 
 #-------------------------注意:所有的方法名称均以serendipity_开头避免和其他框架命名冲突 ----------------------------#
 

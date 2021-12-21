@@ -1,51 +1,52 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Dag\Task;
-
-use Serendipity\Job\Contract\DagInterface;
-use Serendipity\Job\Kernel\Concurrent\ConcurrentMySQLPattern;
-
-class Task1 implements DagInterface
+namespace SwowCloud\Job\Dag\Task
 {
-    public function __construct(string $startDate, string $endDate)
-    {
-        $this->startDate = $startDate;
-        $this->endDate = $endDate;
-    }
+    use SwowCloud\Job\Contract\DagInterface;
+    use SwowCloud\Job\Kernel\Concurrent\ConcurrentMySQLPattern;
 
-    /**
-     * {@inheritDoc}
-     */
-    public function run(array $results): int|bool
+    class Task1 implements DagInterface
     {
-        echo "Task1::run()\n";
-        sleep(20);
+        public function __construct(string $startDate, string $endDate)
+        {
+            $this->startDate = $startDate;
+            $this->endDate = $endDate;
+        }
 
-        return true;
-    }
+        /**
+         * {@inheritDoc}
+         */
+        public function run(array $results): int|bool
+        {
+            echo "Task1::run()\n";
+            sleep(20);
 
-    public function isNext(): bool
-    {
-        return true;
-    }
+            return true;
+        }
 
-    public function getIdentity(): int|string
-    {
-        return 1;
-    }
+        public function isNext(): bool
+        {
+            return true;
+        }
 
-    public function getTimeout(): int
-    {
-        return 5;
-    }
+        public function getIdentity(): int|string
+        {
+            return 1;
+        }
 
-    public function runConcurrentMySQLPattern(ConcurrentMySQLPattern $pattern): mixed
-    {
+        public function getTimeout(): int
+        {
+            return 5;
+        }
+
+        public function runConcurrentMySQLPattern(ConcurrentMySQLPattern $pattern): mixed
+        {
+        }
     }
 }

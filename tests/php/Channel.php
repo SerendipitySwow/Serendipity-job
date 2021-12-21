@@ -1,12 +1,12 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-use SerendipitySwow\Archer\Archer;
+use SwowCloud\Archer\Archer;
 
 require_once(dirname(__DIR__)) . '/../vendor/autoload.php';
 //Swow\Debug\Debugger::runOnTTY();

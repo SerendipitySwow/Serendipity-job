@@ -1,15 +1,15 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Workflow\Exceptions;
+namespace SwowCloud\Job\Workflow\Exceptions;
 
 use JetBrains\PhpStorm\Pure;
-use Serendipity\Job\Workflow\Interfaces\StateInterface;
+use SwowCloud\Job\Workflow\Interfaces\StateInterface;
 
 class BuilderStateNotDeclaredException extends InvalidArgumentException
 {

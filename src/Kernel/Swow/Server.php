@@ -1,18 +1,18 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Kernel\Swow;
+namespace SwowCloud\Job\Kernel\Swow;
 
 use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
-use Serendipity\Job\Contract\ServerInterface;
 use Swow\Socket;
 use SwowCloud\Contract\StdoutLoggerInterface;
+use SwowCloud\Job\Contract\ServerInterface;
 
 class Server implements ServerInterface
 {

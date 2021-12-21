@@ -1,19 +1,19 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Subscriber;
+namespace SwowCloud\Job\Subscriber;
 
 use Hyperf\Utils\Arr;
 use Hyperf\Utils\Str;
 use JetBrains\PhpStorm\ArrayShape;
 use Psr\Container\ContainerInterface;
-use Serendipity\Job\Event\QueryExecuted;
-use Serendipity\Job\Logger\LoggerFactory;
+use SwowCloud\Job\Event\QueryExecuted;
+use SwowCloud\Job\Logger\LoggerFactory;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class DbQueryExecutedSubscriber implements EventSubscriberInterface

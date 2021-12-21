@@ -1,17 +1,17 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Db\Pool;
+namespace SwowCloud\Job\Db\Pool;
 
 use Hyperf\Contract\ConfigInterface;
 use Psr\Container\ContainerInterface;
-use Serendipity\Job\DB\Exception\DriverNotFoundException;
-use Serendipity\Job\DB\Exception\InvalidDriverException;
+use SwowCloud\Job\Db\Exception\DriverNotFoundException;
+use SwowCloud\Job\Db\Exception\InvalidDriverException;
 
 class PoolFactory
 {

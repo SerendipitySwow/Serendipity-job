@@ -1,20 +1,20 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Kernel\Concurrent;
+namespace SwowCloud\Job\Kernel\Concurrent;
 
 use Hyperf\Engine\Channel;
 use Hyperf\Utils\Coroutine as HyperfCo;
 use PDO;
 use Psr\Log\LoggerInterface;
-use Serendipity\job\Kernel\Concurrent\Exception\MySQLRuntimeException;
-use Serendipity\Job\Util\Coordinator\Constants;
-use Serendipity\Job\Util\Coordinator\CoordinatorManager;
+use SwowCloud\Job\Kernel\Concurrent\Exception\MySQLRuntimeException;
+use SwowCloud\Job\Util\Coordinator\Constants;
+use SwowCloud\Job\Util\Coordinator\CoordinatorManager;
 use Throwable;
 
 class ConcurrentMySQLPattern

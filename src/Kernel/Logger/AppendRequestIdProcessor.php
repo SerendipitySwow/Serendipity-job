@@ -1,12 +1,12 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Kernel\Logger;
+namespace SwowCloud\Job\Kernel\Logger;
 
 use Hyperf\Utils\Context;
 use Monolog\Processor\MemoryProcessor;

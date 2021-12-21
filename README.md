@@ -133,13 +133,13 @@ php bin/blend server:restart
 1.启动Serendipity-Job Server.
 
 ````bash
- php bin/serendipity-job serendipity-job:start
+ php bin/job swow-cloud-job:start
 ````
 
 2.启动Job 进行任务消费
 
 ```bash
-php bin/serendipity-job job:start --host=127.0.0.1 --port=9764
+php bin/job job:start --host=127.0.0.1 --port=9764
 ```
 
 #### 参数详解
@@ -151,7 +151,7 @@ php bin/serendipity-job job:start --host=127.0.0.1 --port=9764
 3.配置Crontab
 
 ```php
- (new Serendipity\Job\Crontab\Crontab())->setName('Foo')->setRule('*/5 * * * *')->setCallback([EchoCrontab::class, 'execute'])->setMemo('这是一个示例的定时任务'),
+ (new SwowCloud\Job\Crontab\Crontab())->setName('Foo')->setRule('*/5 * * * *')->setCallback([EchoCrontab::class, 'execute'])->setMemo('这是一个示例的定时任务'),
 ```
 
 

@@ -1,19 +1,19 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Subscriber;
+namespace SwowCloud\Job\Subscriber;
 
 use Hyperf\Contract\ConfigInterface;
 use JetBrains\PhpStorm\ArrayShape;
-use Serendipity\Job\Crontab\Crontab;
-use Serendipity\Job\Crontab\CrontabManager;
-use Serendipity\Job\Event\CrontabEvent;
 use SwowCloud\Contract\StdoutLoggerInterface;
+use SwowCloud\Job\Crontab\Crontab;
+use SwowCloud\Job\Crontab\CrontabManager;
+use SwowCloud\Job\Event\CrontabEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class CrontabRegisterSubscriber implements EventSubscriberInterface

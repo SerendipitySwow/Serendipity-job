@@ -1,19 +1,21 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Workflow\Implementation;
+namespace SwowCloud\Job\Workflow\Implementation;
 
 use Psr\EventDispatcher\EventDispatcherInterface;
-use Serendipity\Job\Workflow\Exceptions\TransitionNotDeclaredException;
-use Serendipity\Job\Workflow\Interfaces\EngineInterface;
-use Serendipity\Job\Workflow\Interfaces\StateAwareInterface;
-use Serendipity\Job\Workflow\Interfaces\TransitionInterface;
-use Serendipity\Job\Workflow\Interfaces\TransitionRepositoryInterface;
+use SwowCloud\Job\Workflow\Exceptions\TransitionNotDeclaredException;
+use SwowCloud\Job\Workflow\Implementation\Events\StateChanged;
+use SwowCloud\Job\Workflow\Implementation\Events\StateChanging;
+use SwowCloud\Job\Workflow\Interfaces\EngineInterface;
+use SwowCloud\Job\Workflow\Interfaces\StateAwareInterface;
+use SwowCloud\Job\Workflow\Interfaces\TransitionInterface;
+use SwowCloud\Job\Workflow\Interfaces\TransitionRepositoryInterface;
 
 abstract class AbstractEngine implements EngineInterface
 {
@@ -33,10 +35,10 @@ abstract class AbstractEngine implements EngineInterface
             throw new TransitionNotDeclaredException($transition);
         }
 
-        $this->dispatcher && $this->dispatcher->dispatch(new Serendipity\Job\Workflow\Implementation\Events\StateChanging($item, $matched->getNewState()));
+        $this->dispatcher && $this->dispatcher->dispatch(new StateChanging($item, $matched->getNewState()));
 
         $item->setState($matched->getNewState());
 
-        $this->dispatcher && $this->dispatcher->dispatch(new Serendipity\Job\Workflow\Implementation\Events\StateChanged($item, $matched->getOldState()));
+        $this->dispatcher && $this->dispatcher->dispatch(new StateChanged($item, $matched->getOldState()));
     }
 }

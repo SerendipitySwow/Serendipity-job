@@ -1,18 +1,18 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace SerendipityTest\Cases;
+namespace SwowCloud\JobTest\Cases;
 
 use GuzzleHttp\Client as GuzzleHttpClient;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
-use Serendipity\Job\Job\SimpleJob;
 use Swow\Coroutine;
+use SwowCloud\Job\Job\SimpleJob;
 
 /**
  * @internal
@@ -44,7 +44,7 @@ class HttpTest extends TestCase
 //            \GuzzleHttp\RequestOptions::JSON    => [
 //                'taskNo'  => 'taskNo84',
 //                'content' => [
-//                    'class'   => '\\Serendipity\\Job\\Job\\SimpleJob',
+//                    'class'   => '\\SwowCloud\\Job\\Job\\SimpleJob',
 //                    '_params' => [
 //                        'startDate' => '2021-07-27 17:50:50',
 //                        'endDate'   => '2021-07-27 17:50:50',

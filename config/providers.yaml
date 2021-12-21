@@ -1,17 +1,17 @@
-Serendipity-Job:
+SwowCloud-Job:
   BootApp:
-    - Serendipity\Job\Config\ConfigProvider
-    - Serendipity\Job\Event\EventProvider
-    - Serendipity\Job\Logger\LoggerProvider
+    - SwowCloud\Job\Config\ConfigProvider
+    - SwowCloud\Job\Event\EventProvider
+    - SwowCloud\Job\Logger\LoggerProvider
     ## 服务启动一定要在最后
-    - Serendipity\Job\Server\ServerProvider
+    - SwowCloud\Job\Server\ServerProvider
 Job:
   BootApp:
-    - Serendipity\Job\Config\ConfigProvider
-    - Serendipity\Job\Logger\LoggerProvider
-    - Serendipity\Job\Event\EventProvider
+    - SwowCloud\Job\Config\ConfigProvider
+    - SwowCloud\Job\Logger\LoggerProvider
+    - SwowCloud\Job\Event\EventProvider
 Dag:
   BootApp:
-    - Serendipity\Job\Config\ConfigProvider
-    - Serendipity\Job\Logger\LoggerProvider
-    - Serendipity\Job\Event\EventProvider
+    - SwowCloud\Job\Config\ConfigProvider
+    - SwowCloud\Job\Logger\LoggerProvider
+    - SwowCloud\Job\Event\EventProvider

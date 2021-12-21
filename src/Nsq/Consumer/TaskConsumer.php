@@ -1,32 +1,32 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Nsq\Consumer;
+namespace SwowCloud\Job\Nsq\Consumer;
 
 use Carbon\Carbon;
 use Hyperf\Utils\Codec\Json;
 use Hyperf\Utils\Coroutine as HyperfCo;
 use InvalidArgumentException;
-use Serendipity\Job\Constant\Statistical;
-use Serendipity\Job\Constant\Task;
-use Serendipity\Job\Contract\EventDispatcherInterface;
-use Serendipity\Job\Contract\JobInterface;
-use Serendipity\Job\Db\DB;
-use Serendipity\Job\Event\UpdateJobEvent;
-use SerendipitySwow\Nsq\Message;
-use SerendipitySwow\Nsq\Nsq;
-use SerendipitySwow\Nsq\Result;
 use Swow\Coroutine as SwowCo;
+use SwowCloud\Job\Constant\Statistical;
+use SwowCloud\Job\Constant\Task;
+use SwowCloud\Job\Contract\EventDispatcherInterface;
+use SwowCloud\Job\Contract\JobInterface;
+use SwowCloud\Job\Db\DB;
+use SwowCloud\Job\Event\UpdateJobEvent;
+use SwowCloud\Nsq\Message;
+use SwowCloud\Nsq\Nsq;
+use SwowCloud\Nsq\Result;
 use SwowCloud\Redis\Lua\Hash\Incr;
 use SwowCloud\RedisLock\RedisLock;
 use Throwable;
-use function Serendipity\Job\Kernel\serendipity_json_decode;
-use function Serendipity\Job\Kernel\server_ip;
+use function SwowCloud\Job\Kernel\serendipity_json_decode;
+use function SwowCloud\Job\Kernel\server_ip;
 
 class TaskConsumer extends AbstractConsumer
 {

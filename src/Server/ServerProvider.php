@@ -1,12 +1,12 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Server;
+namespace SwowCloud\Job\Server;
 
 use Carbon\Carbon;
 use DeviceDetector\DeviceDetector;
@@ -24,25 +24,6 @@ use Hyperf\Utils\Str;
 use PDO;
 use Psr\Http\Message\RequestInterface;
 use Ramsey\Uuid\Uuid;
-use Serendipity\Job\Console\DagJobCommand;
-use Serendipity\Job\Console\JobCommand;
-use Serendipity\Job\Constant\Statistical;
-use Serendipity\Job\Constant\Task;
-use Serendipity\Job\Db\Command;
-use Serendipity\Job\Db\DB;
-use Serendipity\Job\Kernel\Http\Request as SerendipityRequest;
-use Serendipity\Job\Kernel\Http\Response;
-use Serendipity\Job\Kernel\Provider\AbstractProvider;
-use Serendipity\Job\Kernel\Router\RouteCollector;
-use Serendipity\Job\Kernel\Signature;
-use Serendipity\Job\Kernel\Swow\ServerFactory;
-use Serendipity\Job\Kernel\Xhprof\Xhprof;
-use Serendipity\Job\Logger\LoggerFactory;
-use Serendipity\Job\Middleware\AuthMiddleware;
-use Serendipity\Job\Middleware\Exception\UnauthorizedException;
-use Serendipity\Job\Nsq\Consumer\AbstractConsumer;
-use Serendipity\Job\Serializer\SymfonySerializer;
-use SerendipitySwow\Nsq\Nsq;
 use Spatie\Emoji\Emoji;
 use Swow\Coroutine\Exception as CoroutineException;
 use Swow\Http\Exception as HttpException;
@@ -52,12 +33,31 @@ use Swow\Http\Status;
 use Swow\Socket\Exception as SocketException;
 use SwowCloud\Contract\LoggerInterface;
 use SwowCloud\Contract\StdoutLoggerInterface;
+use SwowCloud\Job\Console\DagJobCommand;
+use SwowCloud\Job\Console\JobCommand;
+use SwowCloud\Job\Constant\Statistical;
+use SwowCloud\Job\Constant\Task;
+use SwowCloud\Job\Db\Command;
+use SwowCloud\Job\Db\DB;
+use SwowCloud\Job\Kernel\Http\Request as SwowCloudRequest;
+use SwowCloud\Job\Kernel\Http\Response;
+use SwowCloud\Job\Kernel\Provider\AbstractProvider;
+use SwowCloud\Job\Kernel\Router\RouteCollector;
+use SwowCloud\Job\Kernel\Signature;
+use SwowCloud\Job\Kernel\Swow\ServerFactory;
+use SwowCloud\Job\Kernel\Xhprof\Xhprof;
+use SwowCloud\Job\Logger\LoggerFactory;
+use SwowCloud\Job\Middleware\AuthMiddleware;
+use SwowCloud\Job\Middleware\Exception\UnauthorizedException;
+use SwowCloud\Job\Nsq\Consumer\AbstractConsumer;
+use SwowCloud\Job\Serializer\SymfonySerializer;
+use SwowCloud\Nsq\Nsq;
 use SwowCloud\Redis\Lua\Hash\Incr;
 use Throwable;
 use ZxInc\Zxipdb\IPTool;
 use function FastRoute\simpleDispatcher;
-use function Serendipity\Job\Kernel\serendipity_format_throwable;
-use function Serendipity\Job\Kernel\serendipity_json_decode;
+use function SwowCloud\Job\Kernel\serendipity_format_throwable;
+use function SwowCloud\Job\Kernel\serendipity_json_decode;
 use const Swow\Errno\EMFILE;
 use const Swow\Errno\ENFILE;
 use const Swow\Errno\ENOMEM;
@@ -87,7 +87,7 @@ class ServerProvider extends AbstractProvider
             ->get(LoggerFactory::class)
             ->get();
         $this->stdoutLogger->info(str_repeat(Emoji::flagsForFlagChina() . '  ', 10));
-        $this->stdoutLogger->debug(sprintf('%s Serendipity-Job Start Successfully# %s', Emoji::manSurfing(), Emoji::rocket()));
+        $this->stdoutLogger->debug(sprintf('%s SwowCloud-Job Start Successfully# %s', Emoji::manSurfing(), Emoji::rocket()));
         $this->makeFastRoute();
         while (true) {
             try {
@@ -100,9 +100,9 @@ class ServerProvider extends AbstractProvider
                             try {
                                 Xhprof::startPoint();
                                 /**
-                                 * @var SerendipityRequest $request
+                                 * @var SwowCloudRequest $request
                                  */
-                                $request = $connection->recvHttpRequest(make(SerendipityRequest::class));
+                                $request = $connection->recvHttpRequest(make(SwowCloudRequest::class));
                                 $response = $this->dispatcher($request);
                                 $connection->sendHttpResponse($response);
                             } catch (Throwable $exception) {
@@ -200,7 +200,7 @@ class ServerProvider extends AbstractProvider
              */
             $router->post('/application/refresh-signature', function (): Response {
                 /**
-                 * @var SerendipityRequest $request
+                 * @var SwowCloudRequest $request
                  */
                 $request = Context::get(RequestInterface::class);
                 $params = $request->post();
@@ -257,7 +257,7 @@ class ServerProvider extends AbstractProvider
                 $appKey = Str::random();
                 $secretKey = Str::random(32);
                 /**
-                 * @var SerendipityRequest $request
+                 * @var SwowCloudRequest $request
                  */
                 $request = Context::get(RequestInterface::class);
                 $params = $request->post();
@@ -330,7 +330,7 @@ class ServerProvider extends AbstractProvider
                 $router->post('/nsq/publish', function (): Response {
                     $response = new Response();
                     /**
-                     * @var SerendipityRequest $request
+                     * @var SwowCloudRequest $request
                      */
                     $request = Context::get(RequestInterface::class);
                     $params = $request->post();
@@ -399,7 +399,7 @@ class ServerProvider extends AbstractProvider
                 $router->post('/task/dag', function (): Response {
                     $response = new Response();
                     /**
-                     * @var SerendipityRequest $request
+                     * @var SwowCloudRequest $request
                      */
                     $request = Context::get(RequestInterface::class);
                     $params = $request->post();
@@ -443,7 +443,7 @@ class ServerProvider extends AbstractProvider
                 $router->post('/task/create', function (): Response {
                     $response = new Response();
                     /**
-                     * @var SerendipityRequest $request
+                     * @var SwowCloudRequest $request
                      */
                     $request = Context::get(RequestInterface::class);
                     $params = $request->post();
@@ -562,7 +562,7 @@ class ServerProvider extends AbstractProvider
                  */
                 $router->get('/task/detail', function (): Response {
                     /**
-                     * @var SerendipityRequest $request
+                     * @var SwowCloudRequest $request
                      */
                     $request = Context::get(RequestInterface::class);
                     $swowResponse = new Response();
@@ -590,7 +590,7 @@ class ServerProvider extends AbstractProvider
                  */
                 $router->post('/task/cancel', function () {
                     /**
-                     * @var SerendipityRequest $request
+                     * @var SwowCloudRequest $request
                      */
                     $request = Context::get(RequestInterface::class);
                     $swowResponse = new Response();

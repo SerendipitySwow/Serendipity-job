@@ -1,12 +1,12 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Console;
+namespace SwowCloud\Job\Console;
 
 use Carbon\Carbon;
 use Exception;
@@ -15,19 +15,6 @@ use Hyperf\Utils\ApplicationContext;
 use Hyperf\Utils\Codec\Json;
 use Hyperf\Utils\Coroutine as HyperfCo;
 use Psr\Container\ContainerInterface;
-use Serendipity\Job\Constant\Task;
-use Serendipity\Job\Contract\EventDispatcherInterface;
-use Serendipity\Job\Contract\SerializerInterface;
-use Serendipity\Job\Crontab\CrontabDispatcher;
-use Serendipity\Job\Db\DB;
-use Serendipity\Job\Event\CrontabEvent;
-use Serendipity\Job\Kernel\Http\Response;
-use Serendipity\Job\Kernel\Provider\KernelProvider;
-use Serendipity\Job\Nsq\Consumer\AbstractConsumer;
-use Serendipity\Job\Nsq\Consumer\TaskConsumer;
-use SerendipitySwow\Nsq\Message;
-use SerendipitySwow\Nsq\Nsq;
-use SerendipitySwow\Nsq\Result;
 use Spatie\Emoji\Emoji;
 use Swow\Coroutine as SwowCo;
 use Swow\Coroutine\Exception as CoroutineException;
@@ -36,16 +23,29 @@ use Swow\Http\Server as HttpServer;
 use Swow\Http\Status as HttpStatus;
 use Swow\Socket\Exception as SocketException;
 use SwowCloud\Contract\StdoutLoggerInterface;
+use SwowCloud\Job\Constant\Task;
+use SwowCloud\Job\Contract\EventDispatcherInterface;
+use SwowCloud\Job\Contract\SerializerInterface;
+use SwowCloud\Job\Crontab\CrontabDispatcher;
+use SwowCloud\Job\Db\DB;
+use SwowCloud\Job\Event\CrontabEvent;
+use SwowCloud\Job\Kernel\Http\Response;
+use SwowCloud\Job\Kernel\Provider\KernelProvider;
+use SwowCloud\Job\Nsq\Consumer\AbstractConsumer;
+use SwowCloud\Job\Nsq\Consumer\TaskConsumer;
+use SwowCloud\Nsq\Message;
+use SwowCloud\Nsq\Nsq;
+use SwowCloud\Nsq\Result;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Input\InputOption;
 use Throwable;
-use function Serendipity\Job\Kernel\serendipity_json_decode;
+use function SwowCloud\Job\Kernel\serendipity_json_decode;
 use const Swow\Errno\EMFILE;
 use const Swow\Errno\ENFILE;
 use const Swow\Errno\ENOMEM;
 
 /**
- * @command php bin/serendipity-job job:start --host=127.0.0.1 --port=9764
+ * @command php bin/job job:start --host=127.0.0.1 --port=9764
  */
 final class JobCommand extends Command
 {
@@ -263,6 +263,7 @@ final class JobCommand extends Command
                             $this->config->get(sprintf('nsq.%s', 'default')),
                         ]);
                         $consumer = $this->makeConsumer(TaskConsumer::class, AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX, 'JobConsumer' . $i);
+                        $this->stdoutLogger->debug( 'JobConsumer' . $i.' Started#');
                         $subscriber->subscribe(
                             AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX,
                             'JobConsumer' . $i,

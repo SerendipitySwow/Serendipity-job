@@ -1,18 +1,18 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Kernel\Provider;
+namespace SwowCloud\Job\Kernel\Provider;
 
 use Hyperf\Di\Container;
 use Hyperf\Utils\ApplicationContext;
 use JetBrains\PhpStorm\Pure;
 use Psr\Container\ContainerInterface;
-use Serendipity\Job\Config\ProviderConfig;
+use SwowCloud\Job\Config\ProviderConfig;
 
 abstract class AbstractProvider implements ProviderContract
 {

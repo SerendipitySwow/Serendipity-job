@@ -1,19 +1,19 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Dingtalk\Http;
+namespace SwowCloud\Job\Dingtalk\Http;
 
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
 use Hyperf\Utils\Codec\Json;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
-use Serendipity\Job\Dingtalk\ClientInterface;
+use SwowCloud\Job\Dingtalk\ClientInterface;
 
 class Client implements ClientInterface
 {

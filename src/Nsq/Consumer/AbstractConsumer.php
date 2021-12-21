@@ -1,31 +1,31 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Nsq\Consumer;
+namespace SwowCloud\Job\Nsq\Consumer;
 
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\Engine\Channel;
 use Hyperf\Utils\Pipeline;
 use Psr\Container\ContainerInterface;
-use Serendipity\Job\Contract\SerializerInterface;
-use Serendipity\Job\Dingtalk\DingTalk;
-use Serendipity\Job\Logger\LoggerFactory;
-use Serendipity\Job\Serializer\SymfonySerializer;
-use Serendipity\Job\Util\Waiter;
-use SerendipitySwow\Nsq\Message;
 use SwowCloud\Contract\LoggerInterface;
+use SwowCloud\Job\Contract\SerializerInterface;
+use SwowCloud\Job\Dingtalk\DingTalk;
+use SwowCloud\Job\Logger\LoggerFactory;
+use SwowCloud\Job\Serializer\SymfonySerializer;
+use SwowCloud\Job\Util\Waiter;
+use SwowCloud\Nsq\Message;
 use SwowCloud\Redis\Redis;
 use SwowCloud\Redis\RedisFactory;
 use SwowCloud\Redis\RedisProxy;
 
 abstract class AbstractConsumer
 {
-    public const TOPIC_PREFIX = 'serendipity-job-';
+    public const TOPIC_PREFIX = 'swow-cloud-job-';
 
     protected string $topic = '';
 

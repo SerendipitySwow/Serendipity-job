@@ -1,15 +1,15 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Console;
+namespace SwowCloud\Job\Console;
 
 use Nette\Utils\Strings;
-use Serendipity\Job\Constant\Logo;
+use SwowCloud\Job\Constant\Logo;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Helper\Table;
@@ -193,7 +193,7 @@ abstract class Command extends SymfonyCommand
         ]);
         $this->output->writeln(sprintf('<info>%s</info>', Logo::LOGO));
         $this->output->writeln([
-            '<info>Serendipity Job For SerendipitySwow</info>',
+            '<info>Job For SwowCloud</info>',
             '<info>===================================</info>',
             '',
         ]);
