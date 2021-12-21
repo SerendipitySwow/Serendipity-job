@@ -28,6 +28,7 @@ use Spatie\Emoji\Emoji;
 use Swow\Coroutine\Exception as CoroutineException;
 use Swow\Http\Exception as HttpException;
 use Swow\Http\Server;
+use Swow\Http\Server\Connection;
 use Swow\Http\Server\Request as SwowRequest;
 use Swow\Http\Status;
 use Swow\Socket\Exception as SocketException;
@@ -95,83 +96,18 @@ class ServerProvider extends AbstractProvider
                 HyperfCo::create(function () use ($connection) {
                     try {
                         while (true) {
-                            $time = microtime(true);
                             $request = null;
                             try {
-                                Xhprof::startPoint();
                                 /**
                                  * @var SwowCloudRequest $request
                                  */
                                 $request = $connection->recvHttpRequest(make(SwowCloudRequest::class));
-                                $response = $this->dispatcher($request);
+                                $response = $this->dispatcher($request, $connection);
                                 $connection->sendHttpResponse($response);
-                            } catch (Throwable $exception) {
-                                if ($exception instanceof HttpException) {
-                                    $connection->error($exception->getCode(), $exception->getMessage());
-                                }
-                                throw $exception;
-                            } finally {
-                                if ($request === null) {
-                                    return;
-                                }
-                                if (env('DEBUG')) {
-                                    /*@var LoggerInterface $logger */
-                                    $logger = $this->container()
-                                        ->get(LoggerFactory::class)
-                                        ->get('request');
-                                    // 日志
-                                    $time = microtime(true) - $time;
-                                    $debug = 'URI: ' . $request->getUri()->getPath() . PHP_EOL;
-                                    $debug .= 'TIME: ' . $time * 1000 . 'ms' . PHP_EOL;
-                                    if ($customData = $request->getCustomData()) {
-                                        $debug .= 'DATA: ' . $customData . PHP_EOL;
-                                    }
-                                    $debug .= 'REQUEST: ' . $request->getRequestString() . PHP_EOL;
-                                    if (isset($response)) {
-                                        $debug .= 'RESPONSE: ' . $request->getResponseString($response) . PHP_EOL;
-                                    }
-                                    if (isset($exception) && $exception instanceof Throwable) {
-                                        $debug .= 'EXCEPTION: ' . $exception->getMessage() . PHP_EOL;
-                                    }
-
-                                    $dd = new DeviceDetector(current($request->getHeader('User-Agent')));
-                                    $dd->parse();
-                                    /* @noinspection PhpStatementHasEmptyBodyInspection */
-                                    if ($dd->isBot()) {
-                                        //do something
-                                    } else {
-                                        $debug .= 'DEVICE: ' . $dd->getDeviceName() . '| BRAND_NAME: ' . $dd->getBrandName() . '| OS:' . $dd->getOs('version') . '| CLIENT:' . Json::encode($dd->getClient()) . PHP_EOL;
-                                    }
-                                    if ($time > 1) {
-                                        $logger->error($debug);
-                                    } else {
-                                        $logger->info($debug);
-                                    }
-                                    /**
-                                     * @var Command $command
-                                     */
-                                    $command = make(Command::class);
-                                    $command->insert('request_log', [
-                                        'application_name' => (string) Arr::get($request->getHeader('application'), 'application_name', 'Unknown'),
-                                        'app_key' => current($request->getHeader('app_key')),
-                                        'ip' => $connection->getPeerAddress(),
-                                        'ip_location' => Arr::get(IPTool::query($connection->getPeerAddress()), 'disp'),
-                                        'os' => OperatingSystem::getOsFamily($dd->getOs('name')) ?? 'Unknown',
-                                        'request_info' => $debug,
-                                        'request_time' => Carbon::now()->toDateTimeString(),
-                                    ]);
-                                    DB::run(function (PDO $PDO) use ($command) {
-                                        $statement = $PDO->prepare($command->getSql());
-
-                                        $this->bindValues($statement, $command->getParams());
-
-                                        $statement->execute();
-                                    });
-                                }
-
-                                Xhprof::endPoint($connection, $request);
+                            } catch (HttpException $exception) {
+                                $connection->error($exception->getCode(), $exception->getMessage());
                             }
-                            if (!$request->getKeepAlive()) {
+                            if (!$request || !$request->getKeepAlive()) {
                                 break;
                             }
                         }
@@ -622,10 +558,12 @@ class ServerProvider extends AbstractProvider
         ]);
     }
 
-    protected function dispatcher(SwowRequest $request): Response
+    protected function dispatcher(SwowRequest $request, Connection $connection): Response
     {
         $channel = new Channel();
-        HyperfCo::create(function () use ($request, $channel) {
+        HyperfCo::create(function () use ($request, $channel, $connection) {
+            Xhprof::startPoint();
+            $time = microtime(true);
             HyperfCo::defer(static function () {
                 Context::destroy(RequestInterface::class);
             });
@@ -680,9 +618,68 @@ class ServerProvider extends AbstractProvider
                     $response = call($handler[0], $vars);
                     break;
             }
+            $this->debug($time, $request, $response, $connection);
             $channel->push($response);
         });
 
         return $channel->pop();
+    }
+
+    protected function debug($time, SwowRequest|SwowCloudRequest $request, Response $response, Connection $connection): void
+    {
+        if (env('DEBUG')) {
+            /*@var LoggerInterface $logger */
+            $logger = $this->container()
+                ->get(LoggerFactory::class)
+                ->get('request');
+            // 日志
+            $time = microtime(true) - $time;
+            $debug = 'URI: ' . $request->getUri()->getPath() . PHP_EOL;
+            $debug .= 'TIME: ' . $time * 1000 . 'ms' . PHP_EOL;
+            if ($customData = $request->getCustomData()) {
+                $debug .= 'DATA: ' . $customData . PHP_EOL;
+            }
+            $debug .= 'REQUEST: ' . $request->getRequestString() . PHP_EOL;
+            if (isset($response)) {
+                $debug .= 'RESPONSE: ' . $request->getResponseString($response) . PHP_EOL;
+            }
+
+            $dd = new DeviceDetector(current($request->getHeader('User-Agent')));
+            $dd->parse();
+            /* @noinspection PhpStatementHasEmptyBodyInspection */
+            if ($dd->isBot()) {
+                //do something
+            } else {
+                $debug .= 'DEVICE: ' . $dd->getDeviceName() . '| BRAND_NAME: ' . $dd->getBrandName() . '| OS:' . $dd->getOs('version') . '| CLIENT:' . Json::encode($dd->getClient()) . PHP_EOL;
+            }
+            if ($time > 1) {
+                $logger->error($debug);
+            } else {
+                $logger->info($debug);
+            }
+
+            /*
+             * @var Command $command
+             */
+            $command = make(Command::class);
+            $command->insert('request_log', [
+                'application_name' => (string) Arr::get($request->getHeader('application'), 'application_name', 'Unknown'),
+                'app_key' => current($request->getHeader('app_key')),
+                'ip' => $connection->getPeerAddress(),
+                'ip_location' => Arr::get(IPTool::query($connection->getPeerAddress()), 'disp'),
+                'os' => OperatingSystem::getOsFamily($dd->getOs('name')) ?? 'Unknown',
+                'request_info' => $debug,
+                'request_time' => Carbon::now()->toDateTimeString(),
+            ]);
+            DB::run(function (PDO $PDO) use ($command) {
+                $statement = $PDO->prepare($command->getSql());
+
+                $this->bindValues($statement, $command->getParams());
+
+                $statement->execute();
+            });
+        }
+
+        Xhprof::endPoint($connection, $request);
     }
 }
