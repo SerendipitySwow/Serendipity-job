@@ -14,12 +14,12 @@ use Hyperf\Utils\Arr;
 class Config implements ConfigInterface
 {
     /**
-     * @var array<int, string[]>
+     * @var array<string, string[]>
      */
     private array $configs;
 
     /**
-     * @param array<int, string[]> $configs
+     * @param array<string, string[]> $configs
      */
     public function __construct(array $configs)
     {

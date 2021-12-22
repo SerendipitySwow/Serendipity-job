@@ -34,7 +34,7 @@ class ProviderConfig
      * call ProviderConfig::clear() method if you want to reset the static property.
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
-     * @return array<int,string>
+     * @return array<string,string[]>
      */
     public static function load(): array
     {

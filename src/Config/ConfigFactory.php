@@ -24,7 +24,7 @@ class ConfigFactory
     }
 
     /**
-     * @return array<int,string[]>
+     * @return array<string,string[]>
      */
     private function readConfig(string $configPath): array
     {

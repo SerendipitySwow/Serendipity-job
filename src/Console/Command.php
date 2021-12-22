@@ -39,6 +39,7 @@ abstract class Command extends SymfonyCommand
 
     /**
      * The mapping between human readable verbosity levels and Symfony's OutputInterface.
+     * @var array<string, int>
      */
     protected array $verbosityMap = [
         'v' => OutputInterface::VERBOSITY_VERBOSE,
@@ -69,13 +70,13 @@ abstract class Command extends SymfonyCommand
 
     /**
      * Format input to textual table.
+     * @var array<string,string[]> $headers
+     * @var array<string,string[]> $rows
+     * @var string $tableStyle
+     * @var array<int,string> $columnStyles
      */
-    public function table(
-        array $headers,
-        array $rows,
-        null|string $tableStyle = 'default',
-        array $columnStyles = []
-    ): void {
+    public function table(array $headers, array $rows, string $tableStyle = 'default', array $columnStyles = []): void
+    {
         $table = new Table($this->output);
 
         $table->setHeaders($headers)
@@ -157,7 +158,7 @@ abstract class Command extends SymfonyCommand
         $this->output->newLine();
     }
 
-    protected function parseVerbosity($level = null): int
+    protected function parseVerbosity(mixed $level = null): int
     {
         if (isset($this->verbosityMap[$level])) {
             $level = $this->verbosityMap[$level];

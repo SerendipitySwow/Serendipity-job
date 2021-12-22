@@ -21,6 +21,7 @@ use SwowCloud\Nsq\Message;
 use SwowCloud\Nsq\Nsq;
 use SwowCloud\Nsq\Result;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
+use Throwable;
 
 /**
  * @command php bin/job dag:start
