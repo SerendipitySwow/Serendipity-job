@@ -23,6 +23,9 @@ class ConfigFactory
         return new Config($merged);
     }
 
+    /**
+     * @return array<int,string[]>
+     */
     private function readConfig(string $configPath): array
     {
         $config = [];
@@ -33,6 +36,11 @@ class ConfigFactory
         return is_array($config) ? $config : [];
     }
 
+    /**
+     * @param array<string> $paths
+     *
+     * @return array<int, string[]>
+     */
     private function readPaths(array $paths): array
     {
         $configs = [];

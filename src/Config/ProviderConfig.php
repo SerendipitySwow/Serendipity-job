@@ -19,6 +19,9 @@ use function method_exists;
  */
 class ProviderConfig
 {
+    /**
+     * @var array<int,string>
+     */
     private static array $providerConfigs = [];
 
     public static string $bootApp = 'BootApp';
@@ -29,28 +32,35 @@ class ProviderConfig
      * Load and merge all provider configs from components.
      * Notice that this method will cache the config result into a static property,
      * call ProviderConfig::clear() method if you want to reset the static property.
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @return array<int,string>
      */
     public static function load(): array
     {
-        if (!static::$providerConfigs) {
+        if (!self::$providerConfigs) {
             $loader = ApplicationContext::getContainer()
                 ->get(YamlLoader::class);
-            static::$providerConfigs = $loader->load(BASE_PATH . '/config/providers.yaml');
+            self::$providerConfigs = $loader->load(BASE_PATH . '/config/providers.yaml');
         }
 
-        return static::$providerConfigs;
+        return self::$providerConfigs;
     }
 
     public static function clear(): void
     {
-        static::$providerConfigs = [];
+        self::$providerConfigs = [];
     }
 
+    /**
+     * @param array<string|\SwowCloud\Job\Kernel\Provider\ProviderContract> $providers
+     */
     public static function loadProviders(array $providers, string $method): void
     {
         foreach ($providers as $provider) {
             if (is_string($provider) && class_exists($provider) && method_exists($provider, $method)) {
-                call_user_func([new $provider(), $method]);
+                $provider = make($provider);
+                $provider->{$method}();
             }
         }
     }
