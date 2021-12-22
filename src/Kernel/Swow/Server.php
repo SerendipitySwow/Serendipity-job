@@ -27,6 +27,18 @@ class Server implements ServerInterface
     protected int $backlog = 8192;
 
     protected bool $multi = true;
+    /**
+     * @var \Psr\Container\ContainerInterface
+     */
+    protected ContainerInterface $container;
+    /**
+     * @var null|\SwowCloud\Contract\StdoutLoggerInterface
+     */
+    protected ?StdoutLoggerInterface $stdoutLogger;
+    /**
+     * @var null|\Psr\EventDispatcher\EventDispatcherInterface
+     */
+    protected ?EventDispatcherInterface $dispatcher;
 
     public function __construct(
         ContainerInterface $container,
