@@ -55,6 +55,7 @@ class CrontabDispatcher
     private function sleep(): void
     {
         $current = date('s');
+        /** @var int<0,60> $sleep */
         $sleep = 60 - $current;
         $this->logger->debug('Crontab dispatcher sleep ' . $sleep . 's.');
         $sleep > 0 && sleep($sleep);

@@ -32,12 +32,15 @@ class CrontabManager
         return true;
     }
 
+    /**
+     * @return array<int,\SwowCloud\Job\Crontab\Crontab>
+     */
     public function parse(): array
     {
         $result = [];
         $crontabs = $this->getCrontabs();
         $last = time();
-        foreach ($crontabs ?? [] as $key => $crontab) {
+        foreach ($crontabs as $key => $crontab) {
             if (!$crontab instanceof Crontab) {
                 unset($this->crontabs[$key]);
                 continue;
@@ -53,6 +56,9 @@ class CrontabManager
         return $result;
     }
 
+    /**
+     * @return \SwowCloud\Job\Crontab\Crontab[]
+     */
     public function getCrontabs(): array
     {
         return $this->crontabs;

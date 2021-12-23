@@ -26,13 +26,16 @@ class Scheduler
 
     public function schedule(): SplQueue
     {
-        foreach ($this->getSchedules() ?? [] as $schedule) {
+        foreach ($this->getSchedules() as $schedule) {
             $this->schedules->enqueue($schedule);
         }
 
         return $this->schedules;
     }
 
+    /**
+     * @return array<int,\SwowCloud\Job\Crontab\Crontab>
+     */
     protected function getSchedules(): array
     {
         return $this->crontabManager->parse();

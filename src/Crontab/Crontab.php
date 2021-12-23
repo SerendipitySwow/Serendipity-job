@@ -106,12 +106,12 @@ class Crontab
         return $this;
     }
 
-    public function getCallback()
+    public function getCallback(): mixed
     {
         return $this->callback;
     }
 
-    public function setCallback($callback): Crontab
+    public function setCallback(mixed $callback): Crontab
     {
         $this->callback = $callback;
 
