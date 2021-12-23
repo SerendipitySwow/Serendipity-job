@@ -14,6 +14,9 @@ interface SerializerInterface
 {
     public function serialize(object $object, string $format = JsonEncoder::FORMAT): string;
 
+    /**
+     * @param array<int|string,int|string[]> $context
+     */
     public function deserialize(
         string $serializable,
         string $type,

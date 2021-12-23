@@ -12,17 +12,13 @@ interface JobInterface
 {
     /**
      * Execute current job.
-     *
-     * @return mixed
      */
     public function handle(): void;
 
     /**
      * Determine whether current job can retry if failed.
-     *
-     * @param $error
      */
-    public function canRetry(int $counter, $error): bool;
+    public function canRetry(int $counter, mixed $error): bool;
 
     /**
      * Get current job's next execution unix time after failed.
@@ -31,6 +27,7 @@ interface JobInterface
 
     /**
      * After failed, this function will be called.
+     * @param array<string,int|string> $payload
      */
     public function failed(array $payload): void;
 

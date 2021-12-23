@@ -38,7 +38,7 @@ class SimpleJob implements JobInterface
 //        throw new \Exception('抛出异常');
     }
 
-    public function canRetry(int $counter, $error): bool
+    public function canRetry(int $counter, mixed $error): bool
     {
         return $counter < 5;
     }

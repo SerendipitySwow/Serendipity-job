@@ -70,10 +70,10 @@ abstract class Command extends SymfonyCommand
 
     /**
      * Format input to textual table.
-     * @var array<string,string[]> $headers
-     * @var array<string,string[]> $rows
-     * @var string $tableStyle
-     * @var array<int,string> $columnStyles
+     * @var array<string,string[]>
+     * @var array<string,string[]>
+     * @var string
+     * @var array<int,string>
      */
     public function table(array $headers, array $rows, string $tableStyle = 'default', array $columnStyles = []): void
     {
