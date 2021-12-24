@@ -659,25 +659,24 @@ class ServerProvider extends AbstractProvider
             }
 
             /*
-             * @var Command $command
+             * $command = make(Command::class);
+             * $command->insert('request_log', [
+             * 'application_name' => (string) Arr::get($request->getHeader('application'), 'application_name', 'Unknown'),
+             * 'app_key' => current($request->getHeader('app_key')),
+             * 'ip' => $connection->getPeerAddress(),
+             * 'ip_location' => Arr::get(IPTool::query($connection->getPeerAddress()), 'disp'),
+             * 'os' => OperatingSystem::getOsFamily($dd->getOs('name')) ?? 'Unknown',
+             * 'request_info' => $debug,
+             * 'request_time' => Carbon::now()->toDateTimeString(),
+             * ]);
+             * DB::run(function (PDO $PDO) use ($command) {
+             * $statement = $PDO->prepare($command->getSql());
+             *
+             * $this->bindValues($statement, $command->getParams());
+             *
+             * $statement->execute();
+             * });
              */
-            $command = make(Command::class);
-            $command->insert('request_log', [
-                'application_name' => (string) Arr::get($request->getHeader('application'), 'application_name', 'Unknown'),
-                'app_key' => current($request->getHeader('app_key')),
-                'ip' => $connection->getPeerAddress(),
-                'ip_location' => Arr::get(IPTool::query($connection->getPeerAddress()), 'disp'),
-                'os' => OperatingSystem::getOsFamily($dd->getOs('name')) ?? 'Unknown',
-                'request_info' => $debug,
-                'request_time' => Carbon::now()->toDateTimeString(),
-            ]);
-            DB::run(function (PDO $PDO) use ($command) {
-                $statement = $PDO->prepare($command->getSql());
-
-                $this->bindValues($statement, $command->getParams());
-
-                $statement->execute();
-            });
         }
 
         Xhprof::endPoint($connection, $request);

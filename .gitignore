@@ -9,6 +9,4 @@ composer.lock
 /tests/CodeCoverage
 archer
 .pid.server
-php-consul
-php-swoole-consul-rpc
 consul

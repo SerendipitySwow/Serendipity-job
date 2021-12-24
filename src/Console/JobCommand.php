@@ -15,6 +15,7 @@ use Hyperf\Utils\ApplicationContext;
 use Hyperf\Utils\Codec\Json;
 use Hyperf\Utils\Coroutine as HyperfCo;
 use Psr\Container\ContainerInterface;
+use Ramsey\Uuid\Uuid;
 use Spatie\Emoji\Emoji;
 use Swow\Coroutine as SwowCo;
 use Swow\Coroutine\Exception as CoroutineException;
@@ -29,6 +30,7 @@ use SwowCloud\Job\Contract\SerializerInterface;
 use SwowCloud\Job\Crontab\CrontabDispatcher;
 use SwowCloud\Job\Db\DB;
 use SwowCloud\Job\Event\CrontabEvent;
+use SwowCloud\Job\Kernel\Consul\RegisterServices;
 use SwowCloud\Job\Kernel\Http\Response;
 use SwowCloud\Job\Kernel\Provider\KernelProvider;
 use SwowCloud\Job\Nsq\Consumer\AbstractConsumer;
@@ -36,6 +38,7 @@ use SwowCloud\Job\Nsq\Consumer\JobConsumer;
 use SwowCloud\Nsq\Message;
 use SwowCloud\Nsq\Nsq;
 use SwowCloud\Nsq\Result;
+use SwowCloud\Redis\Redis;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Input\InputOption;
 use Throwable;
@@ -84,6 +87,13 @@ final class JobCommand extends Command
                     'Configure HttpServer port numbers',
                     9764
                 ),
+                new InputOption(
+                    'consul-service-name',
+                    'csn',
+                    InputOption::VALUE_REQUIRED,
+                    'Consul service center service name',
+                    'job_service_name'
+                ),
             ])
             ->setHelp(
                 <<<'EOF'
@@ -93,8 +103,10 @@ final class JobCommand extends Command
                         
                     Use the --host Configure HttpServer host:
                         <info>php %command.full_name% --host=127.0.0.1</info>
-                    Use the --type Configure HttpServer port numbers:
+                    Use the --port Configure HttpServer port numbers:
                         <info>php %command.full_name% --port=9764</info>
+                    Use the --consul-service-name Consul service center service name:
+                        <info>php %command.full_name% --consul-service-name=job_service_name</info>
                     EOF
             );
     }
@@ -113,18 +125,20 @@ final class JobCommand extends Command
         $this->stdoutLogger->info(str_repeat(Emoji::flagsForFlagChina() . '  ', 10));
         $port = (int) $this->input->getOption('port');
         $host = $this->input->getOption('host');
-        $this->stdoutLogger->info(sprintf('%s JobConsumer Successfully Processed# Host:[%s]  Port:[%s] %s', Emoji::manSurfing(), $host, $port, Emoji::rocket()));
+        $name = $this->input->getOption('consul-service-name');
+        $this->stdoutLogger->info(sprintf('%s JobConsumer Successfully Processed# Host:[%s]  Port:[%s]  Name:[%s] %s', Emoji::manSurfing(), $host, $port, $name, Emoji::rocket()));
         $this->subscribe();
-        $this->makeServer($host, $port);
+        $this->makeServer($host, $port, $name);
 
         return SymfonyCommand::SUCCESS;
     }
 
-    protected function makeServer(string $host, int $port): void
+    protected function makeServer(string $host, int $port, string $name): void
     {
         $server = new HttpServer();
         $server->bind($host, $port)
             ->listen();
+        $this->registerConsul(...func_get_args());
         while (true) {
             try {
                 $connection = $server->acceptConnection();
@@ -166,6 +180,11 @@ final class JobCommand extends Command
                                         $connection->sendHttpResponse($response);
                                         break;
                                     }
+                                    case '/Health':
+                                        $response = new Response();
+                                        $response->text('Im Ok');
+                                        $connection->sendHttpResponse($response);
+                                        break;
                                     case '/cancel':
                                         $params = serendipity_json_decode(
                                             $request->getBody()
@@ -330,5 +349,32 @@ final class JobCommand extends Command
             $this->container->get(CrontabDispatcher::class)
                 ->handle();
         }
+    }
+
+    protected function registerConsul(string $host, int $port, string $name): void
+    {
+        $register = $this->container->get(RegisterServices::class);
+
+        if (in_array($host, ['127.0.0.1', '0.0.0.0'])) {
+            $host = $this->getInternalIp();
+        }
+        if (!filter_var($host, FILTER_VALIDATE_IP)) {
+            throw new \InvalidArgumentException(sprintf('Invalid host %s', $host));
+        }
+        if (!is_numeric($port) || ($port < 0 || $port > 65535)) {
+            throw new \InvalidArgumentException(sprintf('Invalid port %s', $port));
+        }
+        $serviceId = Uuid::uuid4()->toString();
+        $register->register($host, $port, ['protocol' => 'http'], $name, Redis::class, $serviceId);
+    }
+
+    protected function getInternalIp(): string
+    {
+        /** @var mixed|string $ip */
+        $ip = gethostbyname(gethostname());
+        if (is_string($ip)) {
+            return $ip;
+        }
+        throw new \RuntimeException('Can not get the internal IP.');
     }
 }
