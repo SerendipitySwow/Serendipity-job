@@ -47,24 +47,24 @@ create table failed_jobs
 -- auto-generated definition
 create table task
 (
-    id           bigint unsigned auto_increment comment '主键ID'
+    id                bigint unsigned auto_increment comment '主键ID'
         primary key,
-    is_deleted   tinyint unsigned         default '0'               not null comment '是否删除',
-    status       tinyint unsigned         default '0'               not null comment '任务状态 0:待处理 1:处理中 2:已处理 3:已取消 4:处理失败',
-    app_key      char(32) charset utf8    default ''                not null comment 'APP KEY',
-    task_no      varchar(50) charset utf8 default ''                not null comment '任务编号',
-    step         tinyint unsigned         default '0'               not null comment '重试间隔(秒)',
-    runtime      timestamp                default CURRENT_TIMESTAMP not null comment '执行时间',
-    content      longtext charset utf8                              not null comment '任务内容',
-    created_at   timestamp                default CURRENT_TIMESTAMP not null comment '创建时间',
-    updated_at   timestamp                default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP,
-    timeout      int                      default -1                not null comment '任务执行时间',
-    name         varchar(64)              default ''                not null comment '任务名称',
-    coroutine_id bigint                   default 0                 not null comment '执行当前的任务协程ID,用于取消当前任务',
-    memo         longtext                                           null comment '当任务执行出现错误时,记录错误信息',
-    result       longtext                                           null comment '执行任务完成的结果',
-    retry_times  int                      default 0                 not null comment '重试次数',
-    server_ip    varchar(32)              default '127.0.0.1'       not null comment '运行任务的服务端IP地址',
+    is_deleted        tinyint unsigned         default '0'               not null comment '是否删除',
+    status            tinyint unsigned         default '0'               not null comment '任务状态 0:待处理 1:处理中 2:已处理 3:已取消 4:处理失败',
+    app_key           char(32) charset utf8    default ''                not null comment 'APP KEY',
+    task_no           varchar(50) charset utf8 default ''                not null comment '任务编号',
+    step              tinyint unsigned         default '0'               not null comment '重试间隔(秒)',
+    runtime           timestamp                default CURRENT_TIMESTAMP not null comment '执行时间',
+    content           longtext charset utf8                              not null comment '任务内容',
+    created_at        timestamp                default CURRENT_TIMESTAMP not null comment '创建时间',
+    updated_at        timestamp                default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP,
+    timeout           int                      default -1                not null comment '任务执行时间',
+    name              varchar(64)              default ''                not null comment '任务名称',
+    coroutine_id      bigint                   default 0                 not null comment '执行当前的任务协程ID,用于取消当前任务',
+    memo              longtext                                           null comment '当任务执行出现错误时,记录错误信息',
+    result            longtext                                           null comment '执行任务完成的结果',
+    retry_times       int                      default 0                 not null comment '重试次数',
+    consul_service_id varchar(64)              default ''                not null comment 'consul运行服务的ID',
     constraint unq_task_no
         unique (task_no)
 )
@@ -78,6 +78,8 @@ create index idx_is_deleted
 
 create index idx_task_no
     on task (app_key, task_no);
+
+;
 
 
 

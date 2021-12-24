@@ -26,7 +26,6 @@ use SwowCloud\Redis\Lua\Hash\Incr;
 use SwowCloud\RedisLock\RedisLock;
 use Throwable;
 use function SwowCloud\Job\Kernel\serendipity_json_decode;
-use function SwowCloud\Job\Kernel\server_ip;
 
 class JobConsumer extends AbstractConsumer
 {
@@ -57,11 +56,11 @@ class JobConsumer extends AbstractConsumer
                     //修改当前那个协程在执行此任务,用于取消任务
                     DB::execute(
                         sprintf(
-                            'update task set coroutine_id = %s,status = %s,server_ip = "%s"  where id = %s;',
+                            'update task set coroutine_id = %s,status = %s,consul_service_id = "%s"  where id = %s;',
                             SwowCo::getCurrent()
                                 ->getId(),
                             Task::TASK_ING,
-                            server_ip(),
+                            $this->getServiceId(),
                             $job->getIdentity()
                         )
                     );

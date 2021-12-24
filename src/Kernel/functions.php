@@ -32,6 +32,7 @@ if (!function_exists('serendipity_format_throwable')) {
 if (!function_exists('serendipity_json_decode')) {
     function serendipity_json_decode(string $json): array|object
     {
+        /* @noinspection PhpUndefinedFunctionInspection */
         return \simdjson_decode($json, true, 512) ?? Json::decode($json);
     }
 }

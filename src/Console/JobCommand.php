@@ -14,8 +14,9 @@ use Hyperf\Contract\ConfigInterface;
 use Hyperf\Utils\ApplicationContext;
 use Hyperf\Utils\Codec\Json;
 use Hyperf\Utils\Coroutine as HyperfCo;
+use InvalidArgumentException;
 use Psr\Container\ContainerInterface;
-use Ramsey\Uuid\Uuid;
+use RuntimeException;
 use Spatie\Emoji\Emoji;
 use Swow\Coroutine as SwowCo;
 use Swow\Coroutine\Exception as CoroutineException;
@@ -38,7 +39,6 @@ use SwowCloud\Job\Nsq\Consumer\JobConsumer;
 use SwowCloud\Nsq\Message;
 use SwowCloud\Nsq\Nsq;
 use SwowCloud\Nsq\Result;
-use SwowCloud\Redis\Redis;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Input\InputOption;
 use Throwable;
@@ -127,7 +127,6 @@ final class JobCommand extends Command
         $host = $this->input->getOption('host');
         $name = $this->input->getOption('consul-service-name');
         $this->stdoutLogger->info(sprintf('%s JobConsumer Successfully Processed# Host:[%s]  Port:[%s]  Name:[%s] %s', Emoji::manSurfing(), $host, $port, $name, Emoji::rocket()));
-        $this->subscribe();
         $this->makeServer($host, $port, $name);
 
         return SymfonyCommand::SUCCESS;
@@ -136,9 +135,9 @@ final class JobCommand extends Command
     protected function makeServer(string $host, int $port, string $name): void
     {
         $server = new HttpServer();
-        $server->bind($host, $port)
-            ->listen();
-        $this->registerConsul(...func_get_args());
+        $server->bind($host, $port)->listen();
+        $serviceId = $this->registerConsul(...func_get_args());
+        $this->subscribe($serviceId);
         while (true) {
             try {
                 $connection = $server->acceptConnection();
@@ -270,18 +269,18 @@ final class JobCommand extends Command
         }
     }
 
-    protected function subscribe(): void
+    protected function subscribe(string $serviceId): void
     {
         HyperfCo::create(
-            function () {
+            function () use ($serviceId) {
                 /* 测试多个消费者并发代码 */
-                for ($i = 0; $i < 10; $i++) {
-                    HyperfCo::create(function () use ($i) {
+                for ($i = 0; $i < 1; $i++) {
+                    HyperfCo::create(function () use ($i, $serviceId) {
                         $subscriber = make(Nsq::class, [
                             $this->container,
                             $this->config->get(sprintf('nsq.%s', 'default')),
                         ]);
-                        $consumer = $this->makeConsumer(JobConsumer::class, AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX, 'JobConsumer' . $i);
+                        $consumer = $this->makeConsumer(JobConsumer::class, AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX, 'JobConsumer' . $i, 'default', $serviceId);
                         $this->stdoutLogger->debug('JobConsumer' . $i . ' Started#');
                         $subscriber->subscribe(
                             AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX,
@@ -316,7 +315,8 @@ final class JobCommand extends Command
         string $class,
         string $topic,
         string $channel,
-        string $redisPool = 'default'
+        string $redisPool = 'default',
+        string $serviceId = ''
     ): AbstractConsumer {
         /**
          * @var AbstractConsumer $consumer
@@ -326,6 +326,7 @@ final class JobCommand extends Command
         $consumer->setTopic($topic);
         $consumer->setChannel($channel);
         $consumer->setRedisPool($redisPool);
+        $consumer->setServiceId($serviceId);
 
         return $consumer;
     }
@@ -351,7 +352,7 @@ final class JobCommand extends Command
         }
     }
 
-    protected function registerConsul(string $host, int $port, string $name): void
+    protected function registerConsul(string $host, int $port, string $name): string
     {
         $register = $this->container->get(RegisterServices::class);
 
@@ -359,15 +360,14 @@ final class JobCommand extends Command
             $host = $this->getInternalIp();
         }
         if (!filter_var($host, FILTER_VALIDATE_IP)) {
-            throw new \InvalidArgumentException(sprintf('Invalid host %s', $host));
+            throw new InvalidArgumentException(sprintf('Invalid host %s', $host));
         }
         if (!is_numeric($port) || ($port < 0 || $port > 65535)) {
-            throw new \InvalidArgumentException(sprintf('Invalid port %s', $port));
+            throw new InvalidArgumentException(sprintf('Invalid port %s', $port));
         }
-        /** @var $serviceId */
-//        $serviceId = Uuid::uuid4()->toString();
-        $serviceId = '';
-        $register->register($host, $port, ['protocol' => 'http'], $name, Redis::class, $serviceId);
+        $register->register($host, $port, ['protocol' => 'http'], $name, $this::class);
+
+        return $register->getServiceId();
     }
 
     protected function getInternalIp(): string
@@ -377,6 +377,6 @@ final class JobCommand extends Command
         if (is_string($ip)) {
             return $ip;
         }
-        throw new \RuntimeException('Can not get the internal IP.');
+        throw new RuntimeException('Can not get the internal IP.');
     }
 }

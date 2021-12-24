@@ -90,6 +90,7 @@
 * 考虑使用swow-cloud/redis-subscriber订阅消息
 * 考虑使用swow-cloud/redis-lock上锁
 * 加入consul支持分布式
+* 通过获取服务节点操作任务(分布式)
 * 支持任务图表
 * 支持后台创建任务
 * [FORM](https://github.com/BoBoooooo/Element-Pro-Crud)

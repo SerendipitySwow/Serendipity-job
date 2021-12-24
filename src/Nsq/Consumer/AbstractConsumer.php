@@ -35,6 +35,8 @@ abstract class AbstractConsumer
 
     protected string $redisPool = 'default';
 
+    protected string $serviceId = '';
+
     protected ?LoggerInterface $logger = null;
 
     protected ContainerInterface $container;
@@ -114,6 +116,16 @@ abstract class AbstractConsumer
         $this->nums = $nums;
 
         return $this;
+    }
+
+    public function getServiceId(): string
+    {
+        return $this->serviceId;
+    }
+
+    public function setServiceId(string $serviceId): void
+    {
+        $this->serviceId = $serviceId;
     }
 
     public function setRedisPool(string $redisPool): self
