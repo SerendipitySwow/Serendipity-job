@@ -364,7 +364,9 @@ final class JobCommand extends Command
         if (!is_numeric($port) || ($port < 0 || $port > 65535)) {
             throw new \InvalidArgumentException(sprintf('Invalid port %s', $port));
         }
-        $serviceId = Uuid::uuid4()->toString();
+        /** @var $serviceId */
+//        $serviceId = Uuid::uuid4()->toString();
+        $serviceId = '';
         $register->register($host, $port, ['protocol' => 'http'], $name, Redis::class, $serviceId);
     }
 
