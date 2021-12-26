@@ -11,6 +11,7 @@ namespace SwowCloud\Job\Server;
 use Carbon\Carbon;
 use DeviceDetector\DeviceDetector;
 use DeviceDetector\Parser\OperatingSystem;
+use Exception;
 use FastRoute\Dispatcher;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
@@ -40,6 +41,7 @@ use SwowCloud\Job\Constant\Statistical;
 use SwowCloud\Job\Constant\Task;
 use SwowCloud\Job\Db\Command;
 use SwowCloud\Job\Db\DB;
+use SwowCloud\Job\Kernel\Consul\ConsulAgent;
 use SwowCloud\Job\Kernel\Http\Request as SwowCloudRequest;
 use SwowCloud\Job\Kernel\Http\Response;
 use SwowCloud\Job\Kernel\Provider\AbstractProvider;
@@ -130,6 +132,7 @@ class ServerProvider extends AbstractProvider
         }
     }
 
+    /** @noinspection PhpComplexFunctionInspection */
     protected function makeFastRoute(): void
     {
         $this->fastRouteDispatcher = simpleDispatcher(function (RouteCollector $router) {
@@ -497,7 +500,7 @@ class ServerProvider extends AbstractProvider
                 });
                 /*
                  * 查看任务详情
-                 * //TODO 根据服务节点获取
+                 *
                  */
                 $router->get('/task/detail', function (): Response {
                     /**
@@ -506,27 +509,34 @@ class ServerProvider extends AbstractProvider
                     $request = Context::get(RequestInterface::class);
                     $swowResponse = new Response();
                     $params = $request->get();
-                    $client = new Client();
-                    $config = $this->container()
-                        ->get(ConfigInterface::class)
-                        ->get('task_server');
-                    $response = $client->get(
-                        sprintf('%s:%s/%s', $config['host'], $config['port'], 'detail'),
-                        [
-                            'query' => ['coroutine_id' => $params['coroutine_id'] ?? 0],
-                        ]
-                    );
 
-                    return $swowResponse->json(
-                        serendipity_json_decode(
-                            $response->getBody()
-                                ->getContents()
-                        )
-                    );
+                    $consulAgent = $this->container()->get(ConsulAgent::class);
+                    $service = $consulAgent->service($params['service_id'])->json();
+
+                    try {
+                        $client = new Client();
+                        $response = $client->get(
+                            sprintf('%s:%s/%s', $service['Address'], $service['Port'], 'detail'),
+                            [
+                                'query' => [
+                                    'coroutine_id' => $params['coroutine_id'] ?? 0,
+                                    'task_id' => $params['id'] ?? 0,
+                                ],
+                            ]
+                        );
+
+                        return $swowResponse->json(
+                            serendipity_json_decode(
+                                $response->getBody()
+                                    ->getContents()
+                            )
+                        );
+                    } catch (Exception $exception) {
+                        throw new HttpException($exception->getCode(), $exception->getMessage());
+                    }
                 });
                 /*
                  * 取消任务
-                 * //TODO 获取服务节点取消任务
                  */
                 $router->post('/task/cancel', function () {
                     /**
@@ -536,25 +546,28 @@ class ServerProvider extends AbstractProvider
                     $swowResponse = new Response();
                     $params = $request->post();
                     $client = new Client();
-                    $config = $this->container()
-                        ->get(ConfigInterface::class)
-                        ->get('task_server');
-                    $response = $client->post(
-                        sprintf('%s:%s/%s', $config['host'], $config['port'], 'cancel'),
-                        [
-                            RequestOptions::JSON => [
-                                'coroutine_id' => $params['coroutine_id'],
-                                'id' => $params['id'],
-                            ],
-                        ]
-                    );
+                    $consulAgent = $this->container()->get(ConsulAgent::class);
+                    $service = $consulAgent->service($params['service_id'])->json();
+                    try {
+                        $response = $client->post(
+                            sprintf('%s:%s/%s', $service['Address'], $service['Port'], 'cancel'),
+                            [
+                                RequestOptions::JSON => [
+                                    'coroutine_id' => $params['coroutine_id'],
+                                    'id' => $params['id'],
+                                ],
+                            ]
+                        );
 
-                    return $swowResponse->json(
-                        serendipity_json_decode(
-                            $response->getBody()
-                                ->getContents()
-                        )
-                    );
+                        return $swowResponse->json(
+                            serendipity_json_decode(
+                                $response->getBody()
+                                    ->getContents()
+                            )
+                        );
+                    } catch (Exception $exception) {
+                        throw new HttpException($exception->getCode(), $exception->getMessage());
+                    }
                 });
             });
         }, [
@@ -612,6 +625,10 @@ class ServerProvider extends AbstractProvider
                             $response = new Response();
                             if ($exception instanceof UnauthorizedException) {
                                 $response->error(Status::UNAUTHORIZED, 'UNAUTHORIZED');
+                                break;
+                            }
+                            if ($exception instanceof HttpException) {
+                                $response->error($exception->getCode(), $exception->getMessage());
                                 break;
                             }
                             $this->logger->error(serendipity_format_throwable($exception));
