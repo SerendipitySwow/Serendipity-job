@@ -26,12 +26,9 @@ RUN set -ex \
     && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
     # download
     && cd /tmp \
-    && curl -SL "https://github.com/swow/swow/archive/${SW_VERSION}.tar.gz" -o swow.tar.gz \
+    && git clone "https://github.com/swow/swow" \
     && ls -alh \
     # php extension:swow
-    && cd /tmp \
-    && mkdir -p swow \
-    && tar -xf swow.tar.gz -C swow --strip-components=1 \
     && ln -s /usr/bin/phpize8 /usr/local/bin/phpize \
     && ln -s /usr/bin/php-config8 /usr/local/bin/php-config \
     && ( \
