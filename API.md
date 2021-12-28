@@ -131,6 +131,7 @@ $signature = $request->getHeaderLine('signature') ?? '';
 | 参数名     | 类型     | 是否必填 | 默认值 | 说明      |
 |---------|--------|------|-----|---------|
 | coroutine_id | int | 是    | -   | 任务运行的协程ID |
+| service_id | string  | 是    | -   | consul服务 |
 | id | int | 是    | -   | 任务ID |
 
 > 程序会尽量拦截任务,不保证拦截成功率(越早拦截成功率越高)！
@@ -156,9 +157,11 @@ $signature = $request->getHeaderLine('signature') ?? '';
 
 ### 接口参数
 
-| 参数名     | 类型     | 是否必填 | 默认值 | 说明      |
-|---------|--------|------|-----|---------|
+| 参数名     | 类型  | 是否必填 | 默认值 | 说明 |
+|---------|-----|------|-----|--|
 | coroutine_id | int | 是    | -   | 任务执行的协程ID |
+| service_id | string  | 是    | -   | consul服务 |
+| id | int  | 是    | -   | 任务ID |
 
 ### 返回结果
 
