@@ -15,6 +15,7 @@ use Swow\Debug\Debugger;
 use SwowCloud\Job\Config\Loader\YamlLoader;
 use SwowCloud\Job\Console\DagJobCommand;
 use SwowCloud\Job\Console\JobCommand;
+use SwowCloud\Job\Console\MatrixCommand;
 use SwowCloud\Job\Console\SwowCloudJobCommand;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\FileLocatorInterface;
@@ -39,6 +40,7 @@ final class Application extends SymfonyApplication
             new SwowCloudJobCommand(),
             new JobCommand($container),
             new DagJobCommand($container),
+            new MatrixCommand($container),
         ]);
     }
 
