@@ -34,6 +34,9 @@
 # 🚀Serendipity-Job  For 🏆Swow 分布式任务平台
 
 🚀 🏆 Task Platform Developed Based On Swow and Php8
+## 介绍
+如今通过PHP开发的任务平台还是停留在原来地同步阻塞模式,通过结合swow开启PHP高性能时代,正式拥抱协程。消息队列选择Nsq利用其易部署,高性能，支持分布式特性。通过Redis分布式锁防止任务并行，实现watchdog防止任务还在执行，而redis锁被释放。给锁续期。该任务平台支持API投递,可以限制其执行时间，支持任务编排,用户可以实时查看任务详情和取消任务,后台支持丰富的图表包括任务统计(成功,失败...)
+
 
 ## 👇 Features👇
 
@@ -45,7 +48,7 @@
 5.支持重试机制,中间件(完成)
 6.支持API查看任务消息
 7.支持后台配置任务.
-8.支持定时任务Crontab.(完成)
+8.支持定时任务Crontab.(完成,考虑是否取消定时任务)
 9.支持任务图表(成功,失败,重试,超时,终止.)(开发中)
 10.支持任务取消(完成)
 11.签名验证(完成)
@@ -75,6 +78,7 @@
 9.请尽量使用框架自带协程的创建方法,主要用日志上下文管理
  Hyperf\Utils\Coroutine::create()
 10.任务执行时间尽量调大一点
+11.dag(任务编排)的执行时间必须要小于nsq的max_msg_timeout的时间，因为超过了nsq会重新入队列
 ```
 
 ## 👇 接口文档👇
@@ -111,7 +115,7 @@
 4.mysql
 5.ext-swow
 6.consul
-7.ext-simdjson
+7.ext-simdjson(https://github.com/crazyxman/simdjson_php)
 ````
 
 ## 👇 Usage👇

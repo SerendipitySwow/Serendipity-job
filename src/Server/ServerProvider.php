@@ -67,8 +67,6 @@ use const Swow\Errno\ENOMEM;
 
 /**
  * Class ServerProvider
- * TODO 1.现在task表记录了consul的服务节点
- *      2.现在取消或者查看任务详情可以通过服务节点操作，这样就是一个简单的分布式.
  */
 class ServerProvider extends AbstractProvider
 {
