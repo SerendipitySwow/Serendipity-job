@@ -8,7 +8,6 @@ declare(strict_types=1);
 
 namespace SwowCloud\Job\Console;
 
-use Hyperf\Utils\Coroutine;
 use Psr\Container\ContainerInterface;
 use SwowCloud\Job\Kernel\MatrixService;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
@@ -34,40 +33,43 @@ class MatrixCommand extends Command
 
     public function handle(): int
     {
-        Coroutine::create(function () {
-            // Initialize Terminal
-            $terminal = new Terminal();
-            $width = $terminal->getWidth();
-            $height = $terminal->getHeight();
-            $cursor = new Cursor($this->output);
-            $cursor->hide();
-
-            // Print Welcome Message
-            $cursor->clearScreen();
-            $cursor->moveToPosition(0, 0);
-            $this->output->writeln('<fg=green;options=bold>Welcome to the Matrix ...</>');
-            sleep(3);
-
-            // Initialize Matrix
-            $cursor->clearScreen();
-            $initLine = $this->matrixService->initMatrix($width);
-            $arrayLine = $this->matrixService->makeArrayLine($width, $height, $initLine);
-
-            // Make matrix
-            $x = 0;
-            while (true) {
-                $a = 0;
-                while ($a < $width - 1) {
-                    $a++;
-                    $cursor->moveToPosition($arrayLine[$a]['col'], $arrayLine[$a]['row']);
-                    $this->output->write('<fg=green;options=bold>' . $arrayLine[$a]['string'] . '</>');
-                }
-                $x++;
-                usleep(60000);
-                $arrayLine = $this->matrixService->makeArrayLine($width, $height, $arrayLine);
-            }
-        });
+        // Initialize Terminal
+        $this->matrix();
 
         return SymfonyCommand::SUCCESS;
+    }
+
+    public function matrix(): void
+    {
+        $terminal = new Terminal();
+        $width = $terminal->getWidth();
+        $height = $terminal->getHeight();
+        $cursor = new Cursor($this->output);
+        $cursor->hide();
+
+        // Print Welcome Message
+        $cursor->clearScreen();
+        $cursor->moveToPosition(0, 0);
+        $this->output->writeln('<fg=green;options=bold>Welcome to the Matrix ...</>');
+        sleep(3);
+
+        // Initialize Matrix
+        $cursor->clearScreen();
+        $initLine = $this->matrixService->initMatrix($width);
+        $arrayLine = $this->matrixService->makeArrayLine($width, $height, $initLine);
+
+        // Make matrix
+        $x = 0;
+        while (true) {
+            $a = 0;
+            while ($a < $width - 1) {
+                $a++;
+                $cursor->moveToPosition($arrayLine[$a]['col'], $arrayLine[$a]['row']);
+                $this->output->write('<fg=green;options=bold>' . $arrayLine[$a]['string'] . '</>');
+            }
+            $x++;
+            usleep(60000);
+            $arrayLine = $this->matrixService->makeArrayLine($width, $height, $arrayLine);
+        }
     }
 }
