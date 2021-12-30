@@ -1,16 +1,16 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Event;
+namespace SwowCloud\Job\Event;
 
 use Hyperf\Contract\ConfigInterface;
-use Serendipity\Job\Contract\EventDispatcherInterface;
-use Serendipity\Job\Kernel\Provider\AbstractProvider;
+use SwowCloud\Job\Contract\EventDispatcherInterface;
+use SwowCloud\Job\Kernel\Provider\AbstractProvider;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class EventProvider extends AbstractProvider

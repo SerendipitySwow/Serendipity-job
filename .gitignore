@@ -9,3 +9,4 @@ composer.lock
 /tests/CodeCoverage
 archer
 .pid.server
+consul

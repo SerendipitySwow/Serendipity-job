@@ -1,22 +1,21 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Console;
+namespace SwowCloud\Job\Console;
 
 use Nette\Utils\Strings;
-use Serendipity\Job\Constant\Logo;
+use SwowCloud\Job\Constant\Logo;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Termage\Termage;
 use const Swow\VERSION;
 
 abstract class Command extends SymfonyCommand
@@ -30,8 +29,6 @@ abstract class Command extends SymfonyCommand
 
     protected SymfonyStyle $output;
 
-    protected Termage $termage;
-
     /**
      * The default verbosity of output commands.
      */
@@ -39,6 +36,7 @@ abstract class Command extends SymfonyCommand
 
     /**
      * The mapping between human readable verbosity levels and Symfony's OutputInterface.
+     * @var array<string, int>
      */
     protected array $verbosityMap = [
         'v' => OutputInterface::VERBOSITY_VERBOSE,
@@ -62,20 +60,19 @@ abstract class Command extends SymfonyCommand
     public function run(InputInterface $input, OutputInterface $output): int
     {
         $this->output = new SymfonyStyle($input, $output);
-        $this->termage = \termage($output);
 
         return parent::run($this->input = $input, $this->output);
     }
 
     /**
      * Format input to textual table.
+     * @var array<string,string[]>
+     * @var array<string,string[]>
+     * @var string
+     * @var array<int,string>
      */
-    public function table(
-        array $headers,
-        array $rows,
-        null|string $tableStyle = 'default',
-        array $columnStyles = []
-    ): void {
+    public function table(array $headers, array $rows, string $tableStyle = 'default', array $columnStyles = []): void
+    {
         $table = new Table($this->output);
 
         $table->setHeaders($headers)
@@ -157,7 +154,7 @@ abstract class Command extends SymfonyCommand
         $this->output->newLine();
     }
 
-    protected function parseVerbosity($level = null): int
+    protected function parseVerbosity(mixed $level = null): int
     {
         if (isset($this->verbosityMap[$level])) {
             $level = $this->verbosityMap[$level];
@@ -193,7 +190,7 @@ abstract class Command extends SymfonyCommand
         ]);
         $this->output->writeln(sprintf('<info>%s</info>', Logo::LOGO));
         $this->output->writeln([
-            '<info>Serendipity Job For SerendipitySwow</info>',
+            '<info>Job For SwowCloud</info>',
             '<info>===================================</info>',
             '',
         ]);

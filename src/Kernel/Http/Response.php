@@ -1,12 +1,12 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Kernel\Http;
+namespace SwowCloud\Job\Kernel\Http;
 
 use Hyperf\Utils\Codec\Json;
 use RuntimeException;
@@ -49,7 +49,7 @@ class Response extends SwowResponse
 
     private function setResponseServerHeader(): void
     {
-        $this->setHeader('Server', 'Serendipity-Job');
+        $this->setHeader('Server', 'SwowCloud-Job');
     }
 
     protected function withJsonResponseHeader(): void
@@ -84,7 +84,7 @@ class Response extends SwowResponse
         $this
             ->setStatus($statusCode, $reasonPhrase)
             ->getBody()->clear()
-            ->write('<html lang="en"><body><h2>HTTP ')->write((string) $statusCode)->write(' ')->write($reasonPhrase)->write('</h2><hr><i>Powered by Serendipity-Swow</i></body></html>');
+            ->write('<html lang="en"><body><h2>HTTP ')->write((string) $statusCode)->write(' ')->write($reasonPhrase)->write('</h2><hr><i>Powered by Swow-Cloud</i></body></html>');
 
         return $this;
     }

@@ -6,7 +6,6 @@
 
 declare(strict_types=1);
 
-$bodytag = str_replace('{date}', date('Y-m-d'), '/10001/{txt}');
-echo $bodytag;
-
-echo trim("date('y-m-d')");
+return [
+    'uri' => env('CONSUL_HOST', 'http://127.0.0.1:8500'),
+];

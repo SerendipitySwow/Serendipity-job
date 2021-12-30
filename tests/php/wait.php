@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
@@ -12,7 +12,7 @@ require_once '../src/Kernel/Lock/RedisLock.php';
 $redis = new Redis();
 $redis->connect('127.0.0.1', 6379);
 
-$lock = new \Serendipity\Job\Kernel\Lock\RedisLock($redis);
+$lock = new \SwowCloud\Job\Kernel\Lock\RedisLock($redis);
 
 $true = $lock->lock('sdfsdf');
 if ($true) {

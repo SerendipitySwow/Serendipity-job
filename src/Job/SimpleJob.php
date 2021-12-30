@@ -1,18 +1,18 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Job;
+namespace SwowCloud\Job\Job;
 
-use Serendipity\Job\Contract\JobInterface;
+use SwowCloud\Job\Contract\JobInterface;
 
 class SimpleJob implements JobInterface
 {
-    public int $identity;
+    public int|string $identity;
 
     public int $timeout;
 
@@ -22,7 +22,7 @@ class SimpleJob implements JobInterface
 
     public int $step;
 
-    public function __construct(int $identity, int $timeout, int $retryTimes, string $name, int $step)
+    public function __construct(int|string $identity, int $timeout, int $retryTimes, string $name, int $step)
     {
         $this->identity = $identity;
         $this->timeout = $timeout;
@@ -38,7 +38,7 @@ class SimpleJob implements JobInterface
 //        throw new \Exception('抛出异常');
     }
 
-    public function canRetry(int $counter, $error): bool
+    public function canRetry(int $counter, mixed $error): bool
     {
         return $counter < 5;
     }

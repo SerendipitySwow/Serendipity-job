@@ -1,12 +1,12 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Crontab;
+namespace SwowCloud\Job\Crontab;
 
 use Hyperf\Contract\ConfigInterface;
 use Psr\Container\ContainerInterface;
@@ -55,6 +55,7 @@ class CrontabDispatcher
     private function sleep(): void
     {
         $current = date('s');
+        /** @var int<0,60> $sleep */
         $sleep = 60 - $current;
         $this->logger->debug('Crontab dispatcher sleep ' . $sleep . 's.');
         $sleep > 0 && sleep($sleep);

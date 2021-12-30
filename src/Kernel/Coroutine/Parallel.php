@@ -1,14 +1,14 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Kernel\Coroutine;
+namespace SwowCloud\Job\Kernel\Coroutine;
 
-use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
+use Hyperf\Utils\Coroutine as HyperfCo;
 use Swow\Channel;
 
 class Parallel
@@ -48,7 +48,7 @@ class Parallel
 
         foreach ($this->callbacks as $key => $callback) {
             $this->concurrentChannel && $this->concurrentChannel->push(true);
-            SerendipitySwowCo::create(function () use ($callback, $key, $wg, &$result, &$throwables) {
+            HyperfCo::create(function () use ($callback, $key, $wg, &$result, &$throwables) {
                 try {
                     $result[$key] = call($callback);
                 } catch (\Throwable $throwable) {

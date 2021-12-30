@@ -1,32 +1,22 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Console;
+namespace SwowCloud\Job\Console;
 
 use Carbon\Carbon;
+use Exception;
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\Utils\ApplicationContext;
 use Hyperf\Utils\Codec\Json;
+use Hyperf\Utils\Coroutine as HyperfCo;
+use InvalidArgumentException;
 use Psr\Container\ContainerInterface;
-use Serendipity\Job\Constant\Task;
-use Serendipity\Job\Contract\EventDispatcherInterface;
-use Serendipity\Job\Contract\SerializerInterface;
-use Serendipity\Job\Crontab\CrontabDispatcher;
-use Serendipity\Job\Db\DB;
-use Serendipity\Job\Event\CrontabEvent;
-use Serendipity\Job\Kernel\Http\Response;
-use Serendipity\Job\Kernel\Provider\KernelProvider;
-use Serendipity\Job\Nsq\Consumer\AbstractConsumer;
-use Serendipity\Job\Nsq\Consumer\TaskConsumer;
-use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
-use SerendipitySwow\Nsq\Message;
-use SerendipitySwow\Nsq\Nsq;
-use SerendipitySwow\Nsq\Result;
+use RuntimeException;
 use Spatie\Emoji\Emoji;
 use Swow\Coroutine as SwowCo;
 use Swow\Coroutine\Exception as CoroutineException;
@@ -35,14 +25,30 @@ use Swow\Http\Server as HttpServer;
 use Swow\Http\Status as HttpStatus;
 use Swow\Socket\Exception as SocketException;
 use SwowCloud\Contract\StdoutLoggerInterface;
+use SwowCloud\Job\Constant\Task;
+use SwowCloud\Job\Contract\EventDispatcherInterface;
+use SwowCloud\Job\Contract\SerializerInterface;
+use SwowCloud\Job\Crontab\CrontabDispatcher;
+use SwowCloud\Job\Db\DB;
+use SwowCloud\Job\Event\CrontabEvent;
+use SwowCloud\Job\Kernel\Consul\RegisterServices;
+use SwowCloud\Job\Kernel\Http\Response;
+use SwowCloud\Job\Kernel\Provider\KernelProvider;
+use SwowCloud\Job\Nsq\Consumer\AbstractConsumer;
+use SwowCloud\Job\Nsq\Consumer\JobConsumer;
+use SwowCloud\Nsq\Message;
+use SwowCloud\Nsq\Nsq;
+use SwowCloud\Nsq\Result;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Input\InputOption;
+use Throwable;
+use function SwowCloud\Job\Kernel\serendipity_json_decode;
 use const Swow\Errno\EMFILE;
 use const Swow\Errno\ENFILE;
 use const Swow\Errno\ENOMEM;
 
 /**
- * @command php bin/serendipity-job job:start --host=127.0.0.1 --port=9764
+ * @command php bin/job job:start --host=127.0.0.1 --port=9764
  */
 final class JobCommand extends Command
 {
@@ -50,7 +56,7 @@ final class JobCommand extends Command
 
     protected const COMMAND_PROVIDER_NAME = 'Job';
 
-    public const TOPIC_SUFFIX = 'task';
+    public const TOPIC_SUFFIX = 'job';
 
     protected ?ConfigInterface $config = null;
 
@@ -59,6 +65,8 @@ final class JobCommand extends Command
     protected ?SerializerInterface $serializer = null;
 
     protected ?Nsq $subscriber = null;
+
+    private ContainerInterface $container;
 
     protected function configure(): void
     {
@@ -79,6 +87,13 @@ final class JobCommand extends Command
                     'Configure HttpServer port numbers',
                     9764
                 ),
+                new InputOption(
+                    'consul-service-name',
+                    'csn',
+                    InputOption::VALUE_REQUIRED,
+                    'Consul service center service name',
+                    'job_service_name'
+                ),
             ])
             ->setHelp(
                 <<<'EOF'
@@ -88,8 +103,10 @@ final class JobCommand extends Command
                         
                     Use the --host Configure HttpServer host:
                         <info>php %command.full_name% --host=127.0.0.1</info>
-                    Use the --type Configure HttpServer port numbers:
+                    Use the --port Configure HttpServer port numbers:
                         <info>php %command.full_name% --port=9764</info>
+                    Use the --consul-service-name Consul service center service name:
+                        <info>php %command.full_name% --consul-service-name=job_service_name</info>
                     EOF
             );
     }
@@ -108,22 +125,23 @@ final class JobCommand extends Command
         $this->stdoutLogger->info(str_repeat(Emoji::flagsForFlagChina() . '  ', 10));
         $port = (int) $this->input->getOption('port');
         $host = $this->input->getOption('host');
-        $this->stdoutLogger->info(sprintf('%s JobConsumer Successfully Processed# %s', Emoji::manSurfing(), Emoji::rocket()));
-        $this->subscribe();
-        $this->makeServer($host, $port);
+        $name = $this->input->getOption('consul-service-name');
+        $this->stdoutLogger->info(sprintf('%s JobConsumer Successfully Processed# Host:[%s]  Port:[%s]  Name:[%s] %s', Emoji::manSurfing(), $host, $port, $name, Emoji::rocket()));
+        $this->makeServer($host, $port, $name);
 
         return SymfonyCommand::SUCCESS;
     }
 
-    protected function makeServer(string $host, int $port): void
+    protected function makeServer(string $host, int $port, string $name): void
     {
         $server = new HttpServer();
-        $server->bind($host, $port)
-            ->listen();
+        $server->bind($host, $port)->listen();
+        $serviceId = $this->registerConsul(...func_get_args());
+        $this->subscribe($serviceId);
         while (true) {
             try {
                 $connection = $server->acceptConnection();
-                SerendipitySwowCo::create(function () use ($connection) {
+                HyperfCo::create(static function () use ($connection) {
                     try {
                         while (true) {
                             $request = null;
@@ -161,8 +179,13 @@ final class JobCommand extends Command
                                         $connection->sendHttpResponse($response);
                                         break;
                                     }
+                                    case '/Health':
+                                        $response = new Response();
+                                        $response->text('Im Ok');
+                                        $connection->sendHttpResponse($response);
+                                        break;
                                     case '/cancel':
-                                        $params = Json::decode(
+                                        $params = serendipity_json_decode(
                                             $request->getBody()
                                                 ->getContents()
                                         );
@@ -185,15 +208,6 @@ final class JobCommand extends Command
                                                     'data' => [],
                                                 ])
                                             );
-                                            break;
-                                        }
-                                        if ($coroutine->getState() === $coroutine::STATE_LOCKED) {
-                                            $response->json([
-                                                'code' => 1,
-                                                'msg' => 'coroutine block object locked	!',
-                                                'data' => [],
-                                            ]);
-                                            $connection->sendHttpResponse($response);
                                             break;
                                         }
                                         $coroutine->kill();
@@ -255,38 +269,44 @@ final class JobCommand extends Command
         }
     }
 
-    protected function subscribe(): void
+    protected function subscribe(string $serviceId): void
     {
-        SerendipitySwowCo::create(
-            function () {
-                $subscriber = make(Nsq::class, [
-                    $this->container,
-                    $this->config->get(sprintf('nsq.%s', 'default')),
-                ]);
-                $consumer = $this->makeConsumer(TaskConsumer::class, AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX, 'JobConsumer');
-                $subscriber->subscribe(
-                    AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX,
-                    'JobConsumer',
-                    function (Message $message) use ($consumer) {
-                        try {
-                            $result = $consumer->consume($message);
-                        } catch (Throwable $error) {
-                            //Segmentation fault
-                            $this->stdoutLogger->error(
-                                sprintf(
-                                    'Consumer failed to consume %s,reason: %s,file: %s,line: %s',
-                                    'Consumer',
-                                    $error->getMessage(),
-                                    $error->getFile(),
-                                    $error->getLine()
-                                )
-                            );
-                            $result = Result::DROP;
-                        }
+        HyperfCo::create(
+            function () use ($serviceId) {
+                /* 测试多个消费者并发代码 */
+                for ($i = 0; $i < 1; $i++) {
+                    HyperfCo::create(function () use ($i, $serviceId) {
+                        $subscriber = make(Nsq::class, [
+                            $this->container,
+                            $this->config->get(sprintf('nsq.%s', 'default')),
+                        ]);
+                        $consumer = $this->makeConsumer(JobConsumer::class, AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX, 'JobConsumer' . $i, $serviceId);
+                        $this->stdoutLogger->debug('JobConsumer' . $i . ' Started#');
+                        $subscriber->subscribe(
+                            AbstractConsumer::TOPIC_PREFIX . self::TOPIC_SUFFIX,
+                            'JobConsumer' . $i,
+                            function (Message $message) use ($consumer) {
+                                try {
+                                    $result = $consumer->consume($message);
+                                } catch (Throwable $error) {
+                                    //Segmentation fault
+                                    $this->stdoutLogger->error(
+                                        sprintf(
+                                            'Consumer failed to consume %s,reason: %s,file: %s,line: %s',
+                                            'Consumer',
+                                            $error->getMessage(),
+                                            $error->getFile(),
+                                            $error->getLine()
+                                        )
+                                    );
+                                    $result = Result::DROP;
+                                }
 
-                        return $result;
-                    }
-                );
+                                return $result;
+                            }
+                        );
+                    });
+                }
             }
         );
     }
@@ -295,7 +315,8 @@ final class JobCommand extends Command
         string $class,
         string $topic,
         string $channel,
-        string $redisPool = 'default'
+        string $serviceId = '',
+        string $redisPool = 'default',
     ): AbstractConsumer {
         /**
          * @var AbstractConsumer $consumer
@@ -305,6 +326,7 @@ final class JobCommand extends Command
         $consumer->setTopic($topic);
         $consumer->setChannel($channel);
         $consumer->setRedisPool($redisPool);
+        $consumer->setServiceId($serviceId);
 
         return $consumer;
     }
@@ -314,7 +336,7 @@ final class JobCommand extends Command
         $this->showLogo();
         KernelProvider::create(self::COMMAND_PROVIDER_NAME)
             ->bootApp();
-        SerendipitySwowCo::create(fn () => $this->dispatchCrontab());
+        HyperfCo::create(fn () => $this->dispatchCrontab());
     }
 
     protected function dispatchCrontab(): void
@@ -328,5 +350,33 @@ final class JobCommand extends Command
             $this->container->get(CrontabDispatcher::class)
                 ->handle();
         }
+    }
+
+    protected function registerConsul(string $host, int $port, string $name): string
+    {
+        $register = $this->container->get(RegisterServices::class);
+
+        if (in_array($host, ['127.0.0.1', '0.0.0.0'])) {
+            $host = $this->getInternalIp();
+        }
+        if (!filter_var($host, FILTER_VALIDATE_IP)) {
+            throw new InvalidArgumentException(sprintf('Invalid host %s', $host));
+        }
+        if (!is_numeric($port) || ($port < 0 || $port > 65535)) {
+            throw new InvalidArgumentException(sprintf('Invalid port %s', $port));
+        }
+        $register->register($host, $port, ['protocol' => 'http'], $name, $this::class);
+
+        return $register->getServiceId();
+    }
+
+    protected function getInternalIp(): string
+    {
+        /** @var mixed|string $ip */
+        $ip = gethostbyname(gethostname());
+        if (is_string($ip)) {
+            return $ip;
+        }
+        throw new RuntimeException('Can not get the internal IP.');
     }
 }

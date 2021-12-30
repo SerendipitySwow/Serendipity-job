@@ -1,16 +1,16 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Subscriber;
+namespace SwowCloud\Job\Subscriber;
 
 use JetBrains\PhpStorm\ArrayShape;
-use Serendipity\Job\Db\DB;
-use Serendipity\Job\Event\UpdateWorkflowEvent;
+use SwowCloud\Job\Db\DB;
+use SwowCloud\Job\Event\UpdateWorkflowEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class UpdateWorkflowSubscriber implements EventSubscriberInterface

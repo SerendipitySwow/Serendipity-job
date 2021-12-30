@@ -1,12 +1,12 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Config;
+namespace SwowCloud\Job\Config;
 
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Finder\Finder;
@@ -23,6 +23,9 @@ class ConfigFactory
         return new Config($merged);
     }
 
+    /**
+     * @return array<string,string[]>
+     */
     private function readConfig(string $configPath): array
     {
         $config = [];
@@ -33,6 +36,11 @@ class ConfigFactory
         return is_array($config) ? $config : [];
     }
 
+    /**
+     * @param array<string> $paths
+     *
+     * @return array<int, string[]>
+     */
     private function readPaths(array $paths): array
     {
         $configs = [];

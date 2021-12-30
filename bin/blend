@@ -1,5 +1,6 @@
 #!/usr/bin/env php
 <?php
+declare(strict_types = 1);
 
 use MAKS\Blend\TaskRunner as Blend;
 
@@ -22,7 +23,7 @@ $blend->addCallbackTask(
             return Blend::FAILURE;
         }
 
-        $pid = $this->exec('php bin/serendipity-job serendipity-job:start ', true); // passing true runs the command asynchronously
+        $pid = $this->exec('php bin/job swow-cloud-job:start ', true); // passing true runs the command asynchronously
         // you can use $this->getExecResult() method to get all additional info about the executed command.
         $this->say("Started a Job Server in the background with PID: [{$pid}]");
 

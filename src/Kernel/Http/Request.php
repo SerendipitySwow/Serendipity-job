@@ -1,17 +1,18 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Kernel\Http;
+namespace SwowCloud\Job\Kernel\Http;
 
+use Hyperf\Utils\Arr;
 use Hyperf\Utils\Codec\Json;
 use JetBrains\PhpStorm\Pure;
-use Serendipity\Job\Util\Arr;
 use Swow\Http\Server\Request as SwowRequest;
+use function SwowCloud\Job\Kernel\serendipity_json_decode;
 
 class Request extends SwowRequest
 {
@@ -19,7 +20,7 @@ class Request extends SwowRequest
     {
         return array_merge(
             $this->getQueryParams(),
-            Json::decode(
+            serendipity_json_decode(
                 $this->getBodyAsString() !== '' ? $this->getBodyAsString() : '{}',
             )
         ) ?? [];
@@ -27,7 +28,7 @@ class Request extends SwowRequest
 
     public function post(string $key = null, mixed $default = null): mixed
     {
-        $body = Json::decode(
+        $body = serendipity_json_decode(
             $this->getBodyAsString(),
         );
 
@@ -94,7 +95,7 @@ class Request extends SwowRequest
     {
         $data = array_merge(
             $this->getQueryParams(),
-            Json::decode(
+            serendipity_json_decode(
                 $this->getBodyAsString() !== '' ? $this->getBodyAsString() : '{}'
             )
         );

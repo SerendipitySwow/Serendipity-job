@@ -1,18 +1,18 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace SerendipityTest\Cases;
+namespace SwowCloud\JobTest\Cases;
 
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
-use Serendipity\Job\Kernel\Logger\AppendRequestIdProcessor;
-use Serendipity\Job\Logger\LoggerFactory;
-use SerendipityTest\HttpTestCase;
+use SwowCloud\Job\Kernel\Logger\AppendRequestIdProcessor;
+use SwowCloud\Job\Logger\LoggerFactory;
+use SwowCloud\JobTest\HttpTestCase;
 
 /**
  * @internal

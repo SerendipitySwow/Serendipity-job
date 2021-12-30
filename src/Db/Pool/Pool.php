@@ -1,18 +1,18 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Db\Pool;
+namespace SwowCloud\Job\Db\Pool;
 
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\Pool\Pool as HyperfPool;
 use Hyperf\Utils\Arr;
 use Psr\Container\ContainerInterface;
-use Serendipity\Job\Db\Frequency;
+use SwowCloud\Job\Db\Frequency;
 
 abstract class Pool extends HyperfPool
 {

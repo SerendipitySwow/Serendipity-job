@@ -1,30 +1,30 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Db;
+namespace SwowCloud\Job\Db;
 
 use Closure;
 use Hyperf\Utils\ApplicationContext;
-use Serendipity\Job\Contract\EventDispatcherInterface;
-use Serendipity\Job\Db\Pool\PoolFactory;
-use Serendipity\Job\Event\QueryExecuted;
-use Serendipity\Job\Util\Context;
+use Hyperf\Utils\Context;
+use SwowCloud\Job\Contract\EventDispatcherInterface;
+use SwowCloud\Job\Db\Pool\PoolFactory;
+use SwowCloud\Job\Event\QueryExecuted;
 use Throwable;
 
 /**
- * @method beginTransaction()
- * @method commit()
- * @method rollback()
- * @method insert(string $query, array $bindings = [])
- * @method execute(string $query, array $bindings = [])
- * @method query(string $query, array $bindings = [])
- * @method fetch(string $query, array $bindings = [])
- * @method run(Closure $closure)
+ * @method static beginTransaction()
+ * @method static commit()
+ * @method static rollback()
+ * @method static insert(string $query, array $bindings = [])
+ * @method static execute(string $query, array $bindings = [])
+ * @method static query(string $query, array $bindings = [])
+ * @method static fetch(string $query, array $bindings = [])
+ * @method static run(Closure $closure)
  */
 class DB
 {
@@ -68,12 +68,11 @@ class DB
         return $result;
     }
 
-    public static function __callStatic($name, $arguments)
+    public static function __callStatic(mixed $name, mixed $arguments)
     {
         $container = ApplicationContext::getContainer();
-        $db = $container->get(static::class);
 
-        return $db->{$name}(...$arguments);
+        return $container->get(static::class)->{$name}(...$arguments);
     }
 
     /**
@@ -124,18 +123,26 @@ class DB
         return sprintf('db.connection.%s', $this->poolName);
     }
 
-    public function logQuery(mixed $query, array $bindings = [], ?float $time = null, $result = null): void
+    /**
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    public function logQuery(mixed $query, array $bindings = [], ?float $time = null, mixed $result = null): void
     {
         if ($query instanceof Closure) {
-            $ref = new \ReflectionFunction($query);
-            $static = $ref->getStaticVariables();
-            if (array_key_exists('command', $static)) {
-                /**
-                 * @var \Serendipity\Job\Db\Command $command
-                 */
-                $command = $static['command'];
-                $query = $command->getSql();
-                $bindings = $command->getParams();
+            try {
+                $ref = new \ReflectionFunction($query);
+                $static = $ref->getStaticVariables();
+                if (array_key_exists('command', $static)) {
+                    /**
+                     * @var \SwowCloud\Job\Db\Command $command
+                     */
+                    $command = $static['command'];
+                    $query = $command->getSql();
+                    $bindings = $command->getParams();
+                }
+            } catch (\ReflectionException $e) {
+                //do not
             }
         }
         if (is_string($query)) {

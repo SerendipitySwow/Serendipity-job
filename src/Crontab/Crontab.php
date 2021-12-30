@@ -1,12 +1,12 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Crontab;
+namespace SwowCloud\Job\Crontab;
 
 use Carbon\Carbon;
 
@@ -106,12 +106,12 @@ class Crontab
         return $this;
     }
 
-    public function getCallback()
+    public function getCallback(): mixed
     {
         return $this->callback;
     }
 
-    public function setCallback($callback): Crontab
+    public function setCallback(mixed $callback): Crontab
     {
         $this->callback = $callback;
 

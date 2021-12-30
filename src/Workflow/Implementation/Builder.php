@@ -1,26 +1,26 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Workflow\Implementation;
+namespace SwowCloud\Job\Workflow\Implementation;
 
 use Psr\EventDispatcher\EventDispatcherInterface;
-use Serendipity\Job\Workflow\Exceptions\BuilderStateAlreadyDeclaredException;
-use Serendipity\Job\Workflow\Exceptions\BuilderStateNotDeclaredException;
-use Serendipity\Job\Workflow\Exceptions\BuilderTransitionAlreadyDeclaredException;
-use Serendipity\Job\Workflow\Implementation\Entities\State;
-use Serendipity\Job\Workflow\Implementation\Entities\Transition;
-use Serendipity\Job\Workflow\Implementation\Entities\TransitionWithData;
-use Serendipity\Job\Workflow\Implementation\Repositories\ArrayRepository;
-use Serendipity\Job\Workflow\Interfaces\EngineInterface;
-use Serendipity\Job\Workflow\Interfaces\StateAwareInterface;
-use Serendipity\Job\Workflow\Interfaces\StateInterface;
-use Serendipity\Job\Workflow\Interfaces\TransitionInterface;
-use Serendipity\Job\Workflow\Interfaces\TransitionRepositoryInterface;
+use SwowCloud\Job\Workflow\Exceptions\BuilderStateAlreadyDeclaredException;
+use SwowCloud\Job\Workflow\Exceptions\BuilderStateNotDeclaredException;
+use SwowCloud\Job\Workflow\Exceptions\BuilderTransitionAlreadyDeclaredException;
+use SwowCloud\Job\Workflow\Implementation\Entities\State;
+use SwowCloud\Job\Workflow\Implementation\Entities\Transition;
+use SwowCloud\Job\Workflow\Implementation\Entities\TransitionWithData;
+use SwowCloud\Job\Workflow\Implementation\Repositories\ArrayRepository;
+use SwowCloud\Job\Workflow\Interfaces\EngineInterface;
+use SwowCloud\Job\Workflow\Interfaces\StateAwareInterface;
+use SwowCloud\Job\Workflow\Interfaces\StateInterface;
+use SwowCloud\Job\Workflow\Interfaces\TransitionInterface;
+use SwowCloud\Job\Workflow\Interfaces\TransitionRepositoryInterface;
 
 /**
  * @see https://github.com/uuf6429/state-engine-php

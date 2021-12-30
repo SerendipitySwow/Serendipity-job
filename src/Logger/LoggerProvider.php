@@ -1,15 +1,15 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Logger;
+namespace SwowCloud\Job\Logger;
 
-use Serendipity\Job\Kernel\Logger\StdoutLogger;
-use Serendipity\Job\Kernel\Provider\AbstractProvider;
+use SwowCloud\Job\Kernel\Logger\StdoutLogger;
+use SwowCloud\Job\Kernel\Provider\AbstractProvider;
 
 class LoggerProvider extends AbstractProvider
 {

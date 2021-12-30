@@ -1,19 +1,21 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Crontab;
+namespace SwowCloud\Job\Crontab;
 
 use Carbon\Carbon;
+use Hyperf\Utils\Coroutine as HyperfCo;
 use Psr\Container\ContainerInterface;
-use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
 
 class CoroutineStrategy
 {
+    private ContainerInterface $container;
+
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
@@ -21,7 +23,7 @@ class CoroutineStrategy
 
     public function dispatch(Crontab $crontab): void
     {
-        SerendipitySwowCo::create(function () use ($crontab) {
+        HyperfCo::create(function () use ($crontab) {
             if ($crontab->getExecuteTime() instanceof Carbon) {
                 $wait = $crontab->getExecuteTime()
                     ->getTimeStamp() - time();

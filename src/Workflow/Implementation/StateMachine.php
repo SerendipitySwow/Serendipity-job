@@ -1,15 +1,16 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Workflow\Implementation;
+namespace SwowCloud\Job\Workflow\Implementation;
 
-use Serendipity\Job\Workflow\Implementation\Entities\State;
-use Serendipity\Job\Workflow\Interfaces\StateAwareInterface;
+use SwowCloud\Job\Workflow\Implementation\Entities\State;
+use SwowCloud\Job\Workflow\Implementation\Entities\TransitionWithData;
+use SwowCloud\Job\Workflow\Interfaces\StateAwareInterface;
 
 class StateMachine extends AbstractEngine
 {
@@ -18,7 +19,7 @@ class StateMachine extends AbstractEngine
      */
     public function processInput(StateAwareInterface $item, array $input): void
     {
-        $transition = new Serendipity\Job\Workflow\Implementation\Entities\TransitionWithData($item->getState(), $input, new State(''));
+        $transition = new TransitionWithData($item->getState(), $input, new State(''));
         $this->execute($item, $transition);
     }
 }

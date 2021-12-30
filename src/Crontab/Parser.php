@@ -1,12 +1,12 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Crontab;
+namespace SwowCloud\Job\Crontab;
 
 use Carbon\Carbon;
 use InvalidArgumentException;
@@ -73,6 +73,7 @@ class Parser
 
     /**
      * Parse each segment of crontab string.
+     * @return array<int,int>
      *
      * @noinspection NotOptimalIfConditionsInspection*/
     protected function parseSegment(string $string, int $min, int $max, int $start = null): array
@@ -94,7 +95,7 @@ class Parser
                     continue;
                 }
 
-                if (!$this->between((int) $value, ($min > $start ? $min : $start), $max)) {
+                if (!$this->between((int) $value, (max($min, $start)), $max)) {
                     continue;
                 }
                 $result[] = (int) $value;
@@ -115,7 +116,7 @@ class Parser
             }
         } elseif (str_contains($string, '-')) {
             $result = array_merge($result, $this->parseSegment($string . '/1', $min, $max, $start));
-        } elseif ($this->between((int) $string, $min > $start ? $min : $start, $max)) {
+        } elseif ($this->between((int) $string, max($min, $start), $max)) {
             $result[] = (int) $string;
         }
 
@@ -144,16 +145,13 @@ class Parser
         return (int) $startTime;
     }
 
-    #[ArrayShape([
-        'second' => 'array|int[]',
-        'minutes' => 'array',
-        'hours' => 'array',
-        'day' => 'array',
-        'month' => 'array',
-        'week' => 'array',
-    ])]
+    /**
+     * @return array<string,int[]>
+     */
+    #[ArrayShape(['second' => 'int[]|mixed', 'minutes' => 'mixed', 'hours' => 'mixed', 'day' => 'mixed', 'month' => 'mixed', 'week' => 'mixed'])]
     private function parseDate(string $crontabString): array
     {
+        /** @var array<int,string> $cron */
         $cron = preg_split('/[\\s]+/i', trim($crontabString));
         if (count($cron) === 6) {
             $date = [

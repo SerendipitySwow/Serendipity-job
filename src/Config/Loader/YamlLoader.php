@@ -1,13 +1,14 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Config\Loader;
+namespace SwowCloud\Job\Config\Loader;
 
+use RuntimeException;
 use Symfony\Component\Config\Loader\FileLoader;
 use Symfony\Component\Yaml\Yaml;
 
@@ -16,7 +17,12 @@ class YamlLoader extends FileLoader
     public function load($resource, string $type = null)
     {
         if ($this->supports($resource, $type)) {
-            return Yaml::parse(file_get_contents($resource));
+            $contents = file_get_contents($resource);
+            if ($contents === false) {
+                throw new RuntimeException(sprintf('Error reading file:%s', $resource));
+            }
+
+            return Yaml::parse($contents);
         }
 
         return [];

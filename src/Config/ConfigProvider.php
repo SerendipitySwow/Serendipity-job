@@ -1,15 +1,15 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Config;
+namespace SwowCloud\Job\Config;
 
 use Hyperf\Contract\ConfigInterface;
-use Serendipity\Job\Kernel\Provider\AbstractProvider;
+use SwowCloud\Job\Kernel\Provider\AbstractProvider;
 
 class ConfigProvider extends AbstractProvider
 {

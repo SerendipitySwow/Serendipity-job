@@ -1,12 +1,12 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Crontab;
+namespace SwowCloud\Job\Crontab;
 
 use JetBrains\PhpStorm\Pure;
 use SplQueue;
@@ -26,13 +26,16 @@ class Scheduler
 
     public function schedule(): SplQueue
     {
-        foreach ($this->getSchedules() ?? [] as $schedule) {
+        foreach ($this->getSchedules() as $schedule) {
             $this->schedules->enqueue($schedule);
         }
 
         return $this->schedules;
     }
 
+    /**
+     * @return array<int,\SwowCloud\Job\Crontab\Crontab>
+     */
     protected function getSchedules(): array
     {
         return $this->crontabManager->parse();

@@ -1,17 +1,17 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Util;
+namespace SwowCloud\Job\Util;
 
 use Closure;
+use Hyperf\Utils\Coroutine as HyperfCo;
 use Hyperf\Utils\Exception\ExceptionThrower;
 use RuntimeException;
-use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
 use Swow\Channel;
 use Throwable;
 
@@ -40,7 +40,7 @@ class Waiter
         }
 
         $channel = new Channel(1);
-        $this->coroutineId = SerendipitySwowCo::create(function () use ($channel, $closure) {
+        $this->coroutineId = HyperfCo::create(function () use ($channel, $closure) {
             try {
                 $result = $closure();
             } catch (Throwable $exception) {

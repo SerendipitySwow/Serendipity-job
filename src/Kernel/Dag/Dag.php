@@ -1,17 +1,17 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Kernel\Dag;
+namespace SwowCloud\Job\Kernel\Dag;
 
 use Hyperf\Engine\Channel;
 use Hyperf\Engine\Coroutine;
-use Serendipity\Job\Kernel\Dag\Exception\InvalidArgumentException;
-use Serendipity\Job\Util\Waiter;
+use SwowCloud\Job\Kernel\Dag\Exception\InvalidArgumentException;
+use SwowCloud\Job\Util\Waiter;
 use Throwable;
 
 class Dag implements Runner

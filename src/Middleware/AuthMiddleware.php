@@ -1,22 +1,23 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Middleware;
+namespace SwowCloud\Job\Middleware;
 
 use Hyperf\Utils\ApplicationContext;
 use Hyperf\Utils\Codec\Json;
+use Hyperf\Utils\Context;
 use Psr\Http\Message\RequestInterface;
-use Serendipity\Job\Db\DB;
-use Serendipity\Job\Kernel\Signature;
-use Serendipity\Job\Middleware\Exception\UnauthorizedException;
-use Serendipity\Job\Util\Context;
 use Swow\Http\Server\Request;
+use SwowCloud\Job\Db\DB;
+use SwowCloud\Job\Kernel\Signature;
+use SwowCloud\Job\Middleware\Exception\UnauthorizedException;
 use SwowCloud\Redis\RedisFactory;
+use function SwowCloud\Job\Kernel\serendipity_json_decode;
 
 class AuthMiddleware
 {
@@ -43,6 +44,10 @@ class AuthMiddleware
 
     /**
      * @param $appKey
+     *
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws \SwowCloud\Job\Middleware\Exception\UnauthorizedException
      */
     protected function getApplication($appKey): array|bool
     {
@@ -62,7 +67,7 @@ class AuthMiddleware
             $redis->set(sprintf('APP_KEY:%s', $appKey), Json::encode($application), 24 * 60 * 60);
         }
 
-        return is_string($application) && $application[0] === '{' ? Json::decode(
+        return is_string($application) && $application[0] === '{' ? serendipity_json_decode(
             $application
         ) : $application ?? false;
     }

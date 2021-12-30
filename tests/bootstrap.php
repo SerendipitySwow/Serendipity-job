@@ -1,13 +1,13 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
 use Psr\Container\ContainerInterface;
-use Serendipity\Job\Application;
+use SwowCloud\Job\Application;
 
 if (!extension_loaded('swow')) {
     exit('Swow extension is required');

@@ -1,20 +1,26 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Config;
+namespace SwowCloud\Job\Config;
 
 use Hyperf\Contract\ConfigInterface;
-use Serendipity\Job\Util\Arr;
+use Hyperf\Utils\Arr;
 
 class Config implements ConfigInterface
 {
+    /**
+     * @var array<string, string[]>
+     */
     private array $configs;
 
+    /**
+     * @param array<string, string[]> $configs
+     */
     public function __construct(array $configs)
     {
         $this->configs = $configs;

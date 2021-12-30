@@ -1,21 +1,22 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job;
+namespace SwowCloud\Job;
 
 use Dotenv\Dotenv;
 use Hyperf\Di\Container;
 use Psr\Container\ContainerInterface;
-use Serendipity\Job\Config\Loader\YamlLoader;
-use Serendipity\Job\Console\DagJobCommand;
-use Serendipity\Job\Console\JobCommand;
-use Serendipity\Job\Console\SerendipityJobCommand;
 use Swow\Debug\Debugger;
+use SwowCloud\Job\Config\Loader\YamlLoader;
+use SwowCloud\Job\Console\DagJobCommand;
+use SwowCloud\Job\Console\JobCommand;
+use SwowCloud\Job\Console\MatrixCommand;
+use SwowCloud\Job\Console\SwowCloudJobCommand;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\FileLocatorInterface;
 use Symfony\Component\Console\Application as SymfonyApplication;
@@ -32,13 +33,14 @@ final class Application extends SymfonyApplication
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
-        parent::__construct('Serendipity Job Console Tool...');
+        parent::__construct('SwowCloud Job Console Tool...');
         $this->initialize();
         $this->debug();
         $this->addCommands([
-            new SerendipityJobCommand(),
+            new SwowCloudJobCommand(),
             new JobCommand($container),
             new DagJobCommand($container),
+            new MatrixCommand($container),
         ]);
     }
 
@@ -70,7 +72,7 @@ final class Application extends SymfonyApplication
     protected function debug(): void
     {
         if (env('DEBUG')) {
-            Debugger::runOnTTY('serendipity-job');
+            Debugger::runOnTTY('swow-cloud-job');
         }
     }
 }

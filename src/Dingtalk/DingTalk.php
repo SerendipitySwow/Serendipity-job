@@ -1,20 +1,20 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Dingtalk;
+namespace SwowCloud\Job\Dingtalk;
 
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\Utils\ApplicationContext;
 use Psr\Http\Message\ResponseInterface;
-use Serendipity\Job\Dingtalk\Http\Client;
-use Serendipity\Job\Dingtalk\Messages\ActionCard;
-use Serendipity\Job\Dingtalk\Messages\FeedCard;
-use Serendipity\Job\Dingtalk\Messages\Message;
+use SwowCloud\Job\Dingtalk\Http\Client;
+use SwowCloud\Job\Dingtalk\Messages\ActionCard;
+use SwowCloud\Job\Dingtalk\Messages\FeedCard;
+use SwowCloud\Job\Dingtalk\Messages\Message;
 
 class DingTalk
 {

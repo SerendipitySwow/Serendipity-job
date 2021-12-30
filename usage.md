@@ -13,12 +13,12 @@
     'task_redis_consumer_time' => 60, //记录消息被消费成功redis缓存的时间
     'task_redis_cache_time' => 24 * 60 * 60, //记录统计的各个数据的缓存时间
   ```
-* crontab.php  定时脚本
+* crontab.php 定时脚本
   ```php
     'enable' => env('ENABLE_CRONTAB', true), //是否开启定时脚本
     'crontab' => [
         // Callback类型定时任务（默认）Example
-        (new Serendipity\Job\Crontab\Crontab())->setName('Foo')->setRule('*/5 * * * *')->setCallback([EchoCrontab::class, 'execute'])->setMemo('这是一个示例的定时任务'), //crontab
+        (new SwowCloud\Job\Crontab\Crontab())->setName('Foo')->setRule('*/5 * * * *')->setCallback([EchoCrontab::class, 'execute'])->setMemo('这是一个示例的定时任务'), //crontab
     ],
   ```
 *  dingtalk.php  钉钉通知
@@ -76,11 +76,11 @@
 * 是否需要开启调试模式 配置.env文件里的DEBUG
 ##  启动server
 ```bash
-php bin/serendipity-job serendipity-job:start
+php bin/job swow-cloud-job:start
 ```
 ## 启动Job
 ```bash
-php bin/serendipity-job job:start  --host=127.0.0.1 --port=9764
+php bin/job job:start  --host=127.0.0.1 --port=9764
 ```
  #### 参数详解
    1. host server host监听地址,用于取消任务或者查卡任务详情

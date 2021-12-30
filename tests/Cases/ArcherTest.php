@@ -1,15 +1,15 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace SerendipityTest\Cases;
+namespace SwowCloud\JobTest\Cases;
 
 use PHPUnit\Framework\TestCase;
-use SerendipitySwow\Archer\Archer;
+use SwowCloud\Archer\Archer;
 
 /**
  * @internal
@@ -27,9 +27,7 @@ class ArcherTest extends TestCase
         };
         $task1 = Archer::taskDefer($callback, ['get', 'some_key']);
         $task2 = Archer::taskDefer($callback, ['hget', 'a', 'b']);
-        $task3 = Archer::taskDefer($callback, ['lget', 'k1', 10]);
         var_dump($task1->recv());
         var_dump($task2->recv());
-        var_dump($task3->recv());
     }
 }

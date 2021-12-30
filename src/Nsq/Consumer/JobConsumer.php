@@ -1,102 +1,113 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Nsq\Consumer;
+namespace SwowCloud\Job\Nsq\Consumer;
 
 use Carbon\Carbon;
 use Hyperf\Utils\Codec\Json;
+use Hyperf\Utils\Coroutine as HyperfCo;
 use InvalidArgumentException;
-use Serendipity\Job\Constant\Statistical;
-use Serendipity\Job\Constant\Task;
-use Serendipity\Job\Contract\EventDispatcherInterface;
-use Serendipity\Job\Contract\JobInterface;
-use Serendipity\Job\Db\DB;
-use Serendipity\Job\Event\UpdateJobEvent;
-use Serendipity\Job\Util\Coroutine as SerendipitySwowCo;
-use SerendipitySwow\Nsq\Message;
-use SerendipitySwow\Nsq\Nsq;
-use SerendipitySwow\Nsq\Result;
 use Swow\Coroutine as SwowCo;
+use SwowCloud\Job\Constant\Statistical;
+use SwowCloud\Job\Constant\Task;
+use SwowCloud\Job\Contract\EventDispatcherInterface;
+use SwowCloud\Job\Contract\JobInterface;
+use SwowCloud\Job\Db\DB;
+use SwowCloud\Job\Event\UpdateJobEvent;
+use SwowCloud\Nsq\Message;
+use SwowCloud\Nsq\Nsq;
+use SwowCloud\Nsq\Result;
 use SwowCloud\Redis\Lua\Hash\Incr;
+use SwowCloud\RedisLock\RedisLock;
 use Throwable;
+use function SwowCloud\Job\Kernel\serendipity_json_decode;
 
-class TaskConsumer extends AbstractConsumer
+class JobConsumer extends AbstractConsumer
 {
     protected const TASK_CONSUMER_REDIS_PREFIX = 'TaskIDEntity#%s-%s';
 
+    /**
+     * @throws \Throwable
+     */
     public function consume(Message $message): ?string
     {
-        $redis = $this->redis();
-        $job = $this->deserializeMessage($message);
-        if (!$job && !$job instanceof JobInterface) {
-            $this->logger->error('Invalid task#' . $message->getBody());
+        /* 测试redis-lock 性能*/
+        HyperfCo::create(function () use ($message) {
+            $job = $this->deserializeMessage($message);
+            if (!$job && !$job instanceof JobInterface) {
+                $this->logger->error('Invalid task#' . $message->getBody());
 
-            return Result::DROP;
-        }
-        //判断消息是否被重复消费.
-        if ($redis->get(sprintf(static::TASK_CONSUMER_REDIS_PREFIX, $job->getIdentity(), $job->getCounter())) >= 1) {
-            $this->logger->error(sprintf('Message %s has been consumed#', $job->getIdentity()));
-
-            return Result::DROP;
-        }
-
-        $incr = make(Incr::class);
-
-        return $this->waiter->wait(function () use ($job, $incr) {
-            try {
-                //修改当前那个协程在执行此任务,用于取消任务
-                DB::execute(
-                    sprintf(
-                        'update task set coroutine_id = %s,status = %s where id = %s;',
-                        SwowCo::getCurrent()
-                            ->getId(),
-                        Task::TASK_ING,
-                        $job->getIdentity(),
-                    )
-                );
-                $this->handle($job);
-                //记录此消息已被消费而且任务已被执行完成
-                $incr->eval([
-                    sprintf(
-                        static::TASK_CONSUMER_REDIS_PREFIX,
-                        $job->getIdentity(),
-                        $job->getCounter()
-                    ),
-                    $this->config->get('consumer.task_redis_consumer_time'),
-                ]);
-                //加入成功执行统计
-                $incr->eval([Statistical::TASK_SUCCESS, $this->config->get('consumer.task_redis_cache_time')]);
-                $this->container->get(EventDispatcherInterface::class)
-                    ->dispatch(
-                        new UpdateJobEvent($job->getIdentity(), Task::TASK_SUCCESS),
-                        UpdateJobEvent::UPDATE_JOB
-                    );
-                $result = Result::ACK;
-            } catch (Throwable $e) {
-                //加入失败执行统计
-                $incr->eval([Statistical::TASK_FAILURE, $this->config->get('consumer.task_redis_cache_time')]);
-                $this->logger->error(
-                    sprintf(
-                        'Uncaptured exception[%s:%s] detected in %s::%d.',
-                        get_class($e),
-                        $e->getMessage(),
-                        $e->getFile(),
-                        $e->getLine()
-                    ),
-                    [
-                        'driver' => $job::class,
-                    ]
-                );
-                $result = Result::DROP;
+                return $this->chan->push(Result::DROP);
             }
+            $lock = make(RedisLock::class);
+            if (!$lock->lock((string) $job->getIdentity(), (int) ($job->getTimeout() / 1000))) {
+                $this->logger->error(sprintf('Task:[%s] Processing#', $job->getIdentity()));
 
-            return $result;
-        }, $job->getTimeout());
+                return $this->chan->push(Result::DROP);
+            }
+            $incr = make(Incr::class);
+            $result = $this->waiter->wait(function () use ($job, $incr) {
+                try {
+                    //修改当前那个协程在执行此任务,用于取消任务
+                    DB::execute(
+                        sprintf(
+                            'update task set coroutine_id = %s,status = %s,consul_service_id = "%s"  where id = %s;',
+                            SwowCo::getCurrent()
+                                ->getId(),
+                            Task::TASK_ING,
+                            $this->getServiceId(),
+                            $job->getIdentity()
+                        )
+                    );
+                    $this->handle($job);
+                    //记录此消息已被消费而且任务已被执行完成
+                    $incr->eval([
+                        sprintf(
+                            static::TASK_CONSUMER_REDIS_PREFIX,
+                            $job->getIdentity(),
+                            $job->getCounter()
+                        ),
+                        $this->config->get('consumer.task_redis_consumer_time'),
+                    ]);
+                    //加入成功执行统计
+                    $incr->eval([Statistical::TASK_SUCCESS, $this->config->get('consumer.task_redis_cache_time')]);
+                    $this->container->get(EventDispatcherInterface::class)
+                        ->dispatch(
+                            new UpdateJobEvent($job->getIdentity(), Task::TASK_SUCCESS),
+                            UpdateJobEvent::UPDATE_JOB
+                        );
+                    $result = Result::ACK;
+                } catch (Throwable $e) {
+                    //加入失败执行统计
+                    $incr->eval([Statistical::TASK_FAILURE, $this->config->get('consumer.task_redis_cache_time')]);
+                    $this->logger->error(
+                        sprintf(
+                            'Uncaptured exception[%s:%s] detected in %s::%d.',
+                            get_class($e),
+                            $e->getMessage(),
+                            $e->getFile(),
+                            $e->getLine()
+                        ),
+                        [
+                            'driver' => $job::class,
+                        ]
+                    );
+                    $result = Result::DROP;
+                }
+
+                return $result;
+            });
+            $lock->unLock();
+
+            return $this->chan->push($result);
+        });
+
+        return $this->chan->pop();
     }
 
     /**
@@ -154,10 +165,10 @@ class TaskConsumer extends AbstractConsumer
                  *          push nsq
                  */
                 $nsq = make(Nsq::class, [$this->container, $config]);
-                SerendipitySwowCo::create(function () use ($nsq, $message, $job) {
+                HyperfCo::create(function () use ($nsq, $message, $job) {
                     $json = Json::encode(
                         array_merge([
-                            'body' => Json::decode(
+                            'body' => serendipity_json_decode(
                                 $message
                             ),
                         ], ['class' => $job::class])
@@ -192,12 +203,13 @@ class TaskConsumer extends AbstractConsumer
         }
     }
 
+    /**
+     * @return JobInterface
+     */
     protected function deserializeMessage(Message $message): mixed
     {
-        $body = Json::decode($message->getBody());
-        /*
-         * @var JobInterface $job
-         */
+        $body = serendipity_json_decode($message->getBody());
+
         return $this->serializer->deserialize(
             Json::encode($body['body'] ?? ''),
             $body['class'] ?? throw new InvalidArgumentException('Unknown class.')

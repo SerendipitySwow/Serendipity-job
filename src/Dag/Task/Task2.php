@@ -1,16 +1,16 @@
 <?php
 /**
- * This file is part of Serendipity Job
+ * This file is part of Swow-Cloud/Job
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
 declare(strict_types=1);
 
-namespace Serendipity\Job\Dag\Task;
+namespace SwowCloud\Job\Dag\Task;
 
-use Serendipity\Job\Contract\DagInterface;
-use Serendipity\Job\Dag\Exception\DagException;
-use Serendipity\Job\Kernel\Concurrent\ConcurrentMySQLPattern;
+use SwowCloud\Job\Contract\DagInterface;
+use SwowCloud\Job\Dag\Exception\DagException;
+use SwowCloud\Job\Kernel\Concurrent\ConcurrentMySQLPattern;
 
 class Task2 implements DagInterface
 {
