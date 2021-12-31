@@ -36,7 +36,6 @@ class JobConsumer extends AbstractConsumer
      */
     public function consume(Message $message): ?string
     {
-        /* 测试redis-lock 性能*/
         HyperfCo::create(function () use ($message) {
             $job = $this->deserializeMessage($message);
             if (!$job && !$job instanceof JobInterface) {
