@@ -51,7 +51,7 @@
         "nikic/fast-route": "^1.3",
         "spatie/emoji": "3.0",
         "swow-cloud/archer": "^0.4.0",
-        "swow-cloud/consul": "3.0.x-dev",
+        "swow-cloud/consul": "dev-master",
         "swow-cloud/contract": "3.0.x-dev",
         "swow-cloud/nsq": "^1.0",
         "swow-cloud/redis": "3.0.x-dev",
@@ -86,11 +86,5 @@
         "test": "phpunit --prepend tests/bootstrap.php -c phpunit.xml --colors=always",
         "cs-fix": [ "@php vendor/bin/php-cs-fixer fix" ],
         "analyse": "phpstan analyse --memory-limit 300M -l 0 -c phpstan.neon ./app ./config"
-    },
-    "repositories": [
-        {
-            "type": "path",
-            "url": "./consul"
-        }
-    ]
+    }
 }
