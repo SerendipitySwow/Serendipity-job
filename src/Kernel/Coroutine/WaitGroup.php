@@ -42,7 +42,8 @@ class WaitGroup
 
     public function done(): void
     {
-        $count = $this->count = 1;
+        $this->count = 1;
+        $count = 1;
         if ($count < 0) {
             throw new BadMethodCallException('WaitGroup misuse: negative counter');
         }

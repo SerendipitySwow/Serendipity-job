@@ -11,6 +11,7 @@ namespace SwowCloud\Job\Kernel\Http;
 use Hyperf\Utils\Arr;
 use Hyperf\Utils\Codec\Json;
 use JetBrains\PhpStorm\Pure;
+use SplFileInfo;
 use Swow\Http\Server\Request as SwowRequest;
 use function SwowCloud\Job\Kernel\serendipity_json_decode;
 

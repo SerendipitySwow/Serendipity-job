@@ -32,7 +32,7 @@ class Parallel
 
     public function add(callable $callable, $key = null): void
     {
-        if (is_null($key)) {
+        if ($key === null) {
             $this->callbacks[] = $callable;
         } else {
             $this->callbacks[$key] = $callable;
@@ -42,7 +42,8 @@ class Parallel
     /** @noinspection DisconnectedForeachInstructionInspection */
     public function wait(bool $throw = true): array
     {
-        $result = $throwables = [];
+        $throwables = [];
+        $result = $throwables;
         $wg = new WaitGroup();
         $wg->add(count($this->callbacks));
 
