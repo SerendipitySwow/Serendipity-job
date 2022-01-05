@@ -19,6 +19,7 @@ use SwowCloud\Job\Contract\EventDispatcherInterface;
 use SwowCloud\Job\Contract\JobInterface;
 use SwowCloud\Job\Db\DB;
 use SwowCloud\Job\Event\UpdateJobEvent;
+use SwowCloud\Job\Util\Waiter;
 use SwowCloud\Nsq\Message;
 use SwowCloud\Nsq\Nsq;
 use SwowCloud\Nsq\Result;
@@ -44,6 +45,8 @@ class JobConsumer extends AbstractConsumer
 
                 return $this->chan->push(Result::DROP);
             }
+            //TODO 考虑任务执行超时时是否应该kill掉执行任务的协程
+            $waiter = $this->container->get(Waiter::class);
             $lock = make(RedisLock::class);
             if (!$lock->lock((string) $job->getIdentity(), (int) ($job->getTimeout() / 1000))) {
                 $this->logger->error(sprintf('Task:[%s] Processing#', $job->getIdentity()));
@@ -52,7 +55,7 @@ class JobConsumer extends AbstractConsumer
             }
             $incr = make(Incr::class);
             try {
-                $result = $this->waiter->wait(function () use ($job, $incr) {
+                $result = $waiter->wait(function () use ($job, $incr) {
                     try {
                         //修改当前那个协程在执行此任务,用于取消任务
                         DB::execute(

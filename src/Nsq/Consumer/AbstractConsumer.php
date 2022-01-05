@@ -17,7 +17,6 @@ use SwowCloud\Job\Contract\SerializerInterface;
 use SwowCloud\Job\Dingtalk\DingTalk;
 use SwowCloud\Job\Logger\LoggerFactory;
 use SwowCloud\Job\Serializer\SymfonySerializer;
-use SwowCloud\Job\Util\Waiter;
 use SwowCloud\Nsq\Message;
 use SwowCloud\Redis\Redis;
 use SwowCloud\Redis\RedisFactory;
@@ -43,8 +42,6 @@ abstract class AbstractConsumer
 
     protected ?SerializerInterface $serializer = null;
 
-    protected ?Waiter $waiter = null;
-
     protected ?Pipeline $pipeline = null;
 
     protected ?ConfigInterface $config = null;
@@ -60,7 +57,6 @@ abstract class AbstractConsumer
         $this->container = $container;
         $this->logger = $this->container->get(LoggerFactory::class)
             ->get('serendipity', 'job');
-        $this->waiter = $this->container->get(Waiter::class);
         $this->serializer = $this->container->get(SymfonySerializer::class);
         $this->pipeline = $this->container->get(Pipeline::class);
         $this->config = $this->container->get(ConfigInterface::class);
