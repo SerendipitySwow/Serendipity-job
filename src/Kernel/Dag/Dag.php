@@ -90,7 +90,7 @@ class Dag implements Runner
                 Coroutine::create(function () use ($element, $queue, $visited) {
                     $this->scheduleChildren($element, $queue, $visited);
                 });
-            }, $element->timeout);
+            }, (int) ($element->timeout / 1000));
         }
 
         // wait for all pending tasks to resolve
