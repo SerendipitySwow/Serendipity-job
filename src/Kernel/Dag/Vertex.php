@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace SwowCloud\Job\Kernel\Dag;
 
+use Closure;
 use JetBrains\PhpStorm\Pure;
 
 class Vertex
@@ -31,9 +32,9 @@ class Vertex
      */
     public array $children = [];
 
-    public static function make(callable $job, int $timeout = 5 * 1000, string $key = null, ): self
+    public static function make(callable $job, int $timeout = 5 * 1000, string $key = null): self
     {
-        $closure = \Closure::fromCallable($job);
+        $closure = Closure::fromCallable($job);
         if ($key === null) {
             $key = spl_object_hash($closure);
         }

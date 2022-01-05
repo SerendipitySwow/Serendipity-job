@@ -10,6 +10,9 @@ namespace SwowCloud\Job\Kernel\Coroutine;
 
 use Hyperf\Utils\Coroutine as HyperfCo;
 use Swow\Channel;
+use Throwable;
+
+use function sprintf;
 
 class Parallel
 {
@@ -32,7 +35,7 @@ class Parallel
 
     public function add(callable $callable, $key = null): void
     {
-        if (is_null($key)) {
+        if ($key === null) {
             $this->callbacks[] = $callable;
         } else {
             $this->callbacks[$key] = $callable;
@@ -42,7 +45,8 @@ class Parallel
     /** @noinspection DisconnectedForeachInstructionInspection */
     public function wait(bool $throw = true): array
     {
-        $result = $throwables = [];
+        $throwables = [];
+        $result = $throwables;
         $wg = new WaitGroup();
         $wg->add(count($this->callbacks));
 
@@ -51,7 +55,7 @@ class Parallel
             HyperfCo::create(function () use ($callback, $key, $wg, &$result, &$throwables) {
                 try {
                     $result[$key] = call($callback);
-                } catch (\Throwable $throwable) {
+                } catch (Throwable $throwable) {
                     $throwables[$key] = $throwable;
                 } finally {
                     $this->concurrentChannel && $this->concurrentChannel->pop();
@@ -90,7 +94,7 @@ class Parallel
     {
         $output = '';
         foreach ($throwables as $key => $value) {
-            $output .= \sprintf('(%s) %s: %s' . PHP_EOL . '%s' . PHP_EOL, $key, get_class($value), $value->getMessage(), $value->getTraceAsString());
+            $output .= sprintf('(%s) %s: %s' . PHP_EOL . '%s' . PHP_EOL, $key, get_class($value), $value->getMessage(), $value->getTraceAsString());
         }
 
         return $output;

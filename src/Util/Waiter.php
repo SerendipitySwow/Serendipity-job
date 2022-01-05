@@ -9,10 +9,10 @@ declare(strict_types=1);
 namespace SwowCloud\Job\Util;
 
 use Closure;
+use Hyperf\Engine\Channel;
 use Hyperf\Utils\Coroutine as HyperfCo;
 use Hyperf\Utils\Exception\ExceptionThrower;
 use RuntimeException;
-use Swow\Channel;
 use Throwable;
 
 class Waiter
@@ -39,7 +39,7 @@ class Waiter
             $timeout = $this->popTimeout;
         }
 
-        $channel = new Channel(1);
+        $channel = new Channel();
         $this->coroutineId = HyperfCo::create(function () use ($channel, $closure) {
             try {
                 $result = $closure();

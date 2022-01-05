@@ -19,12 +19,14 @@ use SwowCloud\Job\Contract\EventDispatcherInterface;
 use SwowCloud\Job\Contract\JobInterface;
 use SwowCloud\Job\Db\DB;
 use SwowCloud\Job\Event\UpdateJobEvent;
+use SwowCloud\Job\Util\Waiter;
 use SwowCloud\Nsq\Message;
 use SwowCloud\Nsq\Nsq;
 use SwowCloud\Nsq\Result;
 use SwowCloud\Redis\Lua\Hash\Incr;
 use SwowCloud\RedisLock\RedisLock;
 use Throwable;
+use function SwowCloud\Job\Kernel\serendipity_format_throwable;
 use function SwowCloud\Job\Kernel\serendipity_json_decode;
 
 class JobConsumer extends AbstractConsumer
@@ -36,7 +38,6 @@ class JobConsumer extends AbstractConsumer
      */
     public function consume(Message $message): ?string
     {
-        /* 测试redis-lock 性能*/
         HyperfCo::create(function () use ($message) {
             $job = $this->deserializeMessage($message);
             if (!$job && !$job instanceof JobInterface) {
@@ -44,6 +45,8 @@ class JobConsumer extends AbstractConsumer
 
                 return $this->chan->push(Result::DROP);
             }
+            //TODO 考虑任务执行超时时是否应该kill掉执行任务的协程
+            $waiter = $this->container->get(Waiter::class);
             $lock = make(RedisLock::class);
             if (!$lock->lock((string) $job->getIdentity(), (int) ($job->getTimeout() / 1000))) {
                 $this->logger->error(sprintf('Task:[%s] Processing#', $job->getIdentity()));
@@ -51,57 +54,64 @@ class JobConsumer extends AbstractConsumer
                 return $this->chan->push(Result::DROP);
             }
             $incr = make(Incr::class);
-            $result = $this->waiter->wait(function () use ($job, $incr) {
-                try {
-                    //修改当前那个协程在执行此任务,用于取消任务
-                    DB::execute(
-                        sprintf(
-                            'update task set coroutine_id = %s,status = %s,consul_service_id = "%s"  where id = %s;',
-                            SwowCo::getCurrent()
-                                ->getId(),
-                            Task::TASK_ING,
-                            $this->getServiceId(),
-                            $job->getIdentity()
-                        )
-                    );
-                    $this->handle($job);
-                    //记录此消息已被消费而且任务已被执行完成
-                    $incr->eval([
-                        sprintf(
-                            static::TASK_CONSUMER_REDIS_PREFIX,
-                            $job->getIdentity(),
-                            $job->getCounter()
-                        ),
-                        $this->config->get('consumer.task_redis_consumer_time'),
-                    ]);
-                    //加入成功执行统计
-                    $incr->eval([Statistical::TASK_SUCCESS, $this->config->get('consumer.task_redis_cache_time')]);
-                    $this->container->get(EventDispatcherInterface::class)
-                        ->dispatch(
-                            new UpdateJobEvent($job->getIdentity(), Task::TASK_SUCCESS),
-                            UpdateJobEvent::UPDATE_JOB
+            try {
+                $result = $waiter->wait(function () use ($job, $incr) {
+                    try {
+                        //修改当前那个协程在执行此任务,用于取消任务
+                        DB::execute(
+                            sprintf(
+                                'update task set coroutine_id = %s,status = %s,consul_service_id = "%s"  where id = %s;',
+                                SwowCo::getCurrent()
+                                    ->getId(),
+                                Task::TASK_ING,
+                                $this->getServiceId(),
+                                $job->getIdentity()
+                            )
                         );
-                    $result = Result::ACK;
-                } catch (Throwable $e) {
-                    //加入失败执行统计
-                    $incr->eval([Statistical::TASK_FAILURE, $this->config->get('consumer.task_redis_cache_time')]);
-                    $this->logger->error(
-                        sprintf(
-                            'Uncaptured exception[%s:%s] detected in %s::%d.',
-                            get_class($e),
-                            $e->getMessage(),
-                            $e->getFile(),
-                            $e->getLine()
-                        ),
-                        [
-                            'driver' => $job::class,
-                        ]
-                    );
-                    $result = Result::DROP;
-                }
+                        $this->handle($job);
+                        //记录此消息已被消费而且任务已被执行完成
+                        $incr->eval([
+                            sprintf(
+                                static::TASK_CONSUMER_REDIS_PREFIX,
+                                $job->getIdentity(),
+                                $job->getCounter()
+                            ),
+                            $this->config->get('consumer.task_redis_consumer_time'),
+                        ]);
+                        //加入成功执行统计
+                        $incr->eval([Statistical::TASK_SUCCESS, $this->config->get('consumer.task_redis_cache_time')]);
+                        $this->container->get(EventDispatcherInterface::class)
+                            ->dispatch(
+                                new UpdateJobEvent($job->getIdentity(), Task::TASK_SUCCESS),
+                                UpdateJobEvent::UPDATE_JOB
+                            );
+                        $result = Result::ACK;
+                    } catch (Throwable $e) {
+                        //加入失败执行统计
+                        $incr->eval([Statistical::TASK_FAILURE, $this->config->get('consumer.task_redis_cache_time')]);
+                        $this->logger->error(
+                            sprintf(
+                                'Uncaptured exception[%s:%s] detected in %s::%d.',
+                                get_class($e),
+                                $e->getMessage(),
+                                $e->getFile(),
+                                $e->getLine()
+                            ),
+                            [
+                                'driver' => $job::class,
+                            ]
+                        );
+                        $result = Result::DROP;
+                    }
 
-                return $result;
-            });
+                    return $result;
+                }, (int) ($job->getTimeout() / 1000));
+            } catch (Throwable $throwable) {
+                $this->logger->error(serendipity_format_throwable($throwable));
+
+                $result = Result::DROP;
+            }
+
             $lock->unLock();
 
             return $this->chan->push($result);

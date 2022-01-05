@@ -8,7 +8,9 @@ declare(strict_types=1);
 
 namespace SwowCloud\Job\Kernel\Coroutine;
 
-class ParallelExecutionException extends \RuntimeException
+use RuntimeException;
+
+class ParallelExecutionException extends RuntimeException
 {
     private array $results;
 
