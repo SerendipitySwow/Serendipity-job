@@ -93,12 +93,11 @@
 * 静下来想想思考项目的规划,架构
 * 考虑支持分布式
 * 考虑使用swow-cloud/redis-subscriber订阅消息
-* 考虑使用swow-cloud/redis-lock上锁
-* 加入consul支持分布式
 * 通过获取服务节点操作任务(分布式)
 * 支持任务图表
 * 支持后台创建任务
 * 支持ORM
+* 任务执行超时，是否考虑杀死执行任务的协程
 * [FORM](https://github.com/BoBoooooo/Element-Pro-Crud)
 * [后台](https://github.com/kanyxmo/MineAdmin)
 
