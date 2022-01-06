@@ -13,6 +13,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Swow\Coroutine;
 use SwowCloud\Job\Job\SimpleJob;
+use SwowCloud\Job\Logger\LoggerFactory;
 
 /**
  * @internal
@@ -134,8 +135,40 @@ class HttpTest extends TestCase
         }
     }
 
-    //TODO 压力测试nsq/publish接口
-    public function testAb()
+    public function testNsqPublish(): void
     {
+        $startTime = microtime(true);
+        for ($i = 0; $i < 100; $i++) {
+            Coroutine::run(function () {
+                $client = new GuzzleHttpClient();
+                $response = $client->post('/nsq/publish', [
+                    'base_uri' => 'http://127.0.0.1:9502',
+                    \GuzzleHttp\RequestOptions::HEADERS => [
+                        'nonce' => 'jcpxB9oadf6al6Tv',
+                        'timestamps' => 1639044971,
+                        'signature' => 'MDcwYmNkZjc2ZThhYmYxNWUwYmNlZWFkNmE1YjU2M2U3MDQxNWNkN2RkN2QyMmVjODhhNDE3MGU5MzEyZTkyNQ==',
+                        'app_key' => 'svpC69glRX0eJUqw',
+                        'payload' => '57bcd60eefcac9701fd2407080a5a7b0',
+                        'secretKey' => 'pOKCTaHwMZaKPk3lfbVYfW07NuFjMAXX',
+                    ],
+                    \GuzzleHttp\RequestOptions::JSON => [
+                        'task_id' => 10,
+                    ],
+                ]);
+                $this->assertJsonStringEqualsJsonString(
+                    (string) $response->getBody(),
+                    json_encode([
+                        'code' => 0,
+                        'msg' => 'Ok!',
+                        'data' => [],
+                    ], JSON_THROW_ON_ERROR)
+                );
+            });
+            $this->assertIsInt($i);
+        }
+        $endTime = microtime(true);
+        $logger = make(LoggerFactory::class)->get();
+        //4510.9159946442ms
+        $logger->info(($endTime - $startTime) * 1000 . 'ms');
     }
 }
