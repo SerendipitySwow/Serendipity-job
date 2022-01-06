@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Hyperf\Utils\Codec\Json;
 use Hyperf\Utils\Coroutine as HyperfCo;
 use InvalidArgumentException;
+use Swow\Coroutine;
 use Swow\Coroutine as SwowCo;
 use SwowCloud\Job\Constant\Statistical;
 use SwowCloud\Job\Constant\Task;
@@ -108,7 +109,8 @@ class JobConsumer extends AbstractConsumer
                 }, (int) ($job->getTimeout() / 1000));
             } catch (Throwable $throwable) {
                 $this->logger->error(serendipity_format_throwable($throwable));
-
+                //kill task coroutine
+                Coroutine::get($waiter->getCoroutineId())?->kill();
                 $result = Result::DROP;
             }
 

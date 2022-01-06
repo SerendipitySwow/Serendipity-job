@@ -11,7 +11,6 @@ namespace SwowCloud\Job\Kernel\Coroutine;
 use Hyperf\Utils\Coroutine as HyperfCo;
 use Swow\Channel;
 use Throwable;
-
 use function sprintf;
 
 class Parallel
