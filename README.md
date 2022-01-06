@@ -57,6 +57,7 @@
 14.workflow->https://github.com/uuf6429/state-engine-php
 15.支持分布式(Task可以支持分布式)
 16.支持分布式锁
+17.任务执行超时时kill掉，资源回收
 ```
 
 ## 基于Vue、Vditor，所构建的在线 Markdown 编辑器，支持流程图、甘特图、时序图、任务列表、HTML 自动转换为 Markdown 等功能；🎉新增「所见即所得」编辑模式。
@@ -97,7 +98,7 @@
 * 支持任务图表
 * 支持后台创建任务
 * 支持ORM
-* 任务执行超时，是否考虑杀死执行任务的协程
+* 压力测试
 * [FORM](https://github.com/BoBoooooo/Element-Pro-Crud)
 * [后台](https://github.com/kanyxmo/MineAdmin)
 
