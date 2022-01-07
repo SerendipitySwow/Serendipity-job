@@ -98,7 +98,6 @@
 * 支持任务图表
 * 支持后台创建任务
 * 支持ORM
-* 压力测试
 * [FORM](https://github.com/BoBoooooo/Element-Pro-Crud)
 * [后台](https://github.com/kanyxmo/MineAdmin)
 
