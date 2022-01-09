@@ -135,6 +135,10 @@ class HttpTest extends TestCase
         }
     }
 
+    /**
+     * 压力测试nsq推送
+     * @return void
+     */
     public function testNsqPublish(): void
     {
         $startTime = microtime(true);
@@ -170,5 +174,14 @@ class HttpTest extends TestCase
         $logger = make(LoggerFactory::class)->get();
         //4510.9159946442ms
         $logger->info(($endTime - $startTime) * 1000 . 'ms');
+    }
+
+    /**
+     * 压力测试创建任务
+     * @return void
+     */
+    public function testAbTaskCreate()
+    {
+
     }
 }
