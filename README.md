@@ -56,7 +56,7 @@
 13.支持系统监控基于xhprof(不支持sql)不建议开启
 14.workflow->https://github.com/uuf6429/state-engine-php
 15.支持分布式(Task可以支持分布式)
-16.支持分布式锁
+16.支持分布式锁(watchdog实现给锁续期)
 17.任务执行超时时kill掉，资源回收
 ```
 
