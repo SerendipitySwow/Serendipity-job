@@ -49,6 +49,7 @@
         "nesbot/carbon": "^2.49",
         "nette/utils": "^3.2",
         "nikic/fast-route": "^1.3",
+        "robinvdvleuten/ulid": "^5.0",
         "spatie/emoji": "3.0",
         "swow-cloud/archer": "^0.4.0",
         "swow-cloud/consul": "dev-master",

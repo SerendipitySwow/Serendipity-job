@@ -60,18 +60,23 @@
     CrontabRegisterSubscriber::class, //crontab注册事件
 * providers.yaml server启动时需要启动的服务
   ```yaml
-  Serendipity-Job:
-  BootApp:
-    - Serendipity\Job\Config\ConfigProvider
-    - Serendipity\Job\Event\EventProvider
-    - Serendipity\Job\Logger\LoggerProvider
+  SwowCloud-Job:
+   BootApp:
+    - SwowCloud\Job\Config\ConfigProvider
+    - SwowCloud\Job\Event\EventProvider
+    - SwowCloud\Job\Logger\LoggerProvider
     ## 服务启动一定要在最后
-    - Serendipity\Job\Server\ServerProvider
-  Manage-Job:
-  BootApp:
-    - Serendipity\Job\Config\ConfigProvider
-    - Serendipity\Job\Logger\LoggerProvider
-    - Serendipity\Job\Event\EventProvider
+    - SwowCloud\Job\Server\ServerProvider
+  Job:
+   BootApp:
+    - SwowCloud\Job\Config\ConfigProvider
+    - SwowCloud\Job\Logger\LoggerProvider
+    - SwowCloud\Job\Event\EventProvider
+  Dag:
+   BootApp:
+    - SwowCloud\Job\Config\ConfigProvider
+    - SwowCloud\Job\Logger\LoggerProvider
+    - SwowCloud\Job\Event\EventProvider
   ```
 * 是否需要开启调试模式 配置.env文件里的DEBUG
 ##  启动server
