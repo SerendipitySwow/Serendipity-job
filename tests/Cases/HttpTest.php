@@ -137,7 +137,6 @@ class HttpTest extends TestCase
 
     /**
      * 压力测试nsq推送
-     * @return void
      */
     public function testNsqPublish(): void
     {
@@ -178,10 +177,8 @@ class HttpTest extends TestCase
 
     /**
      * 压力测试创建任务
-     * @return void
      */
     public function testAbTaskCreate()
     {
-
     }
 }
