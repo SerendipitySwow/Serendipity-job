@@ -180,3 +180,6 @@ php bin/job job:start --host=127.0.0.1 --port=9764
 [license-href]: ./LICENSE
 [vscode-href]: https://open.vscode.dev/MarwanAlsoltany/blend
 [github-href]: https://GitHub.com/serendipity-swow/serendipity-job/stargazers
+
+### Supporters
+[![JET BRAINS](img/jetbrains.png)](https://www.jetbrains.com/?from=SerendipitySwow/Serendipity-job)
