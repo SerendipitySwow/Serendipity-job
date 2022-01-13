@@ -218,8 +218,9 @@ class ServerProvider extends AbstractProvider
                 $command = make(Command::class);
                 $command->insert('application', $data);
                 $id = DB::run(function (PDO $PDO) use ($command): int {
-                    $statement = $PDO->prepare($command->getSql());
 
+                    $statement = $PDO->prepare($command->getSql());
+                    /** @var  \SwowCloud\Job\Db\PDOConnection $this */
                     $this->bindValues($statement, $command->getParams());
 
                     $statement->execute();
