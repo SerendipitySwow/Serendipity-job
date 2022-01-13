@@ -9,10 +9,12 @@ LABEL maintainer="Hyperf Developers <group@hyperf.io>" version="1.0" license="MI
 ARG timezone
 
 ENV TIMEZONE=${timezone:-"Asia/Shanghai"}
+#    COMPOSER_VERSION=2.2.4
 # update
 RUN set -ex \
     && apk update \
-    # install composer
+    # install composer \
+#    https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar
     && wget -nv -O /usr/local/bin/composer https://gitee.com/H_Peter/composer/repository/archive/2.2.4 \
     && chmod u+x /usr/local/bin/composer \
     # show php version and extensions
@@ -39,5 +41,6 @@ COPY . /opt/www
 WORKDIR /opt/www
 
 #RUN composer install --no-dev -o
+
 EXPOSE 9501
 
