@@ -180,5 +180,38 @@ class HttpTest extends TestCase
      */
     public function testAbTaskCreate()
     {
+        for ($i = 0; $i < 100; $i++) {
+            Coroutine::run(function () {
+                $client = new GuzzleHttpClient();
+                $response = $client->post('/task/create', [
+                    'base_uri' => 'http://127.0.0.1:9502',
+                    \GuzzleHttp\RequestOptions::HEADERS => [
+                        'nonce' => 'jcpxB9oadf6al6Tv',
+                        'timestamps' => 1639044971,
+                        'signature' => 'MDcwYmNkZjc2ZThhYmYxNWUwYmNlZWFkNmE1YjU2M2U3MDQxNWNkN2RkN2QyMmVjODhhNDE3MGU5MzEyZTkyNQ==',
+                        'app_key' => 'svpC69glRX0eJUqw',
+                        'payload' => '57bcd60eefcac9701fd2407080a5a7b0',
+                        'secretKey' => 'pOKCTaHwMZaKPk3lfbVYfW07NuFjMAXX',
+                    ],
+                    \GuzzleHttp\RequestOptions::JSON => [
+                        'taskNo' => 'taskNo' . uniqid('', true),
+                        'content' => [
+                            'class' => SimpleJob::class,
+                            '_params' => [
+                                'startDate' => '2021-07-27 17:50:50',
+                                'endDate' => '2021-07-27 17:50:50',
+                            ],
+                        ],
+                        'timeout' => 6000,
+                        'name' => 'SimpleJob',
+                        'runtime' => '2021-07-27 17:50:50',
+                    ],
+                ]);
+                $body = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+                $this->assertArrayHasKey('code', $body);
+                $this->assertEquals(0, $body['code']);
+            });
+            $this->assertIsInt($i);
+        }
     }
 }
