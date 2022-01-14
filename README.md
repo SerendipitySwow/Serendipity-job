@@ -56,9 +56,9 @@
 12.支持刷新应用签名(完成)
 13.支持系统监控基于xhprof(不支持sql)不建议开启
 14.workflow->https://github.com/uuf6429/state-engine-php
-15.支持分布式(Task可以支持分布式)
+15.支持分布式(Task可以支持分布式)(完成)
 16.支持分布式锁(watchdog实现给锁续期)
-17.任务执行超时时kill掉，资源回收
+17.任务执行超时时kill掉，资源回收(完成)
 ```
 
 ## 基于Vue、Vditor，所构建的在线 Markdown 编辑器，支持流程图、甘特图、时序图、任务列表、HTML 自动转换为 Markdown 等功能；🎉新增「所见即所得」编辑模式。
@@ -87,23 +87,23 @@
 
 见API.md
 
-## TODO
+## 正在进行中的功能
 
 * 环境
+* 通过获取服务节点操作任务(分布式),在计划中
+* 支持任务图表
+* [后台](https://github.com/kanyxmo/MineAdmin)
+
+## TODO V3
 * 考虑优化项目结构
 * codecov代码覆盖率
 * 静下来想想思考项目的规划,架构
-* 考虑支持分布式(实现中)
 * 考虑使用swow-cloud/redis-subscriber订阅消息
-* 通过获取服务节点操作任务(分布式),在计划中
-* 支持任务图表
 * 支持后台创建任务
-* 支持ORM
-* 压力测试创建任务接口
+* [支持ORM](https://github.com/cycle/orm)
 * 是否考虑给watchdog限制其最大执行时间
-* 加入内存分析(samlitowitz/php-memory)
 * [FORM](https://github.com/BoBoooooo/Element-Pro-Crud)
-* [后台](https://github.com/kanyxmo/MineAdmin)
+
 
 ## Come on!
 
