@@ -46,7 +46,6 @@ class JobConsumer extends AbstractConsumer
 
                 return $this->chan->push(Result::DROP);
             }
-            //TODO 考虑任务执行超时时是否应该kill掉执行任务的协程
             $waiter = $this->container->get(Waiter::class);
             $lock = make(RedisLock::class);
             if (!$lock->lock((string) $job->getIdentity(), (int) ($job->getTimeout() / 1000))) {

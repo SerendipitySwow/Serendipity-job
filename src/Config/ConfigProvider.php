@@ -15,6 +15,9 @@ class ConfigProvider extends AbstractProvider
 {
     protected static string $interface = ConfigInterface::class;
 
+    /**
+     * @throws \Hyperf\Di\Exception\NotFoundException
+     */
     public function bootApp(): void
     {
         $this->container()

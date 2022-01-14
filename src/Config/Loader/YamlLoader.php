@@ -14,7 +14,7 @@ use Symfony\Component\Yaml\Yaml;
 
 class YamlLoader extends FileLoader
 {
-    public function load($resource, string $type = null)
+    public function load($resource, string $type = null): mixed
     {
         if ($this->supports($resource, $type)) {
             $contents = file_get_contents($resource);
