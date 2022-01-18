@@ -17,6 +17,12 @@ use function SwowCloud\Job\Kernel\serendipity_json_decode;
 
 class Request extends SwowRequest
 {
+    public function __construct()
+    {
+        parent::__construct();
+        $this->queryParams = [];
+    }
+
     public function all(): array
     {
         return array_merge(
