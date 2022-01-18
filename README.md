@@ -91,6 +91,7 @@
 
 * 环境
 * 通过获取服务节点操作任务(分布式),在计划中
+* 适配其他框架
 * 支持任务图表
 * [后台](https://github.com/kanyxmo/MineAdmin)
 
