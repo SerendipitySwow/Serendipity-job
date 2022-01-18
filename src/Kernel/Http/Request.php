@@ -20,6 +20,7 @@ class Request extends SwowRequest
     public function __construct()
     {
         parent::__construct();
+        //TODO 待swow API调整,调整过后删除此代码
         $this->queryParams = [];
     }
 
@@ -44,9 +45,11 @@ class Request extends SwowRequest
 
     public function get(string $key = null, mixed $default = null): mixed
     {
-        $params = $this->getQueryParams();
+        //TODO 待swow API调整
+//        $params = $this->getQueryParams();
+        parse_str($this->query, $this->queryParams);
 
-        return $key === null ? $params : $params[$key] ?? $default;
+        return $key === null ? $this->queryParams : $this->queryParams[$key] ?? $default;
     }
 
     /**

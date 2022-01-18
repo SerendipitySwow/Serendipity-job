@@ -32,6 +32,7 @@ use SwowCloud\Job\Crontab\CrontabDispatcher;
 use SwowCloud\Job\Db\DB;
 use SwowCloud\Job\Event\CrontabEvent;
 use SwowCloud\Job\Kernel\Consul\RegisterServices;
+use SwowCloud\Job\Kernel\Http\Request as SwowCloudRequest;
 use SwowCloud\Job\Kernel\Http\Response;
 use SwowCloud\Job\Kernel\Provider\KernelProvider;
 use SwowCloud\Job\Nsq\Consumer\AbstractConsumer;
@@ -157,12 +158,13 @@ final class JobCommand extends Command
                         while (true) {
                             $request = null;
                             try {
-                                $request = $connection->recvHttpRequest();
+                                /** @var SwowCloudRequest $request */
+                                $request = $connection->recvHttpRequest(make(SwowCloudRequest::class));
                                 switch ($request->getPath()) {
                                     case '/detail':
                                     {
-                                        $params = $request->getQueryParams();
-                                        $coroutine = SwowCo::get((int) $params['coroutine_id']);
+                                        $coroutineId = $request->get('coroutine_id');
+                                        $coroutine = SwowCo::get((int) $coroutineId);
                                         $data = [
                                             'state' => $coroutine?->getStateName(),
                                             //当前协程
