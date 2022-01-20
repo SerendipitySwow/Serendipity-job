@@ -33,10 +33,10 @@ class SimpleJob implements JobInterface
 
     public function handle(): void
     {
-        sleep(20);
-//        echo '输出一个字符串.' . PHP_EOL;
+//        sleep(20);
+        echo '输出一个字符串.' . PHP_EOL;
 
-        throw new \Exception('抛出异常');
+//        throw new \Exception('抛出异常');
     }
 
     public function canRetry(int $counter, mixed $error): bool
