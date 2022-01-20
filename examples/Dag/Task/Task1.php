@@ -4,10 +4,11 @@
  * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
  */
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
-namespace SwowCloud\Job\Dag\Task
+namespace App\Dag\Task
 {
+
     use SwowCloud\Job\Contract\DagInterface;
     use SwowCloud\Job\Kernel\Concurrent\ConcurrentMySQLPattern;
 
@@ -16,13 +17,13 @@ namespace SwowCloud\Job\Dag\Task
         public function __construct(string $startDate, string $endDate)
         {
             $this->startDate = $startDate;
-            $this->endDate = $endDate;
+            $this->endDate   = $endDate;
         }
 
         /**
          * {@inheritDoc}
          */
-        public function run(array $results): int|bool
+        public function run(array $results) : int|bool
         {
             echo "Task1::run()\n";
             sleep(20);
@@ -30,22 +31,22 @@ namespace SwowCloud\Job\Dag\Task
             return true;
         }
 
-        public function isNext(): bool
+        public function isNext() : bool
         {
             return true;
         }
 
-        public function getIdentity(): int|string
+        public function getIdentity() : int|string
         {
             return 1;
         }
 
-        public function getTimeout(): int
+        public function getTimeout() : int
         {
             return 5;
         }
 
-        public function runConcurrentMySQLPattern(ConcurrentMySQLPattern $pattern): mixed
+        public function runConcurrentMySQLPattern(ConcurrentMySQLPattern $pattern) : mixed
         {
         }
     }

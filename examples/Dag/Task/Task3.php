@@ -6,12 +6,12 @@
 
 declare(strict_types=1);
 
-namespace SwowCloud\Job\Dag\Task;
+namespace App\Dag\Task;
 
 use SwowCloud\Job\Contract\DagInterface;
 use SwowCloud\Job\Kernel\Concurrent\ConcurrentMySQLPattern;
 
-class Task4 implements DagInterface
+class Task3 implements DagInterface
 {
     public bool $next;
 

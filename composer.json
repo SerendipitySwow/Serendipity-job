@@ -60,6 +60,7 @@
         "swow-cloud/sockets": "^1.1",
         "symfony/config": "^5.3",
         "symfony/console": "^5.2",
+        "symfony/event-dispatcher": "^6.0",
         "symfony/serializer": "^5.2",
         "symfony/serializer-pack": "^1.0",
         "symfony/workflow": "^5.3",

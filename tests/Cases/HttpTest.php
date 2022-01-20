@@ -8,11 +8,10 @@ declare(strict_types=1);
 
 namespace SwowCloud\JobTest\Cases;
 
+use App\Job\SimpleJob;
 use GuzzleHttp\Client as GuzzleHttpClient;
 use PHPUnit\Framework\TestCase;
-use Psr\Http\Message\ResponseInterface;
 use Swow\Coroutine;
-use SwowCloud\Job\Job\SimpleJob;
 use SwowCloud\Job\Logger\LoggerFactory;
 
 /**

@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace SwowCloud\Job\Dag\Exception;
+namespace App\Dag\Exception;
 
 use RuntimeException;
 

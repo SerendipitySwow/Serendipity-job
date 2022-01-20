@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace SwowCloud\Job\Job;
+namespace App\Job;
 
 use SwowCloud\Job\Contract\JobInterface;
 

@@ -6,7 +6,12 @@ declare(strict_types=1);
 use Psr\Container\ContainerInterface;
 use SwowCloud\Job\Application;
 use Spatie\Emoji\Emoji;
-
+//TODO 重点 2022.1.20号适配其他框架时发现不好适配的问题，现考虑如下
+/**
+ * 1.考虑把config移除
+ * 2.考虑如何把BASE_PATH常量如何优化或者定义
+ * 3.Job和Dag移除src目录
+ */
 define('BASE_PATH', dirname(__DIR__));
 ini_set('display_errors', 'on');
 ini_set('display_startup_errors', 'on');

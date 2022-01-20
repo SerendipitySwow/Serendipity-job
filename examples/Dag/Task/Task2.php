@@ -6,12 +6,13 @@
 
 declare(strict_types=1);
 
-namespace SwowCloud\Job\Dag\Task;
+namespace App\Dag\Task;
 
+use App\Dag\Exception\DagException;
 use SwowCloud\Job\Contract\DagInterface;
 use SwowCloud\Job\Kernel\Concurrent\ConcurrentMySQLPattern;
 
-class Task3 implements DagInterface
+class Task2 implements DagInterface
 {
     public bool $next;
 
@@ -24,11 +25,14 @@ class Task3 implements DagInterface
     /**
      * {@inheritDoc}
      */
-    public function Run(array $results): mixed
+    public function run(array $results): int|bool
     {
-        echo "Task3::run()\n";
+        if ($results['taskNo2'] === true) {
+            echo "Task2::run()\n";
 
-        return true;
+            return true;
+        }
+        throw new DagException('never done!');
     }
 
     public function isNext(): bool
@@ -38,7 +42,7 @@ class Task3 implements DagInterface
 
     public function getIdentity(): int|string
     {
-        return 3;
+        return 2;
     }
 
     public function getTimeout(): int

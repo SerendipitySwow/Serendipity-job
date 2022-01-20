@@ -91,12 +91,12 @@
 
 * 环境
 * 通过获取服务节点操作任务(分布式),在计划中
-* 适配其他框架
+* 考虑优化项目结构
 * 支持任务图表
 * [后台](https://github.com/kanyxmo/MineAdmin)
 
 ## TODO V3
-* 考虑优化项目结构
+* 适配其他框架(需要优化项目架构后)
 * codecov代码覆盖率
 * 静下来想想思考项目的规划,架构
 * 考虑使用swow-cloud/redis-subscriber订阅消息
