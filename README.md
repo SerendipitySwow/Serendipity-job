@@ -130,35 +130,43 @@
 
 [使用说明](dag.md)
 
-## 生产快速启动
+## 安装
+
+```shell
+composer require swow-cloud/job -vvv
+```
+## 配置文件
+需要把`config.php` `container.php` `providers.yaml` 和`autoload`目录下的文件复制到项目`config`目录中
+
+## 使用blend快速启动server
 1. 启动server
 ```bash
-php bin/blend server:start
+vendor/bin/blend server:start
 ````
 2. 停止server
 ```bash
-php bin/blend server:stop
+vendor/bin/blend server:stop
 ```
 3. 重新启动
 ```bash
-php bin/blend server:restart
+vendor/bin/blend server:restart
 ````
-## 开发环境启动
+## 环境启动
 1.启动Serendipity-Job Server.
 
 ````bash
- php bin/job swow-cloud-job:start
+vendor/bin/job swow-cloud-job:start
 ````
 
 2.启动Job 进行任务消费
 
 ```bash
-php bin/job job:start --host=127.0.0.1 --port=9764
+vendor/bin/job job:start --host=127.0.0.1 --port=9764
 ```
 
 #### 参数详解
 
-1.host server host监听地址,用于取消任务或者查卡任务详情
+1.host server host监听地址,用于取消任务或者查看任务详情
 
 2.port server port监听端口号
 
