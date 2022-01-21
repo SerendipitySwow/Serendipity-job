@@ -55,6 +55,7 @@ final class ConfigPublishCommand extends Command
     {
         $this->filesystem = $this->container->get(Filesystem::class);
         $id = $this->input->getOption('id');
+
         $this->copy($id);
 
         return SymfonyCommand::SUCCESS;
