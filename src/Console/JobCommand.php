@@ -32,6 +32,7 @@ use SwowCloud\Job\Crontab\CrontabDispatcher;
 use SwowCloud\Job\Db\DB;
 use SwowCloud\Job\Event\CrontabEvent;
 use SwowCloud\Job\Kernel\Consul\RegisterServices;
+use SwowCloud\Job\Kernel\Http\Request as SwowCloudRequest;
 use SwowCloud\Job\Kernel\Http\Response;
 use SwowCloud\Job\Kernel\Provider\KernelProvider;
 use SwowCloud\Job\Nsq\Consumer\AbstractConsumer;
@@ -52,6 +53,9 @@ use const Swow\Errno\ENOMEM;
  */
 final class JobCommand extends Command
 {
+    /**
+     * @var string
+     */
     public static $defaultName = 'job:start';
 
     protected const COMMAND_PROVIDER_NAME = 'Job';
@@ -117,6 +121,10 @@ final class JobCommand extends Command
         parent::__construct();
     }
 
+    /**
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
     public function handle(): int
     {
         $this->config = $this->container->get(ConfigInterface::class);
@@ -132,6 +140,10 @@ final class JobCommand extends Command
         return SymfonyCommand::SUCCESS;
     }
 
+    /**
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
     protected function makeServer(string $host, int $port, string $name): void
     {
         $server = new HttpServer();
@@ -146,12 +158,13 @@ final class JobCommand extends Command
                         while (true) {
                             $request = null;
                             try {
-                                $request = $connection->recvHttpRequest();
+                                /** @var SwowCloudRequest $request */
+                                $request = $connection->recvHttpRequest(make(SwowCloudRequest::class));
                                 switch ($request->getPath()) {
                                     case '/detail':
                                     {
-                                        $params = $request->getQueryParams();
-                                        $coroutine = SwowCo::get((int) $params['coroutine_id']);
+                                        $coroutineId = $request->get('coroutine_id');
+                                        $coroutine = SwowCo::get((int) $coroutineId);
                                         $data = [
                                             'state' => $coroutine?->getStateName(),
                                             //当前协程
@@ -312,6 +325,10 @@ final class JobCommand extends Command
         );
     }
 
+    /**
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
     protected function makeConsumer(
         string $class,
         string $topic,
@@ -340,6 +357,10 @@ final class JobCommand extends Command
         HyperfCo::create(fn () => $this->dispatchCrontab());
     }
 
+    /**
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
     protected function dispatchCrontab(): void
     {
         if ($this->config->get('crontab.enable')) {
@@ -353,6 +374,10 @@ final class JobCommand extends Command
         }
     }
 
+    /**
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
     protected function registerConsul(string $host, int $port, string $name): string
     {
         $register = $this->container->get(RegisterServices::class);

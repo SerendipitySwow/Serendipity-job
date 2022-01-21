@@ -30,6 +30,7 @@
 ![home](./img/monitor-dashboard.jpg)
 ![home](./img/info.jpg)
 ![home](./img/stat.png)
+## 一定要坚持更新下去,等婚礼办理完.
 
 # 🚀Serendipity-Job  For 🏆Swow 分布式任务平台
 
@@ -55,8 +56,9 @@
 12.支持刷新应用签名(完成)
 13.支持系统监控基于xhprof(不支持sql)不建议开启
 14.workflow->https://github.com/uuf6429/state-engine-php
-15.支持分布式(Task可以支持分布式)
-16.支持分布式锁
+15.支持分布式(Task可以支持分布式)(完成)
+16.支持分布式锁(watchdog实现给锁续期)
+17.任务执行超时时kill掉，资源回收(完成)
 ```
 
 ## 基于Vue、Vditor，所构建的在线 Markdown 编辑器，支持流程图、甘特图、时序图、任务列表、HTML 自动转换为 Markdown 等功能；🎉新增「所见即所得」编辑模式。
@@ -85,22 +87,24 @@
 
 见API.md
 
-## TODO
+## 正在进行中的功能
 
 * 环境
+* 通过获取服务节点操作任务(分布式),在计划中
 * 考虑优化项目结构
+* 支持任务图表
+* [后台](https://github.com/kanyxmo/MineAdmin)
+
+## TODO V3
+* 适配其他框架(需要优化项目架构后)
 * codecov代码覆盖率
 * 静下来想想思考项目的规划,架构
-* 考虑支持分布式
 * 考虑使用swow-cloud/redis-subscriber订阅消息
-* 考虑使用swow-cloud/redis-lock上锁
-* 加入consul支持分布式
-* 通过获取服务节点操作任务(分布式)
-* 支持任务图表
 * 支持后台创建任务
-* 支持ORM
+* [支持ORM](https://github.com/cycle/orm)
+* 是否考虑给watchdog限制其最大执行时间
 * [FORM](https://github.com/BoBoooooo/Element-Pro-Crud)
-* [后台](https://github.com/kanyxmo/MineAdmin)
+
 
 ## Come on!
 
@@ -126,35 +130,43 @@
 
 [使用说明](dag.md)
 
-## 生产快速启动
+## 安装
+
+```shell
+composer require swow-cloud/job -vvv
+```
+## 配置文件
+需要把`config.php` `container.php` `providers.yaml` 和`autoload`目录下的文件复制到项目`config`目录中
+
+## 使用blend快速启动server
 1. 启动server
 ```bash
-php bin/blend server:start
+vendor/bin/blend server:start
 ````
 2. 停止server
 ```bash
-php bin/blend server:stop
+vendor/bin/blend server:stop
 ```
 3. 重新启动
 ```bash
-php bin/blend server:restart
+vendor/bin/blend server:restart
 ````
-## 开发环境启动
+## 环境启动
 1.启动Serendipity-Job Server.
 
 ````bash
- php bin/job swow-cloud-job:start
+vendor/bin/job swow-cloud-job:start
 ````
 
 2.启动Job 进行任务消费
 
 ```bash
-php bin/job job:start --host=127.0.0.1 --port=9764
+vendor/bin/job job:start --host=127.0.0.1 --port=9764
 ```
 
 #### 参数详解
 
-1.host server host监听地址,用于取消任务或者查卡任务详情
+1.host server host监听地址,用于取消任务或者查看任务详情
 
 2.port server port监听端口号
 
@@ -178,3 +190,6 @@ php bin/job job:start --host=127.0.0.1 --port=9764
 [license-href]: ./LICENSE
 [vscode-href]: https://open.vscode.dev/MarwanAlsoltany/blend
 [github-href]: https://GitHub.com/serendipity-swow/serendipity-job/stargazers
+
+### Supporters
+[![JET BRAINS](img/jetbrains.png)](https://www.jetbrains.com/?from=SerendipitySwow/Serendipity-job)

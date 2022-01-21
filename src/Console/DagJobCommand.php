@@ -28,6 +28,9 @@ use Throwable;
  */
 final class DagJobCommand extends Command
 {
+    /**
+     * @var string
+     */
     public static $defaultName = 'dag:start';
 
     protected const COMMAND_PROVIDER_NAME = 'Dag';
@@ -56,6 +59,10 @@ final class DagJobCommand extends Command
         parent::__construct();
     }
 
+    /**
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
     public function handle(): int
     {
         $this->config = $this->container->get(ConfigInterface::class);
@@ -68,6 +75,10 @@ final class DagJobCommand extends Command
         return SymfonyCommand::SUCCESS;
     }
 
+    /**
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
     protected function subscribe(): void
     {
         $subscriber = make(Nsq::class, [
@@ -100,6 +111,10 @@ final class DagJobCommand extends Command
         );
     }
 
+    /**
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
     protected function makeConsumer(
         string $class,
         string $topic,

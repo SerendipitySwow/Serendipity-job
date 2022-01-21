@@ -60,4 +60,9 @@ class Waiter
 
         return $result;
     }
+
+    public function getCoroutineId(): ?int
+    {
+        return $this->coroutineId;
+    }
 }

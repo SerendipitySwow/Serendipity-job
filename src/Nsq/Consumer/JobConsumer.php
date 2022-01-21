@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Hyperf\Utils\Codec\Json;
 use Hyperf\Utils\Coroutine as HyperfCo;
 use InvalidArgumentException;
+use Swow\Coroutine;
 use Swow\Coroutine as SwowCo;
 use SwowCloud\Job\Constant\Statistical;
 use SwowCloud\Job\Constant\Task;
@@ -45,7 +46,6 @@ class JobConsumer extends AbstractConsumer
 
                 return $this->chan->push(Result::DROP);
             }
-            //TODO 考虑任务执行超时时是否应该kill掉执行任务的协程
             $waiter = $this->container->get(Waiter::class);
             $lock = make(RedisLock::class);
             if (!$lock->lock((string) $job->getIdentity(), (int) ($job->getTimeout() / 1000))) {
@@ -108,7 +108,8 @@ class JobConsumer extends AbstractConsumer
                 }, (int) ($job->getTimeout() / 1000));
             } catch (Throwable $throwable) {
                 $this->logger->error(serendipity_format_throwable($throwable));
-
+                //kill task coroutine
+                Coroutine::get($waiter->getCoroutineId())?->kill();
                 $result = Result::DROP;
             }
 

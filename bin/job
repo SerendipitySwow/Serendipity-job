@@ -1,29 +1,40 @@
 #!/usr/bin/env php
 <?php
-
 declare(strict_types=1);
 
 use Psr\Container\ContainerInterface;
 use SwowCloud\Job\Application;
 use Spatie\Emoji\Emoji;
 
-define('BASE_PATH', dirname(__DIR__));
 ini_set('display_errors', 'on');
 ini_set('display_startup_errors', 'on');
 error_reporting(E_ALL);
 date_default_timezone_set('Asia/Shanghai');
-require_once BASE_PATH . '/vendor/autoload.php';
 
-if (!extension_loaded('swow')) {
-    exit(sprintf('Swow extension is required%s#',Emoji::faceWithTearsOfJoy()));
+foreach (
+    [
+        __DIR__ . '/../vendor/autoload.php' => __DIR__ . '/..',
+        __DIR__ . '/../../../autoload.php'  => __DIR__ . '/../../../..',
+    ] as $autoload => $defineBasePath
+) {
+    if (file_exists($autoload)) {
+        require_once $autoload;
+        define('BASE_PATH', $defineBasePath);
+        break;
+    }
 }
 
+if (!extension_loaded('swow')) {
 
+    exit(sprintf('Swow extension is required%s#', Emoji::faceWithTearsOfJoy()));
+}
 
-(static function () {
+(static function ()
+{
     Hyperf\Di\ClassLoader::init();
     /** @var ContainerInterface $container */
-    $container = require BASE_PATH . '/config/container.php';
+    /** @noinspection PhpIncludeInspection */
+    $container   = require BASE_PATH . '/config/container.php';
     $application = $container->get(Application::class);
     $application->run();
 })();

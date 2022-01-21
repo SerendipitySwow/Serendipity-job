@@ -79,7 +79,7 @@ class Response extends SwowResponse
     /**
      * @return $this|Response
      */
-    public function error(int $statusCode, string $reasonPhrase = ''): Response|static
+    public function error(int $statusCode, string $reasonPhrase = ''): static
     {
         $this
             ->setStatus($statusCode, $reasonPhrase)

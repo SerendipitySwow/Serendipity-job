@@ -76,6 +76,14 @@ class ServerProvider extends AbstractProvider
 
     protected Dispatcher $fastRouteDispatcher;
 
+    /**
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Hyperf\Di\Exception\NotFoundException
+     * @throws \JsonException
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws \Throwable
+     */
     public function bootApp(): void
     {
         /**
@@ -130,7 +138,14 @@ class ServerProvider extends AbstractProvider
         }
     }
 
-    /** @noinspection PhpComplexFunctionInspection */
+    /**
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \JsonException
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws \Throwable
+     * @noinspection PhpComplexFunctionInspection
+     */
     protected function makeFastRoute(): void
     {
         $this->fastRouteDispatcher = simpleDispatcher(function (RouteCollector $router) {
@@ -219,7 +234,7 @@ class ServerProvider extends AbstractProvider
                 $command->insert('application', $data);
                 $id = DB::run(function (PDO $PDO) use ($command): int {
                     $statement = $PDO->prepare($command->getSql());
-
+                    /* @var  \SwowCloud\Job\Db\PDOConnection $this */
                     $this->bindValues($statement, $command->getParams());
 
                     $statement->execute();
@@ -644,6 +659,13 @@ class ServerProvider extends AbstractProvider
         return $channel->pop();
     }
 
+    /**
+     * @param $time
+     *
+     * @throws \JsonException
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
     protected function debug($time, SwowRequest|SwowCloudRequest $request, Response $response, Connection $connection): void
     {
         if (env('DEBUG')) {

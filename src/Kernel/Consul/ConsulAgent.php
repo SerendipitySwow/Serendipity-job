@@ -6,10 +6,10 @@
 
 declare(strict_types=1);
 
-namespace SwowCloud\Job\Dag\Exception;
+namespace SwowCloud\Job\Kernel\Consul;
 
-use RuntimeException;
+use SwowCloud\Consul\AgentInterface;
 
-class DagException extends RuntimeException
+interface ConsulAgent extends AgentInterface
 {
 }

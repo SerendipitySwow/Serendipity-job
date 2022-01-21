@@ -19,6 +19,9 @@ class MatrixCommand extends Command
     private MatrixService $matrixService;
 
     // the name of the command (the part after "bin/console")
+    /**
+     * @var string
+     */
     public static $defaultName = 'matrix:start';
 
     public function __construct(ContainerInterface $container)
