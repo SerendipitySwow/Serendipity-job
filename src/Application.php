@@ -13,6 +13,7 @@ use Hyperf\Di\Container;
 use Psr\Container\ContainerInterface;
 use Swow\Debug\Debugger;
 use SwowCloud\Job\Config\Loader\YamlLoader;
+use SwowCloud\Job\Console\ConfigPublishCommand;
 use SwowCloud\Job\Console\DagJobCommand;
 use SwowCloud\Job\Console\JobCommand;
 use SwowCloud\Job\Console\MatrixCommand;
@@ -41,6 +42,7 @@ final class Application extends SymfonyApplication
             new JobCommand($container),
             new DagJobCommand($container),
             new MatrixCommand($container),
+            new ConfigPublishCommand($container),
         ]);
     }
 
