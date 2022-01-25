@@ -4,8 +4,20 @@ declare(strict_types = 1);
 
 use MAKS\Blend\TaskRunner as Blend;
 
-define('BASE_PATH', dirname(__DIR__));
 
+foreach (
+    [
+        __DIR__ . '/../vendor/autoload.php' => __DIR__ . '/..',
+        __DIR__ . '/../../../autoload.php'  => __DIR__ . '/../../../..',
+    ] as $autoload => $defineBasePath
+) {
+    if (file_exists($autoload)) {
+        define('BASE_PATH', $defineBasePath);
+        break;
+    }
+}
+
+/** @noinspection PhpIncludeInspection */
 require_once BASE_PATH . '/vendor/marwanalsoltany/blend/src/TaskRunner.php';
 
 $blend = new Blend();
@@ -23,7 +35,7 @@ $blend->addCallbackTask(
             return Blend::FAILURE;
         }
 
-        $pid = $this->exec('php bin/job swow-cloud-job:start ', true); // passing true runs the command asynchronously
+        $pid = $this->exec('php -dextension=swow bin/job swow-cloud-job:start ', true); // passing true runs the command asynchronously
         // you can use $this->getExecResult() method to get all additional info about the executed command.
         $this->say("Started a Job Server in the background with PID: [{$pid}]");
 
