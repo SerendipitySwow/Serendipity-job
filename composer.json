@@ -36,6 +36,7 @@
         "ext-redis": ">=5.3",
         "ext-simdjson": "*",
         "ext-sockets": "*",
+        "ajthinking/archetype": "^1.0",
         "guzzlehttp/guzzle": "^7.3",
         "hyperf/contract": "3.0.x-dev",
         "hyperf/di": "3.0.x-dev",
