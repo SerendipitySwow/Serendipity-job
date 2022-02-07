@@ -60,7 +60,7 @@ class JobConsumer extends AbstractConsumer
                         $currentCo = SwowCo::getCurrent();
                         \Swow\defer(function () use ($currentCo) {
                             //debug trace
-                            $this->logger->info(Json::encode($currentCo->getTrace()));
+                            $this->debugLogger->info(Json::encode($currentCo->getTrace()));
                         });
                         //修改当前那个协程在执行此任务,用于取消任务
                         DB::execute(

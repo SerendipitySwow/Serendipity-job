@@ -78,4 +78,26 @@ return [
             ],
         ],
     ],
+    'debug' => [
+        'handler' => [
+            'class' => Monolog\Handler\RotatingFileHandler::class,
+            'constructor' => [
+                'filename' => BASE_PATH . '/runtimes/logs/debug/debug.log',
+                'level' => Monolog\Logger::INFO,
+            ],
+        ],
+        'formatter' => [
+            'class' => Monolog\Formatter\LineFormatter::class,
+            'constructor' => [
+                'format' => null,
+                'dateFormat' => 'Y-m-d H:i:s',
+                'allowInlineLineBreaks' => true,
+            ],
+        ],
+        'processors' => [
+            [
+                'class' => AppendRequestIdProcessor::class,
+            ],
+        ],
+    ],
 ];
