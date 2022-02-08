@@ -17,4 +17,3 @@ $coroutine = \Swow\Coroutine::run(function () {
 });
 // just do not
 $coroutine->throw(new Exception('11111'));
-

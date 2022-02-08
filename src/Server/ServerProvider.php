@@ -22,6 +22,7 @@ use Hyperf\Utils\Codec\Json;
 use Hyperf\Utils\Context;
 use Hyperf\Utils\Coroutine as HyperfCo;
 use Hyperf\Utils\Str;
+use itbdw\Ip\IpLocation;
 use PDO;
 use Psr\Http\Message\RequestInterface;
 use Ramsey\Uuid\Uuid;
@@ -57,7 +58,6 @@ use SwowCloud\Job\Serializer\SymfonySerializer;
 use SwowCloud\Nsq\Nsq;
 use SwowCloud\Redis\Lua\Hash\Incr;
 use Throwable;
-use ZxInc\Zxipdb\IPTool;
 use function FastRoute\simpleDispatcher;
 use function SwowCloud\Job\Kernel\serendipity_format_throwable;
 use function SwowCloud\Job\Kernel\serendipity_json_decode;
@@ -700,24 +700,24 @@ class ServerProvider extends AbstractProvider
             }
 
             /*
-             * $command = make(Command::class);
-             * $command->insert('request_log', [
-             * 'application_name' => (string) Arr::get($request->getHeader('application'), 'application_name', 'Unknown'),
-             * 'app_key' => current($request->getHeader('app_key')),
-             * 'ip' => $connection->getPeerAddress(),
-             * 'ip_location' => Arr::get(IPTool::query($connection->getPeerAddress()), 'disp'),
-             * 'os' => OperatingSystem::getOsFamily($dd->getOs('name')) ?? 'Unknown',
-             * 'request_info' => $debug,
-             * 'request_time' => Carbon::now()->toDateTimeString(),
-             * ]);
-             * DB::run(function (PDO $PDO) use ($command) {
-             * $statement = $PDO->prepare($command->getSql());
-             *
-             * $this->bindValues($statement, $command->getParams());
-             *
-             * $statement->execute();
-             * });
-             */
+             $command = make(Command::class);
+             $command->insert('request_log', [
+             'application_name' => (string) Arr::get($request->getHeader('application'), 'application_name', 'Unknown'),
+             'app_key' => current($request->getHeader('app_key')),
+             'ip' => $connection->getPeerAddress(),
+             'ip_location' => Arr::get(IpLocation::getLocation($connection->getPeerAddress()), 'city'),
+             'os' => OperatingSystem::getOsFamily($dd->getOs('name')) ?? 'Unknown',
+             'request_info' => $debug,
+             'request_time' => Carbon::now()->toDateTimeString(),
+             ]);
+             DB::run(function (PDO $PDO) use ($command) {
+             $statement = $PDO->prepare($command->getSql());
+
+             $this->bindValues($statement, $command->getParams());
+
+             $statement->execute();
+             });
+            */
         }
 
         Xhprof::endPoint($connection, $request);
