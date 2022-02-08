@@ -1,7 +1,7 @@
 <?php
 /**
  * This file is part of Swow-Cloud/Job
- * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
+ * @license  https://github.com/serendipity-swow/serendipity-job/blob/master/LICENSE
  */
 
 declare(strict_types=1);
@@ -57,12 +57,16 @@ class JobConsumer extends AbstractConsumer
             try {
                 $result = $waiter->wait(function () use ($job, $incr) {
                     try {
+                        $currentCo = SwowCo::getCurrent();
+                        \Swow\defer(function () use ($currentCo) {
+                            //debug trace
+                            $this->debugLogger->info(Json::encode($currentCo->getTrace()));
+                        });
                         //修改当前那个协程在执行此任务,用于取消任务
                         DB::execute(
                             sprintf(
                                 'update task set coroutine_id = %s,status = %s,consul_service_id = "%s"  where id = %s;',
-                                SwowCo::getCurrent()
-                                    ->getId(),
+                                $currentCo->getId(),
                                 Task::TASK_ING,
                                 $this->getServiceId(),
                                 $job->getIdentity()

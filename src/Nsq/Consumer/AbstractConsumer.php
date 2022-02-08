@@ -1,7 +1,7 @@
 <?php
 /**
  * This file is part of Swow-Cloud/Job
- * @license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
+ * @license  https://github.com/serendipity-swow/serendipity-job/blob/master/LICENSE
  */
 
 declare(strict_types=1);
@@ -38,6 +38,8 @@ abstract class AbstractConsumer
 
     protected ?LoggerInterface $logger = null;
 
+    protected ?LoggerInterface $debugLogger = null;
+
     protected ContainerInterface $container;
 
     protected ?SerializerInterface $serializer = null;
@@ -57,6 +59,8 @@ abstract class AbstractConsumer
         $this->container = $container;
         $this->logger = $this->container->get(LoggerFactory::class)
             ->get('serendipity', 'job');
+        $this->debugLogger = $this->container->get(LoggerFactory::class)
+            ->get('serendipity', 'debug');
         $this->serializer = $this->container->get(SymfonySerializer::class);
         $this->pipeline = $this->container->get(Pipeline::class);
         $this->config = $this->container->get(ConfigInterface::class);

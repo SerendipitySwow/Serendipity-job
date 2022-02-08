@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 $header = <<<'EOF'
 This file is part of Swow-Cloud/Job
-@license  https://github.com/serendipity-swow/serendipity-job/blob/main/LICENSE
+@license  https://github.com/serendipity-swow/serendipity-job/blob/master/LICENSE
 EOF;
 
 return (new PhpCsFixer\Config())
     ->setRiskyAllowed(true)
     ->setRules([
+        '@PSR2' => true,
         '@PSR12' => true,
         '@Symfony' => true,
         '@DoctrineAnnotation' => true,

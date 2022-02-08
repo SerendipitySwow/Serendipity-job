@@ -36,6 +36,7 @@
         "ext-redis": ">=5.3",
         "ext-simdjson": "*",
         "ext-sockets": "*",
+        "ajthinking/archetype": "^1.0",
         "guzzlehttp/guzzle": "^7.3",
         "hyperf/contract": "3.0.x-dev",
         "hyperf/di": "3.0.x-dev",
@@ -65,8 +66,7 @@
         "symfony/serializer-pack": "^1.0",
         "symfony/workflow": "^5.3",
         "symfony/yaml": "^5.2",
-        "vlucas/phpdotenv": "^5.3",
-        "zx-inc/zxipdb": "^1.0"
+        "vlucas/phpdotenv": "^5.3"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.0",
