@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 use Monolog\Formatter\JsonFormatter;
 use Monolog\Formatter\LineFormatter;
+use SwowCloud\Job\Kernel\Logger\AppendJobProcessor;
 use SwowCloud\Job\Kernel\Logger\AppendRequestIdProcessor;
 
 return [
@@ -96,7 +97,7 @@ return [
         ],
         'processors' => [
             [
-                'class' => AppendRequestIdProcessor::class,
+                'class' => AppendJobProcessor::class,
             ],
         ],
     ],
