@@ -58,6 +58,7 @@ use SwowCloud\Job\Serializer\SymfonySerializer;
 use SwowCloud\Nsq\Nsq;
 use SwowCloud\Redis\Lua\Hash\Incr;
 use Throwable;
+use function Chevere\Xr\throwableHandler;
 use function FastRoute\simpleDispatcher;
 use function SwowCloud\Job\Kernel\serendipity_format_throwable;
 use function SwowCloud\Job\Kernel\serendipity_json_decode;
@@ -86,6 +87,13 @@ class ServerProvider extends AbstractProvider
      */
     public function bootApp(): void
     {
+        HyperfCo::create(function () {
+            try {
+                throwableHandler(new \RuntimeException('1111'));
+            } catch (Throwable $throwable) {
+                dd($throwable);
+            }
+        });
         /**
          * @var Server $server
          */
