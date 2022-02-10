@@ -181,7 +181,7 @@ vendor/bin/job job:start --host=127.0.0.1 --port=9764
 
 
 [php-icon]: https://img.shields.io/badge/php->=8.0-yellow?style=flat&logo=php
-[version-icon]: https://img.shields.io/packagist/v/serendipity-swow/serendipity-job.svg?style=flat&logo=packagist
+[version-icon]: https://img.shields.io/packagist/v/swow-cloud/job.svg?style=flat&logo=packagist
 [downloads-icon]: https://img.shields.io/packagist/dt/serendipity-swow/serendipity-job.svg?style=flat&logo=packagist
 [license-icon]: https://img.shields.io/badge/license-MIT-red.svg?style=flat&logo=github
 [vscode-icon]: https://open.vscode.dev/badges/open-in-vscode.svg
