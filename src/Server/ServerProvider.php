@@ -45,6 +45,7 @@ use SwowCloud\Job\Db\DB;
 use SwowCloud\Job\Kernel\Consul\ConsulAgent;
 use SwowCloud\Job\Kernel\Http\Request as SwowCloudRequest;
 use SwowCloud\Job\Kernel\Http\Response;
+use SwowCloud\Job\Kernel\Logger\AppendRequestIdProcessor;
 use SwowCloud\Job\Kernel\Provider\AbstractProvider;
 use SwowCloud\Job\Kernel\Router\RouteCollector;
 use SwowCloud\Job\Kernel\Signature;
@@ -60,6 +61,7 @@ use SwowCloud\Redis\Lua\Hash\Incr;
 use Throwable;
 use function Chevere\Xr\throwableHandler;
 use function FastRoute\simpleDispatcher;
+use function SwowCloud\Job\Kernel\memory_usage;
 use function SwowCloud\Job\Kernel\serendipity_format_throwable;
 use function SwowCloud\Job\Kernel\serendipity_json_decode;
 use const Swow\Errno\EMFILE;
@@ -87,13 +89,6 @@ class ServerProvider extends AbstractProvider
      */
     public function bootApp(): void
     {
-        HyperfCo::create(function () {
-            try {
-                throwableHandler(new \RuntimeException('1111'));
-            } catch (Throwable $throwable) {
-                dd($throwable);
-            }
-        });
         /**
          * @var Server $server
          */
@@ -652,6 +647,13 @@ class ServerProvider extends AbstractProvider
                                 $response->error($exception->getCode(), $exception->getMessage());
                                 break;
                             }
+                            //push xr exception
+                            throwableHandler($exception, sprintf(
+                                '😭请求接口{%s}发生了错误,trace_id:%s,memory_usage:%s',
+                                $request->getUri()->getPath(),
+                                Context::getOrSet(AppendRequestIdProcessor::TRACE_ID, Uuid::uuid4()->toString()),
+                                memory_usage()
+                            ));
                             $this->logger->error(serendipity_format_throwable($exception));
                             $response->error(Status::INTERNAL_SERVER_ERROR);
                             break;
