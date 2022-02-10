@@ -37,6 +37,11 @@ if (!function_exists('serendipity_json_decode')) {
     }
 }
 
+function memory_usage(): string
+{
+    return (!function_exists('memory_get_usage')) ? '0' : round(memory_get_usage() / 1024 / 1024, 2) . 'MB';
+}
+
 if (!function_exists('server_ip')) {
     function server_ip(): string
     {

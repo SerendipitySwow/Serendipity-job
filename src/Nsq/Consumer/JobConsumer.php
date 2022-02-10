@@ -10,8 +10,10 @@ namespace SwowCloud\Job\Nsq\Consumer;
 
 use Carbon\Carbon;
 use Hyperf\Utils\Codec\Json;
+use Hyperf\Utils\Context;
 use Hyperf\Utils\Coroutine as HyperfCo;
 use InvalidArgumentException;
+use Ramsey\Uuid\Uuid;
 use Swow\Coroutine;
 use Swow\Coroutine as SwowCo;
 use SwowCloud\Job\Constant\Statistical;
@@ -20,6 +22,7 @@ use SwowCloud\Job\Contract\EventDispatcherInterface;
 use SwowCloud\Job\Contract\JobInterface;
 use SwowCloud\Job\Db\DB;
 use SwowCloud\Job\Event\UpdateJobEvent;
+use SwowCloud\Job\Kernel\Logger\AppendRequestIdProcessor;
 use SwowCloud\Job\Util\Waiter;
 use SwowCloud\Nsq\Message;
 use SwowCloud\Nsq\Nsq;
@@ -27,6 +30,8 @@ use SwowCloud\Nsq\Result;
 use SwowCloud\Redis\Lua\Hash\Incr;
 use SwowCloud\RedisLock\RedisLock;
 use Throwable;
+use function Chevere\Xr\throwableHandler;
+use function SwowCloud\Job\Kernel\memory_usage;
 use function SwowCloud\Job\Kernel\serendipity_format_throwable;
 use function SwowCloud\Job\Kernel\serendipity_json_decode;
 
@@ -49,6 +54,7 @@ class JobConsumer extends AbstractConsumer
             $waiter = $this->container->get(Waiter::class);
             $lock = make(RedisLock::class);
             if (!$lock->lock((string) $job->getIdentity(), (int) ($job->getTimeout() / 1000))) {
+                xr('😭 Task:[%s] Processing');
                 $this->logger->error(sprintf('Task:[%s] Processing#', $job->getIdentity()));
 
                 return $this->chan->push(Result::DROP);
@@ -58,9 +64,16 @@ class JobConsumer extends AbstractConsumer
                 $result = $waiter->wait(function () use ($job, $incr) {
                     try {
                         $currentCo = SwowCo::getCurrent();
-                        \Swow\defer(function () use ($currentCo) {
-                            //debug trace
-                            $this->debugLogger->info(Json::encode($currentCo->getTrace()));
+                        \Swow\defer(function () use ($currentCo, $job) {
+                            //debug trace | push xr trace
+                            $trace = $currentCo->getTrace();
+                            xr(array_push($trace, [
+                                'trace_id' => Context::getOrSet(AppendRequestIdProcessor::TRACE_ID, Uuid::uuid4()->toString()),
+                                'task_id' => $job->getIdentity(),
+                                'consul_service_id' => $this->getServiceId(),
+                                'message' => sprintf('Task [%s] TraceInfo', $job->getIdentity()),
+                            ]));
+                            $this->debugLogger->info(Json::encode($trace));
                         });
                         //修改当前那个协程在执行此任务,用于取消任务
                         DB::execute(
@@ -112,6 +125,13 @@ class JobConsumer extends AbstractConsumer
                 }, (int) ($job->getTimeout() / 1000));
             } catch (Throwable $throwable) {
                 $this->logger->error(serendipity_format_throwable($throwable));
+                //push xr exception
+                throwableHandler($throwable, sprintf(
+                    'Coroutine Error#,{task_id:%s,trace_id:{%s},memory_usage:%s}',
+                    $job->getIdentity(),
+                    Context::getOrSet(AppendRequestIdProcessor::TRACE_ID, Uuid::uuid4()->toString()),
+                    memory_usage()
+                ));
                 //kill task coroutine
                 Coroutine::get($waiter->getCoroutineId())?->kill();
                 $result = Result::DROP;
@@ -168,6 +188,7 @@ class JobConsumer extends AbstractConsumer
                 'task_id' => $job->getIdentity(),
                 'last_error_line' => $e->getLine(),
                 'last_error_file' => $e->getFile(),
+                'trace_id' => Context::getOrSet(AppendRequestIdProcessor::TRACE_ID, Uuid::uuid4()->toString()),
             ];
             //retry
             if ($job->canRetry($job->getCounter(), $e)) {
@@ -213,6 +234,13 @@ class JobConsumer extends AbstractConsumer
                     )
                 );
             }
+            //push xr exception
+            throwableHandler($e, sprintf(
+                'Task Error#,{task_id:%s,trace_id:{%s},memory_usage:%s}',
+                $job->getIdentity(),
+                Context::getOrSet(AppendRequestIdProcessor::TRACE_ID, Uuid::uuid4()->toString()),
+                memory_usage()
+            ));
             $this->dingTalk->text(Json::encode($payload, JSON_UNESCAPED_UNICODE));
             throw $e;
         }

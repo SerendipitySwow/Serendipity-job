@@ -8,7 +8,9 @@ declare(strict_types=1);
 
 namespace SwowCloud\Job\Nsq\Consumer;
 
+use Hyperf\Utils\Context;
 use Hyperf\Utils\Coroutine as HyperfCo;
+use Ramsey\Uuid\Uuid;
 use SwowCloud\Job\Constant\Statistical;
 use SwowCloud\Job\Constant\Task;
 use SwowCloud\Job\Contract\DagInterface;
@@ -18,10 +20,13 @@ use SwowCloud\Job\Event\UpdateWorkflowEvent;
 use SwowCloud\Job\Kernel\Dag\Dag;
 use SwowCloud\Job\Kernel\Dag\Exception\InvalidArgumentException;
 use SwowCloud\Job\Kernel\Dag\Vertex;
+use SwowCloud\Job\Kernel\Logger\AppendRequestIdProcessor;
 use SwowCloud\Nsq\Message;
 use SwowCloud\Nsq\Result;
 use SwowCloud\Redis\Lua\Hash\Incr;
 use Throwable;
+use function Chevere\Xr\throwableHandler;
+use function SwowCloud\Job\Kernel\memory_usage;
 use function SwowCloud\Job\Kernel\serendipity_format_throwable;
 use function SwowCloud\Job\Kernel\serendipity_json_decode;
 
@@ -97,6 +102,13 @@ SQL;
                 $incr->eval([Statistical::DAG_SUCCESS, $this->config->get('consumer.task_redis_cache_time')]);
             } catch (Throwable $throwable) {
                 $this->dingTalk->text(serendipity_format_throwable($throwable));
+                //push xr exception
+                throwableHandler($throwable, sprintf(
+                    'Workflow Error#,{workflow_id:%s,trace_id:{%s},memory_usage:%s}',
+                    $id,
+                    Context::getOrSet(AppendRequestIdProcessor::TRACE_ID, Uuid::uuid4()->toString()),
+                    memory_usage()
+                ));
                 $this->logger->error(sprintf('Workflow Error[%s]#', $throwable->getMessage()));
                 $incr->eval([Statistical::DAG_FAILURE, $this->config->get('consumer.task_redis_cache_time')]);
             }

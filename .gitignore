@@ -10,3 +10,6 @@ composer.lock
 archer
 .pid.server
 consul
+trace
+xr
+throwable-handler

@@ -14,7 +14,7 @@ class EchoCrontab
 {
     public function execute(): void
     {
-        echo '____________________RNM___________________________' . PHP_EOL;
+        echo '这只是一个demo' . PHP_EOL;
         echo Carbon::now()->toDateTimeString() . PHP_EOL;
     }
 }

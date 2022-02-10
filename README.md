@@ -30,7 +30,8 @@
 ![home](./img/monitor-dashboard.jpg)
 ![home](./img/info.jpg)
 ![home](./img/stat.png)
-## 一定要坚持更新下去,等婚礼办理完.
+![home](./img/debug.png)
+![home](./img/exception.png)
 
 # 🚀Serendipity-Job  For 🏆Swow 分布式任务平台
 
@@ -59,6 +60,7 @@
 15.支持分布式(Task可以支持分布式)(完成)
 16.支持分布式锁(watchdog实现给锁续期)
 17.任务执行超时时kill掉，资源回收(完成)
+18.支持debug和trace查看(https://github.com/chevere/xr)
 ```
 
 ## 基于Vue、Vditor，所构建的在线 Markdown 编辑器，支持流程图、甘特图、时序图、任务列表、HTML 自动转换为 Markdown 等功能；🎉新增「所见即所得」编辑模式。
@@ -94,6 +96,7 @@
 * 考虑优化项目结构
 * 支持任务图表
 * [后台](https://github.com/kanyxmo/MineAdmin)
+* chevere/xr这个组件暂时不支持闭包解析，所以自己fork了包,后续如果支持，再换回来.
 
 ## TODO V3
 * 适配其他框架(需要优化项目架构后)
@@ -178,7 +181,7 @@ vendor/bin/job job:start --host=127.0.0.1 --port=9764
 
 
 [php-icon]: https://img.shields.io/badge/php->=8.0-yellow?style=flat&logo=php
-[version-icon]: https://img.shields.io/packagist/v/serendipity-swow/serendipity-job.svg?style=flat&logo=packagist
+[version-icon]: https://img.shields.io/packagist/v/swow-cloud/job.svg?style=flat&logo=packagist
 [downloads-icon]: https://img.shields.io/packagist/dt/serendipity-swow/serendipity-job.svg?style=flat&logo=packagist
 [license-icon]: https://img.shields.io/badge/license-MIT-red.svg?style=flat&logo=github
 [vscode-icon]: https://open.vscode.dev/badges/open-in-vscode.svg
