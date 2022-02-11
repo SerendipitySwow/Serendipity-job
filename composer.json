@@ -37,6 +37,7 @@
         "ext-simdjson": "*",
         "ext-sockets": "*",
         "ajthinking/archetype": "^1.0",
+        "swow-cloud/xr": "0.1.x-dev",
         "guzzlehttp/guzzle": "^7.3",
         "hyperf/contract": "3.0.x-dev",
         "hyperf/di": "3.0.x-dev",
@@ -74,7 +75,6 @@
         "phpstan/phpstan": "^1.2",
         "phpunit/phpunit": "^9.5",
         "roave/security-advisories": "dev-latest",
-        "swow-cloud/xr": "0.1.x-dev",
         "symfony/var-dumper": "^5.2"
     },
     "minimum-stability": "dev",

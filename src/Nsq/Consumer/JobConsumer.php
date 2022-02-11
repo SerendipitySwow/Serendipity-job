@@ -66,13 +66,14 @@ class JobConsumer extends AbstractConsumer
                         $currentCo = SwowCo::getCurrent();
                         \Swow\defer(function () use ($currentCo, $job) {
                             //debug trace | push xr trace
-                            $trace = $currentCo->getTrace();
-                            xr(array_push($trace, [
+                            $trace = $currentCo->getTraceAsList();
+                            xr([
+                                'trace' => $trace,
                                 'trace_id' => Context::getOrSet(AppendRequestIdProcessor::TRACE_ID, Uuid::uuid4()->toString()),
                                 'task_id' => $job->getIdentity(),
                                 'consul_service_id' => $this->getServiceId(),
                                 'message' => sprintf('Task [%s] TraceInfo', $job->getIdentity()),
-                            ]));
+                            ]);
                             $this->debugLogger->info(Json::encode($trace));
                         });
                         //修改当前那个协程在执行此任务,用于取消任务
