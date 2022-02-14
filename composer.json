@@ -37,7 +37,7 @@
         "ext-simdjson": "*",
         "ext-sockets": "*",
         "ajthinking/archetype": "^1.0",
-        "swow-cloud/xr": "0.1.x-dev",
+        "chevere/xr": "0.1.x-dev",
         "guzzlehttp/guzzle": "^7.3",
         "hyperf/contract": "3.0.x-dev",
         "hyperf/di": "3.0.x-dev",
