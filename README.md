@@ -96,7 +96,6 @@
 * 考虑优化项目结构
 * 支持任务图表
 * [后台](https://github.com/kanyxmo/MineAdmin)
-* chevere/xr这个组件暂时不支持闭包解析，所以自己fork了包,后续如果支持，再换回来.
 
 ## TODO V3
 * 适配其他框架(需要优化项目架构后)
