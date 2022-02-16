@@ -10,4 +10,8 @@ namespace SwowCloud\Job\Kernel\Swow;
 
 class Debugger extends \Swow\Debug\Debugger
 {
+    public function __construct()
+    {
+        parent::__construct();
+    }
 }
