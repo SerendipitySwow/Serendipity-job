@@ -61,6 +61,7 @@
 16.支持分布式锁(watchdog实现给锁续期)
 17.任务执行超时时kill掉，资源回收(完成)
 18.支持debug和trace查看(https://github.com/chevere/xr)
+19.watchdog限制其最大执行时间 默认60s
 ```
 
 ## 基于Vue、Vditor，所构建的在线 Markdown 编辑器，支持流程图、甘特图、时序图、任务列表、HTML 自动转换为 Markdown 等功能；🎉新增「所见即所得」编辑模式。
@@ -104,7 +105,6 @@
 * 考虑使用swow-cloud/redis-subscriber订阅消息
 * 支持后台创建任务
 * [支持ORM](https://github.com/cycle/orm)
-* 是否考虑给watchdog限制其最大执行时间
 * [FORM](https://github.com/BoBoooooo/Element-Pro-Crud)
 
 
