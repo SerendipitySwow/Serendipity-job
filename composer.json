@@ -45,6 +45,7 @@
         "hyperf/pool": "3.0.x-dev",
         "hyperf/utils": "3.0.x-dev",
         "itbdw/ip-database": "3.x-dev",
+        "league/climate": "^3.8",
         "marwanalsoltany/blend": "^1.0",
         "matomo/device-detector": "^4.3",
         "monolog/monolog": "^2.2",
