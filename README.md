@@ -63,6 +63,7 @@
 18.支持debug和trace查看(https://github.com/chevere/xr)
 19.watchdog限制其最大执行时间 默认60s
 20.美化了Swow提供的Debugger组件。
+21.新增Debugger:m->获取当前使用内存,server->获取当前服务server信息包括Host,Port,连接数
 ```
 
 ## 基于Vue、Vditor，所构建的在线 Markdown 编辑器，支持流程图、甘特图、时序图、任务列表、HTML 自动转换为 Markdown 等功能；🎉新增「所见即所得」编辑模式。

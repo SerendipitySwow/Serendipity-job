@@ -1066,13 +1066,14 @@ TEXT;
                             $this->out(sprintf('当前进程使用内存:%s', memory_usage()));
                             break;
                         case 'server':
-                            /** @var \Swow\Socket $server */
+                            /** @var \SwowCloud\Job\Kernel\Swow\Socket $server */
                             $server = ApplicationContext::getContainer()->get(ServerInterface::class);
                             $data = [
                                 [
                                     'Host' => $server?->getSockAddress(),
                                     'Port' => $server?->getSockPort(),
                                     'IoState' => $server?->getIoStateNaming(),
+                                    'Connection' => $server?->connecions(),
                                 ],
                             ];
 
