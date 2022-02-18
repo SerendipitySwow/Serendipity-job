@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace SwowCloud\Job\Kernel\Swow;
 
+use Hyperf\Utils\ApplicationContext;
 use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Swow\Socket;
@@ -89,6 +90,11 @@ class Server implements ServerInterface
         return $this;
     }
 
+    public function getSocket(): Socket|\Swow\Http\Server|null
+    {
+        return $this->server;
+    }
+
     public function start(): Socket
     {
         $bindFlag = Socket::BIND_FLAG_NONE;
@@ -98,6 +104,9 @@ class Server implements ServerInterface
         }
         $this->server->bind($this->host, $this->port, $bindFlag)
             ->listen($this->backlog);
+
+        /* @noinspection PhpPossiblePolymorphicInvocationInspection */
+        ApplicationContext::getContainer()->set(ServerInterface::class, $this->server);
 
         return $this->server;
     }

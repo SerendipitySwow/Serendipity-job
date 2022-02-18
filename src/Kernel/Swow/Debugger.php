@@ -9,6 +9,8 @@ declare(strict_types=1);
 namespace SwowCloud\Job\Kernel\Swow;
 
 use Error;
+use Hyperf\Utils\ApplicationContext;
+use JetBrains\PhpStorm\ArrayShape;
 use League\CLImate\CLImate;
 use SplFileObject;
 use stdClass;
@@ -18,6 +20,7 @@ use Swow\Debug\DebuggerException;
 use Swow\Signal;
 use Swow\Socket;
 use Swow\Util\FileSystem\IOException;
+use SwowCloud\Job\Contract\ServerInterface;
 use Throwable;
 use WeakMap;
 use function array_filter;
@@ -60,6 +63,7 @@ use function strlen;
 use function substr;
 use function Swow\Debug\registerExtendedStatementHandler;
 use function Swow\Debug\var_dump_return;
+use function SwowCloud\Job\Kernel\memory_usage;
 use function trigger_error;
 use function trim;
 use function usleep;
@@ -120,7 +124,7 @@ TEXT;
 
     protected int $currentFrameIndex = 0;
 
-    protected SplFileObject $currentSourceFile;
+    protected ?SplFileObject $currentSourceFile = null;
 
     protected int $currentSourceFileLine = 0;
 
@@ -300,11 +304,8 @@ TEXT;
     public static function getDebugContextOfCoroutine(Coroutine $coroutine): stdClass
     {
         $weakMap = static::getCoroutineDebugWeakMap();
-        if (!isset($weakMap[$coroutine])) {
-            return $weakMap[$coroutine] = new stdClass();
-        }
 
-        return $weakMap[$coroutine];
+        return $weakMap[$coroutine] ?? ($weakMap[$coroutine] = new stdClass());
     }
 
     public function getCurrentFrameIndex(): int
@@ -581,30 +582,31 @@ TEXT;
         return $this::getTraceOfCoroutine($this->getCurrentCoroutine());
     }
 
-    protected static function getSimpleInfoOfCoroutine(Coroutine $coroutine, bool $whatAreYouDoing): array
-    {
-        $info = [
-            'id' => $coroutine->getId(),
-            'state' => static::getStateNameOfCoroutine($coroutine),
-            'round' => $coroutine->getRound(),
-            'elapsed' => $coroutine->getElapsedAsString(),
-        ];
-        if ($whatAreYouDoing) {
-            $frame = static::getTraceOfCoroutine($coroutine, 0);
-            $info['executing'] = static::getExecutingFromFrame($frame);
-            $file = $frame['file'] ?? null;
-            $line = $frame['line'] ?? 0;
-            if ($file === null) {
-                $sourcePosition = '<internal space>';
-            } else {
-                $file = basename($file);
-                $sourcePosition = "{$file}({$line})";
-            }
-            $info['source position'] = $sourcePosition;
-        }
+    #[ArrayShape(['id' => 'int', 'state' => 'string', 'round' => 'int', 'elapsed' => 'string', 'source position' => 'string', 'executing' => 'string'])]
+ protected static function getSimpleInfoOfCoroutine(Coroutine $coroutine, bool $whatAreYouDoing): array
+ {
+     $info = [
+         'id' => $coroutine->getId(),
+         'state' => static::getStateNameOfCoroutine($coroutine),
+         'round' => $coroutine->getRound(),
+         'elapsed' => $coroutine->getElapsedAsString(),
+     ];
+     if ($whatAreYouDoing) {
+         $frame = static::getTraceOfCoroutine($coroutine, 0);
+         $info['executing'] = static::getExecutingFromFrame($frame);
+         $file = $frame['file'] ?? null;
+         $line = $frame['line'] ?? 0;
+         if ($file === null) {
+             $sourcePosition = '<internal space>';
+         } else {
+             $file = basename($file);
+             $sourcePosition = "{$file}({$line})";
+         }
+         $info['source position'] = $sourcePosition;
+     }
 
-        return $info;
-    }
+     return $info;
+ }
 
     protected function showCoroutine(Coroutine $coroutine, bool $newLine = true): static
     {
@@ -888,7 +890,7 @@ TEXT;
         $signalChannel = new Channel();
         $signalListener = Coroutine::run(function () use ($signalChannel): void {
             // Always wait signal int, prevent signals from coming in gaps
-            Signal::wait(Signal::INT, -1);
+            Signal::wait(Signal::INT);
             $signalChannel->push(true);
         });
         do {
@@ -1059,6 +1061,22 @@ TEXT;
                                 default:
                                     throw new Error('Never here');
                             }
+                            break;
+                        case 'm':
+                            $this->out(sprintf('当前进程使用内存:%s', memory_usage()));
+                            break;
+                        case 'server':
+                            /** @var \Swow\Socket $server */
+                            $server = ApplicationContext::getContainer()->get(ServerInterface::class);
+                            $data = [
+                                [
+                                    'Host' => $server?->getSockAddress(),
+                                    'Port' => $server?->getSockPort(),
+                                    'IoState' => $server?->getIoStateNaming(),
+                                ],
+                            ];
+
+                            $this->climate->lightYellow()->table($data);
                             break;
                         case 'l':
                         case 'list':
