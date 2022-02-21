@@ -114,6 +114,7 @@ class ServerProvider extends AbstractProvider
                                 /**
                                  * @var SwowCloudRequest $request
                                  */
+                                //TODO 等待swow官方解决recvHttpRequest 入参
                                 $request = $connection->recvHttpRequest(make(SwowCloudRequest::class));
                                 $response = $this->dispatcher($request, $connection);
                                 $connection->sendHttpResponse($response);
