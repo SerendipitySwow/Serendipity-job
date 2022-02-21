@@ -8,4 +8,5 @@ declare(strict_types=1);
 
 return [
     'pool' => 'default',
+    'watchDogTime' => 60,
 ];
