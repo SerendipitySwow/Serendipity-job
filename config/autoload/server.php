@@ -6,7 +6,6 @@
 
 declare(strict_types=1);
 
-
 return [
     'server' => \SwowCloud\Job\Kernel\Swow\Socket::class,
     'host' => env('SERVER_HOST', '127.0.0.1'),
