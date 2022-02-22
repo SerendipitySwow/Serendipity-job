@@ -22,7 +22,7 @@ class Debugger extends \Swow\Debug\Debugger
 
     /**
      * 终端输出增加颜色控制
-     *
+     *TODO
      * @return $this
      */
     public function out(string $string = '', bool $newline = true, string $color = 'green'): static
