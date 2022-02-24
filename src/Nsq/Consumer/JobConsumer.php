@@ -9,8 +9,8 @@ declare(strict_types=1);
 namespace SwowCloud\Job\Nsq\Consumer;
 
 use Carbon\Carbon;
+use Hyperf\Context\Context;
 use Hyperf\Utils\Codec\Json;
-use Hyperf\Utils\Context;
 use Hyperf\Utils\Coroutine as HyperfCo;
 use InvalidArgumentException;
 use Ramsey\Uuid\Uuid;

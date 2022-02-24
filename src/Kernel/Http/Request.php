@@ -17,13 +17,6 @@ use function SwowCloud\Job\Kernel\serendipity_json_decode;
 
 class Request extends SwowRequest
 {
-    public function __construct()
-    {
-        parent::__construct();
-        //TODO 待swow API调整,调整过后删除此代码
-        $this->queryParams = [];
-    }
-
     public function all(): array
     {
         return array_merge(
@@ -45,11 +38,9 @@ class Request extends SwowRequest
 
     public function get(string $key = null, mixed $default = null): mixed
     {
-        //TODO 待swow API调整
-//        $params = $this->getQueryParams();
-        parse_str($this->query, $this->queryParams);
+        $params = $this->getQueryParams();
 
-        return $key === null ? $this->queryParams : $this->queryParams[$key] ?? $default;
+        return $key === null ? $params : $params[$key] ?? $default;
     }
 
     /**

@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace SwowCloud\Job\Nsq\Consumer;
 
-use Hyperf\Utils\Context;
+use Hyperf\Context\Context;
 use Hyperf\Utils\Coroutine as HyperfCo;
 use Ramsey\Uuid\Uuid;
 use SwowCloud\Job\Constant\Statistical;

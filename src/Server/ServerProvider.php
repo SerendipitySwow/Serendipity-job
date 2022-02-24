@@ -15,11 +15,11 @@ use Exception;
 use FastRoute\Dispatcher;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
+use Hyperf\Context\Context;
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\Engine\Channel;
 use Hyperf\Utils\Arr;
 use Hyperf\Utils\Codec\Json;
-use Hyperf\Utils\Context;
 use Hyperf\Utils\Coroutine as HyperfCo;
 use Hyperf\Utils\Str;
 use itbdw\Ip\IpLocation;
@@ -114,7 +114,7 @@ class ServerProvider extends AbstractProvider
                                 /**
                                  * @var SwowCloudRequest $request
                                  */
-                                $request = $connection->recvHttpRequest(make(SwowCloudRequest::class));
+                                $request = $connection->recvHttpRequestTo(make(SwowCloudRequest::class));
                                 $response = $this->dispatcher($request, $connection);
                                 $connection->sendHttpResponse($response);
                             } catch (HttpException $exception) {

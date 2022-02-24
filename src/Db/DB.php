@@ -9,8 +9,8 @@ declare(strict_types=1);
 namespace SwowCloud\Job\Db;
 
 use Closure;
+use Hyperf\Context\Context;
 use Hyperf\Utils\ApplicationContext;
-use Hyperf\Utils\Context;
 use SwowCloud\Job\Contract\EventDispatcherInterface;
 use SwowCloud\Job\Db\Pool\PoolFactory;
 use SwowCloud\Job\Event\QueryExecuted;
