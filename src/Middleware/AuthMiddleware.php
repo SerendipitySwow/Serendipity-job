@@ -8,9 +8,9 @@ declare(strict_types=1);
 
 namespace SwowCloud\Job\Middleware;
 
+use Hyperf\Context\Context;
 use Hyperf\Utils\ApplicationContext;
 use Hyperf\Utils\Codec\Json;
-use Hyperf\Utils\Context;
 use Psr\Http\Message\RequestInterface;
 use Swow\Http\Server\Request;
 use SwowCloud\Job\Db\DB;

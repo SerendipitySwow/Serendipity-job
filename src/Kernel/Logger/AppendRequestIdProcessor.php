@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace SwowCloud\Job\Kernel\Logger;
 
-use Hyperf\Utils\Context;
+use Hyperf\Context\Context;
 use Monolog\Processor\MemoryProcessor;
 use Ramsey\Uuid\Uuid;
 
