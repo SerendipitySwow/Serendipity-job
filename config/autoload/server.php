@@ -12,5 +12,5 @@ return [
     'type' => env('SERVER_TYPE', \Swow\Socket::TYPE_TCP),
     'port' => (int) env('SERVER_PORT', 9502),
     'backlog' => (int) env('SERVER_BACKLOG', 8192),
-    'multi' => (bool) env('SERVER_MULTI', true),
+    'multi' => (bool) env('SERVER_MULTI', false),
 ];
