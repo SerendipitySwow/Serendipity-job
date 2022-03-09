@@ -65,7 +65,7 @@ class JobConsumer extends AbstractConsumer
                     try {
                         $currentCo = SwowCo::getCurrent();
                         \Swow\defer(function () use ($currentCo, $job) {
-                            //debug trace | push xr trace
+                            // debug trace | push xr trace
                             $trace = $currentCo->getTraceAsList();
                             xr([
                                 'trace' => $trace,
@@ -76,7 +76,7 @@ class JobConsumer extends AbstractConsumer
                             ]);
                             $this->debugLogger->info(Json::encode($trace));
                         });
-                        //修改当前那个协程在执行此任务,用于取消任务
+                        // 修改当前那个协程在执行此任务,用于取消任务
                         DB::execute(
                             sprintf(
                                 'update task set coroutine_id = %s,status = %s,consul_service_id = "%s"  where id = %s;',
@@ -87,7 +87,7 @@ class JobConsumer extends AbstractConsumer
                             )
                         );
                         $this->handle($job);
-                        //记录此消息已被消费而且任务已被执行完成
+                        // 记录此消息已被消费而且任务已被执行完成
                         $incr->eval([
                             sprintf(
                                 static::TASK_CONSUMER_REDIS_PREFIX,
@@ -96,7 +96,7 @@ class JobConsumer extends AbstractConsumer
                             ),
                             $this->config->get('consumer.task_redis_consumer_time'),
                         ]);
-                        //加入成功执行统计
+                        // 加入成功执行统计
                         $incr->eval([Statistical::TASK_SUCCESS, $this->config->get('consumer.task_redis_cache_time')]);
                         $this->container->get(EventDispatcherInterface::class)
                             ->dispatch(
@@ -105,7 +105,7 @@ class JobConsumer extends AbstractConsumer
                             );
                         $result = Result::ACK;
                     } catch (Throwable $e) {
-                        //加入失败执行统计
+                        // 加入失败执行统计
                         $incr->eval([Statistical::TASK_FAILURE, $this->config->get('consumer.task_redis_cache_time')]);
                         $this->logger->error(
                             sprintf(
@@ -126,14 +126,14 @@ class JobConsumer extends AbstractConsumer
                 }, (int) ($job->getTimeout() / 1000));
             } catch (Throwable $throwable) {
                 $this->logger->error(serendipity_format_throwable($throwable));
-                //push xr exception
+                // push xr exception
                 throwableHandler($throwable, sprintf(
                     'Coroutine Error#,{task_id:%s,trace_id:{%s},memory_usage:%s}',
                     $job->getIdentity(),
                     Context::getOrSet(AppendRequestIdProcessor::TRACE_ID, Uuid::uuid4()->toString()),
                     memory_usage()
                 ));
-                //kill task coroutine
+                // kill task coroutine
                 Coroutine::get($waiter->getCoroutineId())?->kill();
                 $result = Result::DROP;
             }
@@ -191,7 +191,7 @@ class JobConsumer extends AbstractConsumer
                 'last_error_file' => $e->getFile(),
                 'trace_id' => Context::getOrSet(AppendRequestIdProcessor::TRACE_ID, Uuid::uuid4()->toString()),
             ];
-            //retry
+            // retry
             if ($job->canRetry($job->getCounter(), $e)) {
                 $job->IncreaseCounter();
                 $message = $this->serializer->serialize($job);
@@ -224,7 +224,7 @@ class JobConsumer extends AbstractConsumer
                     );
                 });
             } else {
-                //failed
+                // failed
                 $job->failed($payload);
                 DB::execute(
                     sprintf(
@@ -235,7 +235,7 @@ class JobConsumer extends AbstractConsumer
                     )
                 );
             }
-            //push xr exception
+            // push xr exception
             throwableHandler($e, sprintf(
                 'Task Error#,{task_id:%s,trace_id:{%s},memory_usage:%s}',
                 $job->getIdentity(),

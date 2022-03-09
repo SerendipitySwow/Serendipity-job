@@ -127,7 +127,7 @@ class ServerProvider extends AbstractProvider
                     } catch (Throwable $throwable) {
                         $this->logger->error(serendipity_format_throwable($throwable));
                     } finally {
-                        ## close session
+                        # # close session
                         $connection->close();
                     }
                 });
@@ -622,7 +622,7 @@ class ServerProvider extends AbstractProvider
                     [, $handler, $vars] = $routeInfo;
 
                     if (is_array($handler) && $handler['middlewares']) {
-                        //middleware
+                        // middleware
                         /**
                          * @var AuthMiddleware $middleware
                          */
@@ -647,7 +647,7 @@ class ServerProvider extends AbstractProvider
                                 $response->error($exception->getCode(), $exception->getMessage());
                                 break;
                             }
-                            //push xr exception
+                            // push xr exception
                             throwableHandler($exception, sprintf(
                                 '😭请求接口{%s}发生了错误,trace_id:%s,memory_usage:%s',
                                 $request->getUri()->getPath(),
@@ -679,7 +679,7 @@ class ServerProvider extends AbstractProvider
     protected function debug($time, SwowRequest|SwowCloudRequest $request, Response $response, Connection $connection): void
     {
         if (env('DEBUG')) {
-            /*@var LoggerInterface $logger */
+            /* @var LoggerInterface $logger */
             $logger = $this->container()
                 ->get(LoggerFactory::class)
                 ->get('request');
@@ -699,7 +699,7 @@ class ServerProvider extends AbstractProvider
             $dd->parse();
             /* @noinspection PhpStatementHasEmptyBodyInspection */
             if ($dd->isBot()) {
-                //do something
+                // do something
             } else {
                 $debug .= 'DEVICE: ' . $dd->getDeviceName() . '| BRAND_NAME: ' . $dd->getBrandName() . '| OS:' . $dd->getOs('version') . '| CLIENT:' . Json::encode($dd->getClient()) . PHP_EOL;
             }

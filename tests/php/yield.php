@@ -17,7 +17,7 @@ echo "👴是第一行\n";
 \Swow\Coroutine::run(function () use ($coroutine) {
     echo "Beginning\n";
     var_dump($coroutine);
-    $coroutine->resume(); //这一步会去执行 \Swow\Coroutine::getCurrent()->yield(); 挂起协程
+    $coroutine->resume(); // 这一步会去执行 \Swow\Coroutine::getCurrent()->yield(); 挂起协程
 });
 var_dump($coroutine);
-$coroutine->resume(); //继续恢复协程
+$coroutine->resume(); // 继续恢复协程

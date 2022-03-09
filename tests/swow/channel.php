@@ -14,10 +14,10 @@ $result = $waiter->wait(function () {
 }, 1);
 dump($result);
 //
-//$channel = new \Swow\Channel();
-//\Swow\Coroutine::run(function ()use($channel){
+// $channel = new \Swow\Channel();
+// \Swow\Coroutine::run(function ()use($channel){
 //   sleep(20);
 //   $channel->push('呵呵');
-//});
-//$channel->pop(1000);
-//var_dump($channel);
+// });
+// $channel->pop(1000);
+// var_dump($channel);

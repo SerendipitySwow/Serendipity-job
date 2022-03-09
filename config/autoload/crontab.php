@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 use SwowCloud\Job\Task\EchoCrontab;
 
-//TODO 考虑是否取消定时任务
+// TODO 考虑是否取消定时任务
 return [
     'enable' => env('ENABLE_CRONTAB', false),
     'crontab' => [

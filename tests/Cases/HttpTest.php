@@ -170,7 +170,7 @@ class HttpTest extends TestCase
         }
         $endTime = microtime(true);
         $logger = make(LoggerFactory::class)->get();
-        //4510.9159946442ms
+        // 4510.9159946442ms
         $logger->info(($endTime - $startTime) * 1000 . 'ms');
     }
 
