@@ -142,7 +142,7 @@ class DB
                     $bindings = $command->getParams();
                 }
             } catch (\ReflectionException $e) {
-                //do not
+                // do not
             }
         }
         if (is_string($query)) {

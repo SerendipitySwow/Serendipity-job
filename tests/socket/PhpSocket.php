@@ -40,7 +40,7 @@ class HttpServer
             $fileName = __DIR__ . '/' . $fileName;
             switch ($fileExt) {
                 case 'html':
-                    //set content type
+                    // set content type
                     socket_write($socketAccept, 'Content-Type: text/html' . PHP_EOL);
                     socket_write($socketAccept, '' . PHP_EOL);
                     $fileContent = file_get_contents($fileName);

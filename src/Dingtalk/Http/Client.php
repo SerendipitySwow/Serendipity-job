@@ -69,7 +69,7 @@ class Client implements ClientInterface
                 $query['timestamp'] = $timestamp;
                 $query['sign'] = base64_encode($sign);
             } catch (Exception) {
-                //do something
+                // do something
             }
         }
 

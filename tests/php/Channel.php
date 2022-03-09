@@ -9,7 +9,7 @@ declare(strict_types=1);
 use SwowCloud\Archer\Archer;
 
 require_once(dirname(__DIR__)) . '/../vendor/autoload.php';
-//Swow\Debug\Debugger::runOnTTY();
+// Swow\Debug\Debugger::runOnTTY();
 $callback = function (string $method, ...$param) {
     return $param;
 };
@@ -36,7 +36,7 @@ try {
 \Swow\Coroutine::run(function () use ($channel) {
     $channel->pop(1);
 });
-//var_dump($channel->__debugInfo());
+// var_dump($channel->__debugInfo());
 exit;
 $channel = new \Swow\Channel();
 $coroutine = \Swow\Coroutine::run(function () use ($channel) {
@@ -61,7 +61,7 @@ try {
 } catch (Throwable $Throwable) {
 }
 
-//\Swow\Coroutine::run(function () use ($channel) {
+// \Swow\Coroutine::run(function () use ($channel) {
 //    sleep(3);
 //    $channel->push(3);
-//});
+// });

@@ -98,11 +98,11 @@ SQL;
                         new UpdateWorkflowEvent($id, Task::TASK_SUCCESS),
                         UpdateWorkflowEvent::UPDATE_WORKFLOW
                     );
-                //加入成功执行统计
+                // 加入成功执行统计
                 $incr->eval([Statistical::DAG_SUCCESS, $this->config->get('consumer.task_redis_cache_time')]);
             } catch (Throwable $throwable) {
                 $this->dingTalk->text(serendipity_format_throwable($throwable));
-                //push xr exception
+                // push xr exception
                 throwableHandler($throwable, sprintf(
                     'Workflow Error#,{workflow_id:%s,trace_id:{%s},memory_usage:%s}',
                     $id,

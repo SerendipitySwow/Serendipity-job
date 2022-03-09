@@ -167,21 +167,21 @@ final class JobCommand extends Command
                                         $coroutine = SwowCo::get((int) $coroutineId);
                                         $data = [
                                             'state' => $coroutine?->getStateName(),
-                                            //当前协程
+                                            // 当前协程
                                             'trace_list' => Json::encode($coroutine?->getTrace()),
-                                            //协程函数调用栈
+                                            // 协程函数调用栈
                                             'executed_file_name' => $coroutine?->getExecutedFilename(),
-                                            //获取执行文件名
+                                            // 获取执行文件名
                                             'executed_function_name' => $coroutine?->getExecutedFunctionName(),
-                                            //获取执行的函数名称
+                                            // 获取执行的函数名称
                                             'executed_function_line' => $coroutine?->getExecutedLineno(),
-                                            //获得执行的文件行数
+                                            // 获得执行的文件行数
                                             'vars' => $coroutine?->getDefinedVars(),
-                                            //获取定义的变量
+                                            // 获取定义的变量
                                             'round' => $coroutine?->getRound(),
-                                            //获取协程切换次数
+                                            // 获取协程切换次数
                                             'elapsed' => $coroutine?->getElapsed(),
-                                            //获取协程运行的时间以便于分析统计或找出僵尸协程
+                                            // 获取协程运行的时间以便于分析统计或找出僵尸协程
                                         ];
                                         $response = new Response();
                                         $response->json([
@@ -303,7 +303,7 @@ final class JobCommand extends Command
                                 try {
                                     $result = $consumer->consume($message);
                                 } catch (Throwable $error) {
-                                    //Segmentation fault
+                                    // Segmentation fault
                                     $this->stdoutLogger->error(
                                         sprintf(
                                             'Consumer failed to consume %s,reason: %s,file: %s,line: %s',

@@ -25,10 +25,10 @@ class TcpClient
      */
     private function createSocket()
     {
-        //创建socket套接字
+        // 创建socket套接字
         $this->socket_handle = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
         if (!$this->socket_handle) {
-            //创建失败抛出异常，socket_last_error获取最后一次socket操作错误码，socket_strerror打印出对应错误码所对应的可读性描述
+            // 创建失败抛出异常，socket_last_error获取最后一次socket操作错误码，socket_strerror打印出对应错误码所对应的可读性描述
             throw new Exception(socket_strerror(socket_last_error($this->socket_handle)));
         }
         echo "create socket successful\n";
@@ -43,7 +43,7 @@ class TcpClient
         }
         while (true) {
             $data = fgets(STDIN);
-            //如果用户输入quit，那么退出程序
+            // 如果用户输入quit，那么退出程序
             if (strcmp($data, 'quit') == 0) {
                 break;
             }

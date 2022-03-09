@@ -36,10 +36,10 @@ class WebsocketServer
      */
     private function createSocket()
     {
-        //创建socket套接字
+        // 创建socket套接字
         $this->socket_handle = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
         if (!$this->socket_handle) {
-            //创建失败抛出异常，socket_last_error获取最后一次socket操作错误码，socket_strerror打印出对应错误码所对应的可读性描述
+            // 创建失败抛出异常，socket_last_error获取最后一次socket操作错误码，socket_strerror打印出对应错误码所对应的可读性描述
             throw new Exception(socket_strerror(socket_last_error($this->socket_handle)));
         }
         echo "create socket successful\n";
@@ -74,17 +74,17 @@ class WebsocketServer
             if (!$client_socket_handle) {
                 throw new Exception(socket_strerror(socket_last_error($this->socket_handle)));
             }
-            //与客户端握手
+            // 与客户端握手
             if (!$this->is_shakehanded) {
                 $this->shakehand($client_socket_handle);
                 $this->is_shakehanded = true;
             }
-            //等待客户端新传输的数据
+            // 等待客户端新传输的数据
             if (!socket_recv($client_socket_handle, $buffer, 1000, 0)) {
                 throw new Exception(socket_strerror(socket_last_error($client_socket_handle)));
             }
-            //解析消息的长度
-                $payload_length = ord($buffer[1]) & 0x7F; //第二个字符的低7位
+            // 解析消息的长度
+                $payload_length = ord($buffer[1]) & 0x7F; // 第二个字符的低7位
                 if ($payload_length >= 0 && $payload_length < 125) {
                     $this->current_message_length = $payload_length;
                     $payload_type = 1;
@@ -105,20 +105,20 @@ class WebsocketServer
                         | (ord($buffer[8]) << 8)
                         | (ord($buffer[9]) << 0);
                 }
-            //解析掩码，这个必须有的，掩码总共4个字节
+            // 解析掩码，这个必须有的，掩码总共4个字节
             $mask_key_offset = ($payload_type == 1 ? 0 : ($payload_type == 2 ? 2 : 8)) + 2;
             $this->mask_key = substr($buffer, $mask_key_offset, 4);
-            //获取加密的内容
+            // 获取加密的内容
             $real_message = substr($buffer, $mask_key_offset + 4);
             $i = 0;
             $parsed_ret = '';
-            //解析加密的数据
+            // 解析加密的数据
             while ($i < strlen($real_message)) {
                 $parsed_ret .= chr((ord($real_message[$i]) ^ ord(($this->mask_key[$i % 4]))));
                 $i++;
             }
             echo $parsed_ret . "\n";
-            //把解析出来的数据直接返回给客户端
+            // 把解析出来的数据直接返回给客户端
             $this->echoContentToClient($client_socket_handle, $parsed_ret);
         }
     }
@@ -131,11 +131,11 @@ class WebsocketServer
     private function echoContentToClient($client_socket, $content)
     {
         $len = strlen($content);
-        //第一个字节
+        // 第一个字节
         $char_seq = chr(0x80 | 1);
 
         $b_2 = 0;
-        //fill length
+        // fill length
         if ($len > 0 && $len <= 125) {
             $char_seq .= chr(($b_2 | $len));
         } elseif ($len <= 65535) {
@@ -185,7 +185,7 @@ class WebsocketServer
                 break;
             }
         }
-        //响应客户端
+        // 响应客户端
         $this->writeToSocket($client_socket_handle, "HTTP/1.1 101 Switching Protocol\r\n");
         $this->writeToSocket($client_socket_handle, "Upgrade: websocket\r\n");
         $this->writeToSocket($client_socket_handle, "Connection: upgrade\r\n");

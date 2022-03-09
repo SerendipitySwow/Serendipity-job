@@ -25,7 +25,7 @@ class Debugger extends \Swow\Debug\Debugger
      *TODO
      * @return $this
      */
-    public function out(string $string = '', bool $newline = true, string $color = 'green'): static
+    final public function out(string $string = '', bool $newline = true, string $color = 'green'): static
     {
         $buffer = $this->climate->output->get('buffer');
         /* @noinspection PhpPossiblePolymorphicInvocationInspection */
@@ -37,14 +37,14 @@ class Debugger extends \Swow\Debug\Debugger
         return $this;
     }
 
-    public function error(string $string = '', bool $newline = true): static
+    final public function error(string $string = '', bool $newline = true): static
     {
         $this->out($string, $newline, 'error');
 
         return $this;
     }
 
-    public function exception(string $string = '', bool $newline = true): static
+    final public function exception(string $string = '', bool $newline = true): static
     {
         $this->out($string, $newline, 'error');
 

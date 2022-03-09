@@ -93,7 +93,7 @@ final class DagJobCommand extends Command
                 try {
                     $result = $consumer->consume($message);
                 } catch (Throwable $error) {
-                    //Segmentation fault
+                    // Segmentation fault
                     $this->stdoutLogger->error(
                         sprintf(
                             'Consumer failed to consume %s,reason: %s,file: %s,line: %s',

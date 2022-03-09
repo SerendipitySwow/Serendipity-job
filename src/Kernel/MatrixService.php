@@ -18,7 +18,7 @@ class MatrixService
      */
     public function initMatrix(int $width): array
     {
-        //new array
+        // new array
         $line = [];
         $a = 0;
 

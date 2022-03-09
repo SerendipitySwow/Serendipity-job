@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 namespace SwowCloud\Job\Kernel;
 
-#-------------------------注意:所有的方法名称均以serendipity_开头避免和其他框架命名冲突 ----------------------------#
+# -------------------------注意:所有的方法名称均以serendipity_开头避免和其他框架命名冲突 ----------------------------#
 
 use Hyperf\Utils\Arr;
 use Hyperf\Utils\Codec\Json;
