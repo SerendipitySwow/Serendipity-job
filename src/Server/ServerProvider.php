@@ -622,7 +622,6 @@ class ServerProvider extends AbstractProvider
                     [, $handler, $vars] = $routeInfo;
 
                     if (is_array($handler) && $handler['middlewares']) {
-                        // middleware
                         /**
                          * @var AuthMiddleware $middleware
                          */
