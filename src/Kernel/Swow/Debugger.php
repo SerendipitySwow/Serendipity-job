@@ -37,6 +37,9 @@ class Debugger extends \Swow\Debug\Debugger
         return $this;
     }
 
+    /**
+     * @return $this
+     */
     final public function error(string $string = '', bool $newline = true): static
     {
         $this->out($string, $newline, 'error');
@@ -44,6 +47,9 @@ class Debugger extends \Swow\Debug\Debugger
         return $this;
     }
 
+    /**
+     * @return $this
+     */
     final public function exception(string $string = '', bool $newline = true): static
     {
         $this->out($string, $newline, 'error');
