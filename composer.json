@@ -62,6 +62,7 @@
         "swow-cloud/redis": "3.0.x-dev",
         "swow-cloud/redis-lock": "3.0.x-dev",
         "swow-cloud/sockets": "^1.1",
+        "swow/swow": "dev-develop",
         "symfony/config": "^5.3",
         "symfony/console": "^5.2",
         "symfony/event-dispatcher": "^6.0",
