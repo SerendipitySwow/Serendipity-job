@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace SwowCloud\Job\Console;
 
 use Nette\Utils\Strings;
+use Swow;
 use SwowCloud\Job\Constant\Logo;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
@@ -16,7 +17,6 @@ use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use const Swow\VERSION;
 
 abstract class Command extends SymfonyCommand
 {
@@ -185,7 +185,7 @@ abstract class Command extends SymfonyCommand
     {
         $this->output->table(['APP_NAME', 'PHP_VERSION', 'SWOW_VERSION', 'APP_VERSION'], [
             [
-                env('APP_NAME'), PHP_VERSION, VERSION, env('APP_VERSION'),
+                env('APP_NAME'), PHP_VERSION, Swow::VERSION, env('APP_VERSION'),
             ],
         ]);
         $this->output->writeln(sprintf('<info>%s</info>', Logo::LOGO));

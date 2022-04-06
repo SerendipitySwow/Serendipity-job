@@ -74,6 +74,7 @@ final class Application extends SymfonyApplication
     protected function debug(): void
     {
         if (env('DEBUG')) {
+//            \Swow\Debug\showExecutedSourceLines(true);
             Debugger::runOnTTY('swow-cloud-job');
         }
     }
