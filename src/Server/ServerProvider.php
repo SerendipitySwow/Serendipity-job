@@ -27,13 +27,14 @@ use PDO;
 use Psr\Http\Message\RequestInterface;
 use Ramsey\Uuid\Uuid;
 use Spatie\Emoji\Emoji;
-use Swow\Coroutine\Exception as CoroutineException;
-use Swow\Http\Exception as HttpException;
+use Swow\CoroutineException;
+use Swow\Errno;
+use Swow\Http\ResponseException;
 use Swow\Http\Server;
 use Swow\Http\Server\Connection;
 use Swow\Http\Server\Request as SwowRequest;
 use Swow\Http\Status;
-use Swow\Socket\Exception as SocketException;
+use Swow\SocketException;
 use SwowCloud\Contract\LoggerInterface;
 use SwowCloud\Contract\StdoutLoggerInterface;
 use SwowCloud\Job\Console\DagJobCommand;
@@ -64,9 +65,6 @@ use function FastRoute\simpleDispatcher;
 use function SwowCloud\Job\Kernel\memory_usage;
 use function SwowCloud\Job\Kernel\serendipity_format_throwable;
 use function SwowCloud\Job\Kernel\serendipity_json_decode;
-use const Swow\Errno\EMFILE;
-use const Swow\Errno\ENFILE;
-use const Swow\Errno\ENOMEM;
 
 /**
  * Class ServerProvider
@@ -117,7 +115,7 @@ class ServerProvider extends AbstractProvider
                                 $request = $connection->recvHttpRequestTo(make(SwowCloudRequest::class));
                                 $response = $this->dispatcher($request, $connection);
                                 $connection->sendHttpResponse($response);
-                            } catch (HttpException $exception) {
+                            } catch (ResponseException $exception) {
                                 $connection->error($exception->getCode(), $exception->getMessage());
                             }
                             if (!$request || !$request->getKeepAlive()) {
@@ -132,7 +130,7 @@ class ServerProvider extends AbstractProvider
                     }
                 });
             } catch (SocketException|CoroutineException $exception) {
-                if (in_array($exception->getCode(), [EMFILE, ENFILE, ENOMEM], true)) {
+                if (in_array($exception->getCode(), [Errno::EMFILE, Errno::ENFILE, Errno::ENOMEM], true)) {
                     sleep(1);
                 } else {
                     break;
@@ -548,7 +546,7 @@ class ServerProvider extends AbstractProvider
                             )
                         );
                     } catch (Exception $exception) {
-                        throw new HttpException($exception->getCode(), $exception->getMessage());
+                        throw new ResponseException($exception->getCode(), $exception->getMessage());
                     }
                 });
                 /*
@@ -582,7 +580,7 @@ class ServerProvider extends AbstractProvider
                             )
                         );
                     } catch (Exception $exception) {
-                        throw new HttpException($exception->getCode(), $exception->getMessage());
+                        throw new ResponseException($exception->getCode(), $exception->getMessage());
                     }
                 });
             });
@@ -642,7 +640,7 @@ class ServerProvider extends AbstractProvider
                                 $response->error(Status::UNAUTHORIZED, 'UNAUTHORIZED');
                                 break;
                             }
-                            if ($exception instanceof HttpException) {
+                            if ($exception instanceof ResponseException) {
                                 $response->error($exception->getCode(), $exception->getMessage());
                                 break;
                             }
