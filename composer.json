@@ -38,6 +38,7 @@
         "ext-redis": ">=5.3",
         "ext-simdjson": "*",
         "ext-sockets": "*",
+        "ext-swow": "8",
         "ajthinking/archetype": "^1.0",
         "chevere/xr": "^0.2.0",
         "guzzlehttp/guzzle": "^7.3",
